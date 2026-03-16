@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viewstation</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'></path></svg>">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
+            muted: '#6b7280', fg: '#111827',
+            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626' }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    .sensor-btn { width: 20px; height: 20px; border-radius: 4px; transition: all 0.15s ease; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); }
+    .sensor-btn:hover { transform: scale(1.2); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 10; position: relative; }
+    .status-ok { background: #16a34a; }
+    .status-warn { background: #d97706; }
+    .status-critical { background: #dc2626; }
+    .status-unknown { background: #9ca3af; }
+    .section-card { background: #ffffff; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); }
+    .table-header { background: #dc2626; color: white; }
+    .row-label { min-width: 95px; font-size: 10px; color: #374151; font-weight: 500; }
+    
+    @keyframes pulse-warn { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); } 50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(217, 119, 6, 0); } }
+    @keyframes pulse-critical { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); } 50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); } }
+    .pulse-warn { animation: pulse-warn 2s infinite; }
+    .pulse-critical { animation: pulse-critical 1s infinite; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+    .tooltip {
+      position: fixed; background: white; border: 1px solid #e5e7eb; padding: 8px 12px;
+      border-radius: 6px; font-size: 11px; color: #111827; pointer-events: none;
+      z-index: 1000; display: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-left: 3px solid #dc2626;
+    }
+  </style>
+</head>
+
+<body class="bg-bg text-fg min-h-screen overflow-hidden">
+  
+  <!-- Navbar -->
+  <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+      </div>
+      <h1 class="font-sans font-bold text-lg tracking-tight text-accent">Viewstation</h1>
+    </div>
+
+    <div class="flex items-center gap-6 text-xs">
+      <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+        <span class="text-muted">Updated:</span>
+        <span id="lastUpdate" class="font-semibold text-fg">--:--:--</span>
+      </div>
+      <div class="flex items-center gap-4 px-2">
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-ok"></div>
+          <span id="okCount" class="font-bold text-status-ok">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
+          <span id="warnCount" class="font-bold text-status-warn">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
+          <span id="criticalCount" class="font-bold text-status-critical">0</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="p-3 h-[calc(100vh-56px)] overflow-auto">
+    <div class="grid grid-cols-12 gap-3">
+      
+      <!-- HSA (AL) -->
+      <div class="col-span-2 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2"><h2 class="font-sans font-bold text-xs uppercase tracking-wider">HSA (AL)</h2></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+            <tr>
+              <th class="text-left pb-1.5 text-[9px] font-bold text-muted uppercase">Lines</th>
+              {% for col in hsa_al.cols %}
+              <th class="pb-1.5 text-[9px] font-semibold text-slate-500">{{ col }}</th>
+              {% endfor %}
+            </tr>
+            {% for row in hsa_al.rows %}
+            <tr class="border-b border-slate-100 last:border-0">
+              <td class="row-label py-1">{{ row }}</td>
+              {% for col in hsa_al.cols %}
+              {% set status = hsa_al.data[row][col] %}
+              <td class="text-center py-1">
+                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+                        data-section="hsa-al" data-row="{{ row }}" data-col="{{ col }}" data-status="{{ status }}"></button>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <!-- HSA (NL) -->
+      <div class="col-span-4 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2"><h2 class="font-sans font-bold text-xs uppercase tracking-wider">HSA (NL)</h2></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+            <tr>
+              <th class="text-left pb-1.5 text-[9px] font-bold text-muted uppercase">Lines</th>
+              {% for col in hsa_nl.cols %}
+              <th class="pb-1.5 text-[9px] font-semibold text-slate-500">{{ col }}</th>
+              {% endfor %}
+            </tr>
+            {% for row in hsa_nl.rows %}
+            <tr class="border-b border-slate-100 last:border-0">
+              <td class="row-label py-1">{{ row }}</td>
+              {% for col in hsa_nl.cols %}
+              {% set status = hsa_nl.data[row][col] %}
+              <td class="text-center py-1">
+                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+                        data-section="hsa-nl" data-row="{{ row }}" data-col="{{ col }}" data-status="{{ status }}"></button>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <!-- DIS-ASSY -->
+      <div class="col-span-3 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2"><h2 class="font-sans font-bold text-xs uppercase tracking-wider">DIS-ASSY</h2></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+            <tr>
+              <th class="text-left pb-1.5 text-[9px] font-bold text-muted uppercase">Lines</th>
+              {% for col in dis.cols %}
+              <th class="pb-1.5 text-[9px] font-semibold text-slate-500">{{ col }}</th>
+              {% endfor %}
+            </tr>
+            {% for row in dis.rows %}
+            <tr class="border-b border-slate-100 last:border-0">
+              <td class="row-label py-1">{{ row }}</td>
+              {% for col in dis.cols %}
+              {% set status = dis.data[row][col] %}
+              <td class="text-center py-1">
+                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+                        data-section="dis" data-row="{{ row }}" data-col="{{ col }}" data-status="{{ status }}"></button>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <!-- AOI -->
+      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2"><h2 class="font-sans font-bold text-xs uppercase tracking-wider">AOI</h2></div>
+        <div class="p-2 flex flex-col gap-1">
+          {% for item in aoi %}
+          <div class="flex items-center gap-2 bg-slate-50 rounded px-2 py-0.5 border border-slate-100">
+            <button class="sensor-btn status-{{ item.STATUS|lower }} {% if item.STATUS == 'WARN' %}pulse-warn{% elif item.STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+                    data-section="aoi" data-row="{{ item.LINE }}" data-status="{{ item.STATUS }}"></button>
+            <span class="text-[9px] text-slate-600 font-medium">{{ item.LINE | replace("AOI", "") }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- S MACHINE -->
+      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2"><h2 class="font-sans font-bold text-xs uppercase tracking-wider">S MACHINE</h2></div>
+        <div class="p-2 flex flex-col gap-1">
+          {% for item in sm %}
+          <div class="flex items-center gap-2 bg-slate-50 rounded px-2 py-0.5 border border-slate-100">
+            <button class="sensor-btn status-{{ item.STATUS|lower }} {% if item.STATUS == 'WARN' %}pulse-warn{% elif item.STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+                    data-section="sm" data-row="{{ item.LINE }}" data-status="{{ item.STATUS }}"></button>
+            <span class="text-[9px] text-slate-600 font-medium">{{ item.LINE | replace("SM", "") }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- WCS -->
+      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2"><h2 class="font-sans font-bold text-xs uppercase tracking-wider">WCS</h2></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+             {% for i in range(0, wcs | length, 2) %}
+             <tr>
+               <td class="p-0.5">
+                 <div class="flex items-center gap-1 bg-slate-50 rounded px-1 py-0.5 border border-slate-100">
+                   <button class="sensor-btn status-{{ wcs[i].STATUS|lower }} {% if wcs[i].STATUS == 'WARN' %}pulse-warn{% elif wcs[i].STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+                           data-section="wcs" data-row="{{ wcs[i].LINE }}" data-status="{{ wcs[i].STATUS }}"></button>
+                   <span class="text-[8px] text-slate-600 font-medium">{{ wcs[i].LINE | replace("WCS", "") }}</span>
+                 </div>
+               </td>
+               {% if wcs[i + 1] is defined %}
+               <td class="p-0.5">
+                 <div class="flex items-center gap-1 bg-slate-50 rounded px-1 py-0.5 border border-slate-100">
+                   <button class="sensor-btn status-{{ wcs[i+1].STATUS|lower }} {% if wcs[i+1].STATUS == 'WARN' %}pulse-warn{% elif wcs[i+1].STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+                           data-section="wcs" data-row="{{ wcs[i+1].LINE }}" data-status="{{ wcs[i+1].STATUS }}"></button>
+                   <span class="text-[8px] text-slate-600 font-medium">{{ wcs[i+1].LINE | replace("WCS", "") }}</span>
+                 </div>
+               </td>
+               {% else %}
+               <td></td>
+               {% endif %}
+             </tr>
+             {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <!-- HDA -->
+      <div class="col-span-12 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2"><h2 class="font-sans font-bold text-xs uppercase tracking-wider">HDA</h2></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+            <tr>
+              <th class="text-left pb-1.5 text-[9px] font-bold text-muted uppercase sticky left-0 bg-white">Lines</th>
+              {% for col in hda.cols %}
+              <th class="pb-1.5 text-[9px] font-semibold text-slate-500 whitespace-nowrap">{{ col }}</th>
+              {% endfor %}
+            </tr>
+            {% for row in hda.rows %}
+            <tr class="border-b border-slate-50 last:border-0">
+              <td class="row-label py-1 sticky left-0 bg-white">{{ row }}</td>
+              {% for col in hda.cols %}
+              {% set status = hda.data[row][col] %}
+              <td class="text-center py-0.5">
+                 <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+                         data-section="hda" data-row="{{ row }}" data-col="{{ col }}" data-status="{{ status }}"></button>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    $(document).ready(function() {
+      function updateCounts() {
+        let ok = 0, warn = 0, critical = 0;
+        $('.sensor-btn').each(function() {
+          const status = $(this).data('status');
+          if (status === 'OK') ok++;
+          else if (status === 'WARN') warn++;
+          else if (status === 'CRITICAL') critical++;
+        });
+        $('#okCount').text(ok);
+        $('#warnCount').text(warn);
+        $('#criticalCount').text(critical);
+      }
+
+      function updateTimestamp() {
+        const now = new Date();
+        $('#lastUpdate').text(now.toLocaleTimeString());
+      }
+
+      const $tooltip = $('#tooltip');
+      
+      $(document).on('mouseenter', '.sensor-btn', function(e) {
+        const $btn = $(this);
+        const section = $btn.data('section');
+        const row = $btn.data('row');
+        const col = $btn.data('col');
+        const status = $btn.data('status');
+        
+        let statusColor = '';
+        if(status === 'OK') statusColor = '#16a34a';
+        else if(status === 'WARN') statusColor = '#d97706';
+        else if(status === 'CRITICAL') statusColor = '#dc2626';
+        else statusColor = '#6b7280';
+
+        $tooltip.html(`
+          <div class="font-bold text-accent text-xs uppercase">${section}</div>
+          <div class="text-slate-800 mt-1">${row} ${col ? '- ' + col : ''}</div>
+          <div class="mt-1.5 pt-1.5 border-t border-slate-100">
+            Status: <span style="color: ${statusColor}; font-weight: 600;">${status}</span>
+          </div>
+        `);
+        
+        $tooltip.css({ display: 'block', left: e.clientX + 15, top: e.clientY + 15 });
+      });
+      
+      $(document).on('mousemove', '.sensor-btn', function(e) {
+        $tooltip.css({ left: e.clientX + 15, top: e.clientY + 15 });
+      });
+      
+      $(document).on('mouseleave', '.sensor-btn', function() {
+        $tooltip.css('display', 'none');
+      });
+
+      updateCounts();
+      updateTimestamp();
+      setInterval(updateTimestamp, 1000);
+    });
+  </script>
+</body>
+</html>
