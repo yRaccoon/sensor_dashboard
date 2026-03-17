@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viewstation - Sensor Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'></path></svg>">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
+            muted: '#6b7280', fg: '#111827',
+            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626', unknown: '#9ca3af' }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    .sensor-btn { 
+      width: 28px; 
+      height: 28px; 
+      border-radius: 6px; 
+      transition: all 0.15s ease; 
+      cursor: pointer; 
+      border: 2px solid rgba(0,0,0,0.1); 
+    }
+    .sensor-btn:hover { 
+      transform: scale(1.2); 
+      box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.2); 
+      z-index: 10; 
+    }
+    .status-ok { background: #16a34a; }
+    .status-warn { background: #d97706; }
+    .status-critical { background: #dc2626; }
+    .status-unknown { background: #9ca3af; }
+    .section-card { background: #ffffff; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+    .table-header { background: #dc2626; color: white; }
+    .table-header h2 { font-size: 1rem; }
+    .row-label { min-width: 120px; font-size: 0.9rem; color: #374151; font-weight: 600; padding: 8px 4px; }
+    
+    @keyframes pulse-warn { 
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.5); } 
+      50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(217, 119, 6, 0); } 
+    }
+    @keyframes pulse-critical { 
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); } 
+      50% { opacity: 0.7; box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); } 
+    }
+    .pulse-warn { animation: pulse-warn 2s infinite; }
+    .pulse-critical { animation: pulse-critical 1s infinite; }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+    .tooltip {
+      position: fixed; 
+      background: white; 
+      border: 1px solid #e5e7eb; 
+      padding: 16px 20px;
+      border-radius: 10px; 
+      font-size: 13px; 
+      color: #111827; 
+      pointer-events: none;
+      z-index: 1000; 
+      display: none; 
+      box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.15);
+      border-left: 5px solid #dc2626;
+      min-width: 300px;
+    }
+
+    .tooltip-item {
+      display: flex;
+      margin-bottom: 8px;
+    }
+
+    .tooltip-label {
+      font-weight: 700;
+      color: #6b7280;
+      width: 90px;
+      font-size: 13px;
+    }
+
+    .tooltip-value {
+      font-weight: 500;
+      color: #111827;
+      word-break: break-word;
+      font-size: 13px;
+    }
+
+    .nav-text {
+      font-size: 0.95rem;
+    }
+
+    .status-badge {
+      font-size: 0.9rem;
+    }
+
+    th {
+      font-size: 0.9rem;
+      padding-bottom: 8px;
+    }
+
+    td {
+      font-size: 0.9rem;
+    }
+
+    .refresh-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #10b981;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+  </style>
+</head>
+
+<body class="bg-bg text-fg min-h-screen overflow-hidden">
+  
+  <!-- Navbar -->
+  <nav class="bg-card border-b border-border px-6 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+      </div>
+      <h1 class="font-sans font-bold text-2xl tracking-tight text-accent">Viewstation</h1>
+    </div>
+
+    <div class="flex items-center gap-8 nav-text">
+      <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-full">
+        <div class="flex items-center">
+          <span class="refresh-indicator"></span>
+          <span class="text-muted">Auto-refresh:</span>
+        </div>
+        <span id="refreshStatus" class="font-semibold text-fg">30s</span>
+      </div>
+      <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-full">
+        <span class="text-muted">Updated:</span>
+        <span id="lastUpdate" class="font-semibold text-fg">--:--:--</span>
+      </div>
+      <div class="flex items-center gap-6 px-3 status-badge">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-sm bg-status-ok"></div>
+          <span id="okCount" class="font-bold text-status-ok">0</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-sm bg-status-warn"></div>
+          <span id="warnCount" class="font-bold text-status-warn">0</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-sm bg-status-critical"></div>
+          <span id="criticalCount" class="font-bold text-status-critical">0</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-sm bg-status-unknown"></div>
+          <span id="unknownCount" class="font-bold text-status-unknown">0</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="p-4 h-[calc(100vh-72px)] overflow-auto">
+    <div class="grid grid-cols-12 gap-4">
+      
+      <!-- HSA (AL) -->
+      <div class="col-span-2 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">HSA (AL)</h2></div>
+        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+            <tr>
+              <th class="text-left font-bold text-muted uppercase">Lines</th>
+              {% for col in hsa_al.cols %}
+              <th class="font-semibold text-slate-500">STN{{ col }}</th>
+              {% endfor %}
+            </tr>
+            {% for row in hsa_al.rows %}
+            <tr class="border-b border-slate-100 last:border-0">
+              <td class="row-label">{{ row }}</td>
+              {% for col in hsa_al.cols %}
+              {% set status = hsa_al.data[row][col] %}
+              {% set detail_key = row + '_' + col %}
+              {% set detail = hsa_al.details.get(detail_key, {}) %}
+              <td class="text-center py-2">
+                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+                        data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
+                        data-description="{{ detail.get('description', 'N/A') }}"
+                        data-location="{{ detail.get('location', 'N/A') }}"
+                        data-status="{{ status }}"></button>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <!-- HSA (NL) -->
+      <div class="col-span-4 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">HSA (NL)</h2></div>
+        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+            <tr>
+              <th class="text-left font-bold text-muted uppercase">Lines</th>
+              {% for col in hsa_nl.cols %}
+              <th class="font-semibold text-slate-500">STN{{ col }}</th>
+              {% endfor %}
+            </tr>
+            {% for row in hsa_nl.rows %}
+            <tr class="border-b border-slate-100 last:border-0">
+              <td class="row-label">{{ row }}</td>
+              {% for col in hsa_nl.cols %}
+              {% set status = hsa_nl.data[row][col] %}
+              {% set detail_key = row + '_' + col %}
+              {% set detail = hsa_nl.details.get(detail_key, {}) %}
+              <td class="text-center py-2">
+                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+                        data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
+                        data-description="{{ detail.get('description', 'N/A') }}"
+                        data-location="{{ detail.get('location', 'N/A') }}"
+                        data-status="{{ status }}"></button>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <!-- DIS-ASSY -->
+      <div class="col-span-3 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">DIS-ASSY</h2></div>
+        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+            <tr>
+              <th class="text-left font-bold text-muted uppercase">Lines</th>
+              {% for col in dis.cols %}
+              <th class="font-semibold text-slate-500">STN{{ col }}</th>
+              {% endfor %}
+            </tr>
+            {% for row in dis.rows %}
+            <tr class="border-b border-slate-100 last:border-0">
+              <td class="row-label">{{ row }}</td>
+              {% for col in dis.cols %}
+              {% set status = dis.data[row][col] %}
+              {% set detail_key = row + '_' + col %}
+              {% set detail = dis.details.get(detail_key, {}) %}
+              <td class="text-center py-2">
+                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+                        data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
+                        data-description="{{ detail.get('description', 'N/A') }}"
+                        data-location="{{ detail.get('location', 'N/A') }}"
+                        data-status="{{ status }}"></button>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <!-- AOI -->
+      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">AOI</h2></div>
+        <div class="p-3 flex flex-col gap-2">
+          {% for item in aoi %}
+          <div class="flex items-center gap-3 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+            <button class="sensor-btn status-{{ item.STATUS|lower }} {% if item.STATUS == 'WARN' %}pulse-warn{% elif item.STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+                    data-dcp-name="{{ item.DCP_NAME }}"
+                    data-description="{{ item.DESCRIPTION }}"
+                    data-location="{{ item.LOCATION }}"
+                    data-status="{{ item.STATUS }}"></button>
+            <span class="text-base text-slate-600 font-medium">{{ item.LINE | replace("AOI", "") }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- S MACHINE -->
+      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">S10, S20, S30</h2></div>
+        <div class="p-3 flex flex-col gap-2">
+          {% for item in sm %}
+          <div class="flex items-center gap-3 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+            <button class="sensor-btn status-{{ item.STATUS|lower }} {% if item.STATUS == 'WARN' %}pulse-warn{% elif item.STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+                    data-dcp-name="{{ item.DCP_NAME }}"
+                    data-description="{{ item.DESCRIPTION }}"
+                    data-location="{{ item.LOCATION }}"
+                    data-status="{{ item.STATUS }}"></button>
+            <span class="text-base text-slate-600 font-medium">{{ item.LINE | replace("SM", "") }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- WCS (2 Column Table) -->
+      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">WCS</h2></div>
+        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+             {% for i in range(0, wcs | length, 2) %}
+             <tr>
+               <td class="p-1.5">
+                 <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-100">
+                   <button class="sensor-btn status-{{ wcs[i].STATUS|lower }} {% if wcs[i].STATUS == 'WARN' %}pulse-warn{% elif wcs[i].STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+                           data-dcp-name="{{ wcs[i].DCP_NAME }}"
+                           data-description="{{ wcs[i].DESCRIPTION }}"
+                           data-location="{{ wcs[i].LOCATION }}"
+                           data-status="{{ wcs[i].STATUS }}"></button>
+                   <span class="text-sm text-slate-600 font-medium">{{ wcs[i].LINE | replace("WCS", "") }}</span>
+                 </div>
+               </td>
+               {% if wcs[i + 1] is defined %}
+               <td class="p-1.5">
+                 <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-100">
+                   <button class="sensor-btn status-{{ wcs[i+1].STATUS|lower }} {% if wcs[i+1].STATUS == 'WARN' %}pulse-warn{% elif wcs[i+1].STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+                           data-dcp-name="{{ wcs[i+1].DCP_NAME }}"
+                           data-description="{{ wcs[i+1].DESCRIPTION }}"
+                           data-location="{{ wcs[i+1].LOCATION }}"
+                           data-status="{{ wcs[i+1].STATUS }}"></button>
+                   <span class="text-sm text-slate-600 font-medium">{{ wcs[i+1].LINE | replace("WCS", "") }}</span>
+                 </div>
+               </td>
+               {% else %}
+               <td></td>
+               {% endif %}
+             </tr>
+             {% endfor %}
+          </table>
+        </div>
+      </div>
+
+      <!-- HDA -->
+      <div class="col-span-12 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">HDA</h2></div>
+        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
+          <table class="w-full border-collapse">
+            <tr>
+              <th class="text-left font-bold text-muted uppercase sticky left-0 bg-white">Lines</th>
+              {% for col in hda.cols %}
+              <th class="font-semibold text-slate-500 whitespace-nowrap">STN{{ col }}</th>
+              {% endfor %}
+            </tr>
+            {% for row in hda.rows %}
+            <tr class="border-b border-slate-50 last:border-0">
+              <td class="row-label sticky left-0 bg-white">{{ row }}</td>
+              {% for col in hda.cols %}
+              {% set status = hda.data[row][col] %}
+              {% set detail_key = row + '_' + col %}
+              {% set detail = hda.details.get(detail_key, {}) %}
+              <td class="text-center py-1.5">
+                 <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+                         data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
+                         data-description="{{ detail.get('description', 'N/A') }}"
+                         data-location="{{ detail.get('location', 'N/A') }}"
+                         data-status="{{ status }}"></button>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    $(document).ready(function() {
+      // Auto-refresh configuration
+      const REFRESH_INTERVAL = 30000; // 30 seconds
+      let refreshTimer;
+      
+      // Update status counts
+      function updateCounts() {
+        let ok = 0, warn = 0, critical = 0, unknown = 0;
+        
+        $('.sensor-btn').each(function() {
+          const status = $(this).data('status');
+          if (status === 'OK') ok++;
+          else if (status === 'WARN') warn++;
+          else if (status === 'CRITICAL') critical++;
+          else unknown++;
+        });
+        
+        $('#okCount').text(ok);
+        $('#warnCount').text(warn);
+        $('#criticalCount').text(critical);
+        $('#unknownCount').text(unknown);
+      }
+
+      // Update timestamp
+      function updateTimestamp() {
+        const now = new Date();
+        $('#lastUpdate').text(now.toLocaleTimeString());
+      }
+
+      // Refresh the page
+      function refreshPage() {
+        console.log('Auto-refreshing page...');
+        location.reload();
+      }
+
+      // Start auto-refresh timer
+      function startAutoRefresh() {
+        if (refreshTimer) {
+          clearInterval(refreshTimer);
+        }
+        refreshTimer = setInterval(refreshPage, REFRESH_INTERVAL);
+        console.log(`Auto-refresh started: every ${REFRESH_INTERVAL/1000} seconds`);
+      }
+
+      // Stop auto-refresh timer
+      function stopAutoRefresh() {
+        if (refreshTimer) {
+          clearInterval(refreshTimer);
+          refreshTimer = null;
+          console.log('Auto-refresh stopped');
+        }
+      }
+
+      // Tooltip functionality
+      const $tooltip = $('#tooltip');
+      
+      $(document).on('mouseenter', '.sensor-btn', function(e) {
+        const $btn = $(this);
+        const dcpName = $btn.data('dcp-name') || 'N/A';
+        const description = $btn.data('description') || 'N/A';
+        const location = $btn.data('location') || 'N/A';
+        const status = $btn.data('status') || 'UNKNOWN';
+        
+        let statusColor = '';
+        let statusBg = '';
+        if(status === 'OK') {
+          statusColor = '#16a34a';
+          statusBg = 'bg-status-ok';
+        } else if(status === 'WARN') {
+          statusColor = '#d97706';
+          statusBg = 'bg-status-warn';
+        } else if(status === 'CRITICAL') {
+          statusColor = '#dc2626';
+          statusBg = 'bg-status-critical';
+        } else {
+          statusColor = '#6b7280';
+          statusBg = 'bg-status-unknown';
+        }
+
+        $tooltip.html(`
+          <div class="font-bold text-accent text-sm uppercase mb-3">Sensor Details</div>
+          <div class="tooltip-item">
+            <span class="tooltip-label">DCP Name:</span>
+            <span class="tooltip-value">${dcpName}</span>
+          </div>
+          <div class="tooltip-item">
+            <span class="tooltip-label">Description:</span>
+            <span class="tooltip-value">${description}</span>
+          </div>
+          <div class="tooltip-item">
+            <span class="tooltip-label">Location:</span>
+            <span class="tooltip-value">${location}</span>
+          </div>
+          <div class="tooltip-item mt-3 pt-3 border-t border-slate-100">
+            <span class="tooltip-label">Status:</span>
+            <span class="tooltip-value" style="color: ${statusColor}; font-weight: 600;">
+              <span class="inline-block w-3 h-3 rounded-sm ${statusBg} mr-2"></span>
+              ${status}
+            </span>
+          </div>
+        `);
+        
+        $tooltip.css({
+          display: 'block',
+          left: e.clientX + 20,
+          top: e.clientY + 20
+        });
+      });
+      
+      $(document).on('mousemove', '.sensor-btn', function(e) {
+        $tooltip.css({
+          left: e.clientX + 20,
+          top: e.clientY + 20
+        });
+      });
+      
+      $(document).on('mouseleave', '.sensor-btn', function() {
+        $tooltip.css('display', 'none');
+      });
+
+      // Manual refresh button (optional - can be triggered by clicking on timestamp)
+      $('#lastUpdate').css('cursor', 'pointer').click(function() {
+        refreshPage();
+      });
+
+      // Initial setup
+      updateCounts();
+      updateTimestamp();
+      
+      // Start auto-refresh
+      startAutoRefresh();
+      
+      // Update timestamp every second
+      setInterval(updateTimestamp, 1000);
+      
+      // Optional: Stop auto-refresh when user interacts with the page
+      // Uncomment if you want this behavior
+      /*
+      $(document).on('mousemove keydown', function() {
+        stopAutoRefresh();
+        setTimeout(startAutoRefresh, 60000); // Restart after 1 minute of inactivity
+      });
+      */
+    });
+  </script>
+</body>
+</html>
