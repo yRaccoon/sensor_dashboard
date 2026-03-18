@@ -130,12 +130,44 @@
       50% { opacity: 0.5; }
       100% { opacity: 1; }
     }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #dc2626;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 
 <body class="bg-bg text-fg min-h-screen overflow-hidden">
   
-  <!-- Navbar -->
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Navbar (No Refresh) -->
   <nav class="bg-card border-b border-border px-6 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-4">
       <div class="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
@@ -157,234 +189,86 @@
       </div>
       <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-full">
         <span class="text-muted">Updated:</span>
-        <span id="lastUpdate" class="font-semibold text-fg">--:--:--</span>
+        <span id="lastUpdate" class="font-semibold text-fg">{{ now.strftime('%H:%M:%S') if now else '--:--:--' }}</span>
       </div>
       <div class="flex items-center gap-6 px-3 status-badge">
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 rounded-sm bg-status-ok"></div>
-          <span id="okCount" class="font-bold text-status-ok">0</span>
+          <span id="okCount" class="font-bold text-status-ok">{{ status_counts.OK }}</span>
         </div>
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 rounded-sm bg-status-warn"></div>
-          <span id="warnCount" class="font-bold text-status-warn">0</span>
+          <span id="warnCount" class="font-bold text-status-warn">{{ status_counts.WARN }}</span>
         </div>
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 rounded-sm bg-status-critical"></div>
-          <span id="criticalCount" class="font-bold text-status-critical">0</span>
+          <span id="criticalCount" class="font-bold text-status-critical">{{ status_counts.CRITICAL }}</span>
         </div>
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 rounded-sm bg-status-unknown"></div>
-          <span id="unknownCount" class="font-bold text-status-unknown">0</span>
+          <span id="unknownCount" class="font-bold text-status-unknown">{{ status_counts.UNKNOWN }}</span>
         </div>
       </div>
+      <button id="manualRefreshBtn" class="bg-accent text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-700 transition">
+        Refresh Data
+      </button>
     </div>
   </nav>
 
-  <!-- Main Content -->
-  <main class="p-4 h-[calc(100vh-72px)] overflow-auto">
-    <div class="grid grid-cols-12 gap-4">
-      
-      <!-- HSA (AL) -->
-      <div class="col-span-2 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">HSA (AL)</h2></div>
-        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
-          <table class="w-full border-collapse">
-            <tr>
-              <th class="text-left font-bold text-muted uppercase">Lines</th>
-              {% for col in hsa_al.cols %}
-              <th class="font-semibold text-slate-500">STN{{ col }}</th>
-              {% endfor %}
-            </tr>
-            {% for row in hsa_al.rows %}
-            <tr class="border-b border-slate-100 last:border-0">
-              <td class="row-label">{{ row }}</td>
-              {% for col in hsa_al.cols %}
-              {% set status = hsa_al.data[row][col] %}
-              {% set detail_key = row + '_' + col %}
-              {% set detail = hsa_al.details.get(detail_key, {}) %}
-              <td class="text-center py-2">
-                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
-                        data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
-                        data-description="{{ detail.get('description', 'N/A') }}"
-                        data-location="{{ detail.get('location', 'N/A') }}"
-                        data-status="{{ status }}"></button>
-              </td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </table>
-        </div>
+<!-- Main Content -->
+<main class="p-4 h-[calc(100vh-72px)] overflow-auto">
+  <div class="grid grid-cols-12 gap-4" id="dashboardContent">
+    
+    <!-- HSA (Combined AL + NL) -->
+    <div class="col-span-5 section-card rounded-lg overflow-hidden">
+      <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">HSA</h2></div>
+      <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]" id="hsaContainer">
+        {% include 'partials/hsa_table.html' %}
       </div>
-
-      <!-- HSA (NL) -->
-      <div class="col-span-4 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">HSA (NL)</h2></div>
-        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
-          <table class="w-full border-collapse">
-            <tr>
-              <th class="text-left font-bold text-muted uppercase">Lines</th>
-              {% for col in hsa_nl.cols %}
-              <th class="font-semibold text-slate-500">STN{{ col }}</th>
-              {% endfor %}
-            </tr>
-            {% for row in hsa_nl.rows %}
-            <tr class="border-b border-slate-100 last:border-0">
-              <td class="row-label">{{ row }}</td>
-              {% for col in hsa_nl.cols %}
-              {% set status = hsa_nl.data[row][col] %}
-              {% set detail_key = row + '_' + col %}
-              {% set detail = hsa_nl.details.get(detail_key, {}) %}
-              <td class="text-center py-2">
-                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
-                        data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
-                        data-description="{{ detail.get('description', 'N/A') }}"
-                        data-location="{{ detail.get('location', 'N/A') }}"
-                        data-status="{{ status }}"></button>
-              </td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </table>
-        </div>
-      </div>
-
-      <!-- DIS-ASSY -->
-      <div class="col-span-3 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">DIS-ASSY</h2></div>
-        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
-          <table class="w-full border-collapse">
-            <tr>
-              <th class="text-left font-bold text-muted uppercase">Lines</th>
-              {% for col in dis.cols %}
-              <th class="font-semibold text-slate-500">STN{{ col }}</th>
-              {% endfor %}
-            </tr>
-            {% for row in dis.rows %}
-            <tr class="border-b border-slate-100 last:border-0">
-              <td class="row-label">{{ row }}</td>
-              {% for col in dis.cols %}
-              {% set status = dis.data[row][col] %}
-              {% set detail_key = row + '_' + col %}
-              {% set detail = dis.details.get(detail_key, {}) %}
-              <td class="text-center py-2">
-                <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
-                        data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
-                        data-description="{{ detail.get('description', 'N/A') }}"
-                        data-location="{{ detail.get('location', 'N/A') }}"
-                        data-status="{{ status }}"></button>
-              </td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </table>
-        </div>
-      </div>
-
-      <!-- AOI -->
-      <div class="col-span-1 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">AOI</h2></div>
-        <div class="p-3 flex flex-col gap-2">
-          {% for item in aoi %}
-          <div class="flex items-center gap-3 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
-            <button class="sensor-btn status-{{ item.STATUS|lower }} {% if item.STATUS == 'WARN' %}pulse-warn{% elif item.STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
-                    data-dcp-name="{{ item.DCP_NAME }}"
-                    data-description="{{ item.DESCRIPTION }}"
-                    data-location="{{ item.LOCATION }}"
-                    data-status="{{ item.STATUS }}"></button>
-            <span class="text-base text-slate-600 font-medium">{{ item.LINE | replace("AOI", "") }}</span>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- S MACHINE -->
-      <div class="col-span-1 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">S10, S20, S30</h2></div>
-        <div class="p-3 flex flex-col gap-2">
-          {% for item in sm %}
-          <div class="flex items-center gap-3 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
-            <button class="sensor-btn status-{{ item.STATUS|lower }} {% if item.STATUS == 'WARN' %}pulse-warn{% elif item.STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
-                    data-dcp-name="{{ item.DCP_NAME }}"
-                    data-description="{{ item.DESCRIPTION }}"
-                    data-location="{{ item.LOCATION }}"
-                    data-status="{{ item.STATUS }}"></button>
-            <span class="text-base text-slate-600 font-medium">{{ item.LINE | replace("SM", "") }}</span>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- WCS (2 Column Table) -->
-      <div class="col-span-1 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">WCS</h2></div>
-        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
-          <table class="w-full border-collapse">
-             {% for i in range(0, wcs | length, 2) %}
-             <tr>
-               <td class="p-1.5">
-                 <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-100">
-                   <button class="sensor-btn status-{{ wcs[i].STATUS|lower }} {% if wcs[i].STATUS == 'WARN' %}pulse-warn{% elif wcs[i].STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
-                           data-dcp-name="{{ wcs[i].DCP_NAME }}"
-                           data-description="{{ wcs[i].DESCRIPTION }}"
-                           data-location="{{ wcs[i].LOCATION }}"
-                           data-status="{{ wcs[i].STATUS }}"></button>
-                   <span class="text-sm text-slate-600 font-medium">{{ wcs[i].LINE | replace("WCS", "") }}</span>
-                 </div>
-               </td>
-               {% if wcs[i + 1] is defined %}
-               <td class="p-1.5">
-                 <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-100">
-                   <button class="sensor-btn status-{{ wcs[i+1].STATUS|lower }} {% if wcs[i+1].STATUS == 'WARN' %}pulse-warn{% elif wcs[i+1].STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
-                           data-dcp-name="{{ wcs[i+1].DCP_NAME }}"
-                           data-description="{{ wcs[i+1].DESCRIPTION }}"
-                           data-location="{{ wcs[i+1].LOCATION }}"
-                           data-status="{{ wcs[i+1].STATUS }}"></button>
-                   <span class="text-sm text-slate-600 font-medium">{{ wcs[i+1].LINE | replace("WCS", "") }}</span>
-                 </div>
-               </td>
-               {% else %}
-               <td></td>
-               {% endif %}
-             </tr>
-             {% endfor %}
-          </table>
-        </div>
-      </div>
-
-      <!-- HDA -->
-      <div class="col-span-12 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">HDA</h2></div>
-        <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]">
-          <table class="w-full border-collapse">
-            <tr>
-              <th class="text-left font-bold text-muted uppercase sticky left-0 bg-white">Lines</th>
-              {% for col in hda.cols %}
-              <th class="font-semibold text-slate-500 whitespace-nowrap">STN{{ col }}</th>
-              {% endfor %}
-            </tr>
-            {% for row in hda.rows %}
-            <tr class="border-b border-slate-50 last:border-0">
-              <td class="row-label sticky left-0 bg-white">{{ row }}</td>
-              {% for col in hda.cols %}
-              {% set status = hda.data[row][col] %}
-              {% set detail_key = row + '_' + col %}
-              {% set detail = hda.details.get(detail_key, {}) %}
-              <td class="text-center py-1.5">
-                 <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
-                         data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
-                         data-description="{{ detail.get('description', 'N/A') }}"
-                         data-location="{{ detail.get('location', 'N/A') }}"
-                         data-status="{{ status }}"></button>
-              </td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </table>
-        </div>
-      </div>
-
     </div>
-  </main>
+
+    <!-- DIS-ASSY -->
+    <div class="col-span-3 section-card rounded-lg overflow-hidden">
+      <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">DIS-ASSY</h2></div>
+      <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]" id="disContainer">
+        {% include 'partials/dis_table.html' %}
+      </div>
+    </div>
+
+    <!-- AOI -->
+    <div class="col-span-1 section-card rounded-lg overflow-hidden">
+      <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">AOI</h2></div>
+      <div class="p-3 flex flex-col gap-2" id="aoiContainer">
+        {% include 'partials/aoi_list.html' %}
+      </div>
+    </div>
+
+    <!-- S MACHINE -->
+    <div class="col-span-1 section-card rounded-lg overflow-hidden">
+      <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">S10, S20, S30</h2></div>
+      <div class="p-3 flex flex-col gap-2" id="smContainer">
+        {% include 'partials/sm_list.html' %}
+      </div>
+    </div>
+
+    <!-- WCS - Increased to col-span-2 -->
+    <div class="col-span-2 section-card rounded-lg overflow-hidden">
+      <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">WCS</h2></div>
+      <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]" id="wcsContainer">
+        {% include 'partials/wcs_table.html' %}
+      </div>
+    </div>
+
+    <!-- HDA -->
+    <div class="col-span-12 section-card rounded-lg overflow-hidden">
+      <div class="table-header px-4 py-3"><h2 class="font-sans font-bold uppercase tracking-wider">HDA</h2></div>
+      <div class="p-3 overflow-auto max-h-[calc(50vh-80px)]" id="hdaContainer">
+        {% include 'partials/hda_table.html' %}
+      </div>
+    </div>
+
+  </div>
+</main>
 
   <!-- Tooltip -->
   <div id="tooltip" class="tooltip"></div>
@@ -396,21 +280,11 @@
       let refreshTimer;
       
       // Update status counts
-      function updateCounts() {
-        let ok = 0, warn = 0, critical = 0, unknown = 0;
-        
-        $('.sensor-btn').each(function() {
-          const status = $(this).data('status');
-          if (status === 'OK') ok++;
-          else if (status === 'WARN') warn++;
-          else if (status === 'CRITICAL') critical++;
-          else unknown++;
-        });
-        
-        $('#okCount').text(ok);
-        $('#warnCount').text(warn);
-        $('#criticalCount').text(critical);
-        $('#unknownCount').text(unknown);
+      function updateCounts(counts) {
+        $('#okCount').text(counts.OK);
+        $('#warnCount').text(counts.WARN);
+        $('#criticalCount').text(counts.CRITICAL);
+        $('#unknownCount').text(counts.UNKNOWN);
       }
 
       // Update timestamp
@@ -419,28 +293,221 @@
         $('#lastUpdate').text(now.toLocaleTimeString());
       }
 
-      // Refresh the page
-      function refreshPage() {
-        console.log('Auto-refreshing page...');
-        location.reload();
+      // Show/hide loading overlay
+      function showLoading() {
+        $('#loadingOverlay').css('display', 'flex');
       }
 
-      // Start auto-refresh timer
-      function startAutoRefresh() {
-        if (refreshTimer) {
-          clearInterval(refreshTimer);
-        }
-        refreshTimer = setInterval(refreshPage, REFRESH_INTERVAL);
-        console.log(`Auto-refresh started: every ${REFRESH_INTERVAL/1000} seconds`);
+      function hideLoading() {
+        $('#loadingOverlay').hide();
       }
 
-      // Stop auto-refresh timer
-      function stopAutoRefresh() {
-        if (refreshTimer) {
-          clearInterval(refreshTimer);
-          refreshTimer = null;
-          console.log('Auto-refresh stopped');
-        }
+      // Refresh data via AJAX (no page reload)
+      function refreshData() {
+        showLoading();
+        
+        $.ajax({
+          url: '/api/sensor-data',
+          method: 'GET',
+          dataType: 'json',
+          success: function(data) {
+            // Update HSA table
+            $('#hsaContainer').html(data.hsa.html || generateHsaTable(data.hsa));
+            
+            // Update DIS-ASSY table
+            $('#disContainer').html(data.dis.html || generateDisTable(data.dis));
+            
+            // Update AOI list
+            $('#aoiContainer').html(generateAoiList(data.aoi));
+            
+            // Update SM list
+            $('#smContainer').html(generateSmList(data.sm));
+            
+            // Update WCS table
+            $('#wcsContainer').html(generateWcsTable(data.wcs));
+            
+            // Update HDA table
+            $('#hdaContainer').html(data.hda.html || generateHdaTable(data.hda));
+            
+            // Update status counts
+            updateCounts(data.status_counts);
+            
+            // Update timestamp
+            updateTimestamp();
+            
+            hideLoading();
+          },
+          error: function(xhr, status, error) {
+            console.error('Error refreshing data:', error);
+            hideLoading();
+          }
+        });
+      }
+
+      // Helper functions to generate HTML (fallback if partials aren't available)
+      function generateHsaTable(hsaData) {
+        let html = '<table class="w-full border-collapse"><tr><th class="text-left font-bold text-muted uppercase">Lines</th>';
+        hsaData.cols.forEach(col => {
+          html += `<th class="font-semibold text-slate-500">STN${col}</th>`;
+        });
+        html += '</tr>';
+        
+        hsaData.rows.forEach(row => {
+          html += `<tr class="border-b border-slate-100 last:border-0">`;
+          html += `<td class="row-label">${row}</td>`;
+          hsaData.cols.forEach(col => {
+            const status = hsaData.data[row] && hsaData.data[row][col] ? hsaData.data[row][col] : 'UNKNOWN';
+            const detail = hsaData.details[`${row}_${col}`] || {};
+            const pulseClass = status === 'WARN' ? 'pulse-warn' : (status === 'CRITICAL' ? 'pulse-critical' : '');
+            html += `<td class="text-center py-2">`;
+            html += `<button class="sensor-btn status-${status.toLowerCase()} ${pulseClass}"`;
+            html += ` data-dcp-name="${detail.dcp_name || 'N/A'}"`;
+            html += ` data-description="${detail.description || 'N/A'}"`;
+            html += ` data-location="${detail.location || 'N/A'}"`;
+            html += ` data-status="${status}"></button>`;
+            html += `</td>`;
+          });
+          html += `</tr>`;
+        });
+        html += '</table>';
+        return html;
+      }
+
+      function generateDisTable(disData) {
+        let html = '<table class="w-full border-collapse"><tr><th class="text-left font-bold text-muted uppercase">Lines</th>';
+        disData.cols.forEach(col => {
+          html += `<th class="font-semibold text-slate-500">STN${col}</th>`;
+        });
+        html += '</tr>';
+        
+        disData.rows.forEach(row => {
+          html += `<tr class="border-b border-slate-100 last:border-0">`;
+          html += `<td class="row-label">${row}</td>`;
+          disData.cols.forEach(col => {
+            const status = disData.data[row] && disData.data[row][col] ? disData.data[row][col] : 'UNKNOWN';
+            const detail = disData.details[`${row}_${col}`] || {};
+            const pulseClass = status === 'WARN' ? 'pulse-warn' : (status === 'CRITICAL' ? 'pulse-critical' : '');
+            html += `<td class="text-center py-2">`;
+            html += `<button class="sensor-btn status-${status.toLowerCase()} ${pulseClass}"`;
+            html += ` data-dcp-name="${detail.dcp_name || 'N/A'}"`;
+            html += ` data-description="${detail.description || 'N/A'}"`;
+            html += ` data-location="${detail.location || 'N/A'}"`;
+            html += ` data-status="${status}"></button>`;
+            html += `</td>`;
+          });
+          html += `</tr>`;
+        });
+        html += '</table>';
+        return html;
+      }
+
+      function generateAoiList(aoiData) {
+        let html = '';
+        aoiData.forEach(item => {
+          const pulseClass = item.STATUS === 'WARN' ? 'pulse-warn' : (item.STATUS === 'CRITICAL' ? 'pulse-critical' : '');
+          html += `<div class="flex items-center gap-3 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">`;
+          html += `<button class="sensor-btn status-${item.STATUS.toLowerCase()} ${pulseClass}"`;
+          html += ` data-dcp-name="${item.DCP_NAME}"`;
+          html += ` data-description="${item.DESCRIPTION}"`;
+          html += ` data-location="${item.LOCATION}"`;
+          html += ` data-status="${item.STATUS}"></button>`;
+          html += `<span class="text-base text-slate-600 font-medium">${item.LINE.replace('AOI', '')}</span>`;
+          html += `</div>`;
+        });
+        return html;
+      }
+
+      function generateSmList(smData) {
+        let html = '';
+        smData.forEach(item => {
+          const pulseClass = item.STATUS === 'WARN' ? 'pulse-warn' : (item.STATUS === 'CRITICAL' ? 'pulse-critical' : '');
+          html += `<div class="flex items-center gap-3 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">`;
+          html += `<button class="sensor-btn status-${item.STATUS.toLowerCase()} ${pulseClass}"`;
+          html += ` data-dcp-name="${item.DCP_NAME}"`;
+          html += ` data-description="${item.DESCRIPTION}"`;
+          html += ` data-location="${item.LOCATION}"`;
+          html += ` data-status="${item.STATUS}"></button>`;
+          html += `<span class="text-base text-slate-600 font-medium">${item.LINE.replace('SM', '')}</span>`;
+          html += `</div>`;
+        });
+        return html;
+      }
+
+      function generateWcsTable(wcsData) {
+  if (!wcsData || wcsData.length === 0) {
+    return '<div class="text-center py-8 text-muted"><svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4M12 20V4"></path></svg><p class="text-lg">No WCS data available</p></div>';
+  }
+  
+  let html = '<div class="w-full"><table class="w-full border-collapse">';
+  for (let i = 0; i < wcsData.length; i += 2) {
+    html += '<tr>';
+    // First column
+    html += '<td class="p-2 w-1/2">';
+    if (wcsData[i]) {
+      const item = wcsData[i];
+      const pulseClass = item.STATUS === 'WARN' ? 'pulse-warn' : (item.STATUS === 'CRITICAL' ? 'pulse-critical' : '');
+      html += `<div class="flex items-center gap-3 bg-slate-50 rounded-lg px-4 py-3 border border-slate-200 hover:shadow-md transition-shadow">`;
+      html += `<button class="sensor-btn status-${item.STATUS.toLowerCase()} ${pulseClass} flex-shrink-0"`;
+      html += ` data-dcp-name="${item.DCP_NAME}"`;
+      html += ` data-description="${item.DESCRIPTION}"`;
+      html += ` data-location="${item.LOCATION}"`;
+      html += ` data-status="${item.STATUS}"></button>`;
+      html += `<div class="flex flex-col min-w-0 flex-1">`;
+      html += `<span class="text-base font-semibold text-slate-800">${item.LINE}</span>`;
+      html += `<span class="text-xs text-muted truncate">${item.DESCRIPTION}</span>`;
+      html += `</div></div>`;
+    }
+    html += '</td>';
+    
+    // Second column
+    html += '<td class="p-2 w-1/2">';
+    if (wcsData[i + 1]) {
+      const item = wcsData[i + 1];
+      const pulseClass = item.STATUS === 'WARN' ? 'pulse-warn' : (item.STATUS === 'CRITICAL' ? 'pulse-critical' : '');
+      html += `<div class="flex items-center gap-3 bg-slate-50 rounded-lg px-4 py-3 border border-slate-200 hover:shadow-md transition-shadow">`;
+      html += `<button class="sensor-btn status-${item.STATUS.toLowerCase()} ${pulseClass} flex-shrink-0"`;
+      html += ` data-dcp-name="${item.DCP_NAME}"`;
+      html += ` data-description="${item.DESCRIPTION}"`;
+      html += ` data-location="${item.LOCATION}"`;
+      html += ` data-status="${item.STATUS}"></button>`;
+      html += `<div class="flex flex-col min-w-0 flex-1">`;
+      html += `<span class="text-base font-semibold text-slate-800">${item.LINE}</span>`;
+      html += `<span class="text-xs text-muted truncate">${item.DESCRIPTION}</span>`;
+      html += `</div></div>`;
+    }
+    html += '</td>';
+    html += '</tr>';
+  }
+  html += '</table></div>';
+  return html;
+}
+
+      function generateHdaTable(hdaData) {
+        let html = '<table class="w-full border-collapse"><tr><th class="text-left font-bold text-muted uppercase sticky left-0 bg-white">Lines</th>';
+        hdaData.cols.forEach(col => {
+          html += `<th class="font-semibold text-slate-500 whitespace-nowrap">STN${col}</th>`;
+        });
+        html += '</tr>';
+        
+        hdaData.rows.forEach(row => {
+          html += `<tr class="border-b border-slate-50 last:border-0">`;
+          html += `<td class="row-label sticky left-0 bg-white">${row}</td>`;
+          hdaData.cols.forEach(col => {
+            const status = hdaData.data[row] && hdaData.data[row][col] ? hdaData.data[row][col] : 'UNKNOWN';
+            const detail = hdaData.details[`${row}_${col}`] || {};
+            const pulseClass = status === 'WARN' ? 'pulse-warn' : (status === 'CRITICAL' ? 'pulse-critical' : '');
+            html += `<td class="text-center py-1.5">`;
+            html += `<button class="sensor-btn status-${status.toLowerCase()} ${pulseClass}"`;
+            html += ` data-dcp-name="${detail.dcp_name || 'N/A'}"`;
+            html += ` data-description="${detail.description || 'N/A'}"`;
+            html += ` data-location="${detail.location || 'N/A'}"`;
+            html += ` data-status="${status}"></button>`;
+            html += `</td>`;
+          });
+          html += `</tr>`;
+        });
+        html += '</table>';
+        return html;
       }
 
       // Tooltip functionality
@@ -510,21 +577,33 @@
         $tooltip.css('display', 'none');
       });
 
-      // Manual refresh button (optional - can be triggered by clicking on timestamp)
-      $('#lastUpdate').css('cursor', 'pointer').click(function() {
-        refreshPage();
+      // Start auto-refresh
+      function startAutoRefresh() {
+        if (refreshTimer) {
+          clearInterval(refreshTimer);
+        }
+        refreshTimer = setInterval(refreshData, REFRESH_INTERVAL);
+        console.log(`Auto-refresh started: every ${REFRESH_INTERVAL/1000} seconds`);
+      }
+
+      // Stop auto-refresh
+      function stopAutoRefresh() {
+        if (refreshTimer) {
+          clearInterval(refreshTimer);
+          refreshTimer = null;
+          console.log('Auto-refresh stopped');
+        }
+      }
+
+      // Manual refresh button
+      $('#manualRefreshBtn').click(function() {
+        refreshData();
       });
 
       // Initial setup
-      updateCounts();
       updateTimestamp();
-      
-      // Start auto-refresh
       startAutoRefresh();
-      
-      // Update timestamp every second
-      setInterval(updateTimestamp, 1000);
-      
+
       // Optional: Stop auto-refresh when user interacts with the page
       // Uncomment if you want this behavior
       /*

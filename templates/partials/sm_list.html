@@ -1,0 +1,10 @@
+{% for item in sm %}
+<div class="flex items-center gap-3 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+  <button class="sensor-btn status-{{ item.STATUS|lower }} {% if item.STATUS == 'WARN' %}pulse-warn{% elif item.STATUS == 'CRITICAL' %}pulse-critical{% endif %}"
+          data-dcp-name="{{ item.DCP_NAME }}"
+          data-description="{{ item.DESCRIPTION }}"
+          data-location="{{ item.LOCATION }}"
+          data-status="{{ item.STATUS }}"></button>
+  <span class="text-base text-slate-600 font-medium">{{ item.LINE | replace("SM", "") }}</span>
+</div>
+{% endfor %}

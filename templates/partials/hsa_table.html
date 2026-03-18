@@ -1,0 +1,25 @@
+<table class="w-full border-collapse">
+  <tr>
+    <th class="text-left font-bold text-muted uppercase">Lines</th>
+    {% for col in hsa.cols %}
+    <th class="font-semibold text-slate-500">STN{{ col }}</th>
+    {% endfor %}
+  </tr>
+  {% for row in hsa.rows %}
+  <tr class="border-b border-slate-100 last:border-0">
+    <td class="row-label">{{ row }}</td>
+    {% for col in hsa.cols %}
+    {% set status = hsa.data[row][col] %}
+    {% set detail_key = row + '_' + col %}
+    {% set detail = hsa.details.get(detail_key, {}) %}
+    <td class="text-center py-2">
+      <button class="sensor-btn status-{{ status|lower }} {% if status == 'WARN' %}pulse-warn{% elif status == 'CRITICAL' %}pulse-critical{% endif %}"
+              data-dcp-name="{{ detail.get('dcp_name', 'N/A') }}"
+              data-description="{{ detail.get('description', 'N/A') }}"
+              data-location="{{ detail.get('location', 'N/A') }}"
+              data-status="{{ status }}"></button>
+    </td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
