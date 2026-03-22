@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viewstation</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
+            'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827',
+            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626' }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    * { box-sizing: border-box; }
+    .sensor-btn {
+      width: 20px; height: 20px; border-radius: 4px; transition: all 0.15s ease;
+      cursor: pointer; border: 1px solid rgba(0,0,0,0.1);
+    }
+    .sensor-btn:hover {
+      transform: scale(1.2);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      z-index: 10; position: relative;
+    }
+    .status-ok { background: #16a34a; }
+    .status-warn { background: #d97706; }
+    .status-critical { background: #dc2626; }
+    .status-unknown { background: #9ca3af; }
+    
+    .section-card {
+      background: #ffffff; border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+    .table-header { background: #dc2626; color: white; }
+    .row-label { min-width: 120px; font-size: 1rem; color: #374151; font-weight: 500; }
+    
+    @keyframes pulse-warn {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(217, 119, 6, 0); }
+    }
+    @keyframes pulse-critical {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+    }
+    .pulse-warn { animation: pulse-warn 2s infinite; }
+    .pulse-critical { animation: pulse-critical 1s infinite; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+    .tooltip {
+      position: fixed; background: white; border: 1px solid #e5e7eb;
+      padding: 10px 14px; border-radius: 6px; font-size: 1rem;
+      color: #111827;
+      pointer-events: none; z-index: 1000; display: none;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-left: 3px solid #dc2626; max-width: 280px;
+    }
+  </style>
+</head>
+
+<body class="bg-bg text-fg min-h-screen overflow-hidden">
+  
+  <!-- Navbar -->
+  <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+      </div>
+      <h1 class="font-sans font-bold text-xl tracking-tight text-accent">Viewstation</h1>
+    </div>
+
+    <div class="flex items-center gap-6 text-base">
+      <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+        <span class="text-muted">Updated:</span>
+        <span id="lastUpdate" class="font-semibold text-fg">--:--:--</span>
+      </div>
+      <div class="flex items-center gap-4 px-2">
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-ok"></div>
+          <span id="okCount" class="font-bold text-status-ok">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
+          <span id="warnCount" class="font-bold text-status-warn">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
+          <span id="criticalCount" class="font-bold text-status-critical">0</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="p-3 h-[calc(100vh-56px)] overflow-auto">
+    <div class="grid grid-cols-12 gap-3">
+      
+      <!-- HSA Section (Changed to col-span-4) -->
+      <div class="col-span-4 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2">
+          <h2 class="font-sans font-bold text-base uppercase tracking-wider">HSA</h2>
+        </div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hsa-container"></div>
+      </div>
+
+      <!-- DIS-ASSY Section (Changed to col-span-4) -->
+      <div class="col-span-4 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2">
+          <h2 class="font-sans font-bold text-base uppercase tracking-wider">DIS-ASSY</h2>
+        </div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="disassy-container"></div>
+      </div>
+
+      <!-- WCS Section -->
+      <div class="col-span-2 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2">
+          <h2 class="font-sans font-bold text-base uppercase tracking-wider">WCS</h2>
+        </div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="wcs-container"></div>
+      </div>
+
+      <!-- AOI Section -->
+      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2">
+          <h2 class="font-sans font-bold text-base uppercase tracking-wider">AOI</h2>
+        </div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="aoi-container"></div>
+      </div>
+
+      <!-- S MACHINE Section -->
+      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2">
+          <h2 class="font-sans font-bold text-base uppercase tracking-wider">S MACHINE</h2>
+        </div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="smachine-container"></div>
+      </div>
+
+      <!-- HDA Section -->
+      <div class="col-span-12 section-card rounded-lg overflow-hidden">
+        <div class="table-header px-3 py-2">
+          <h2 class="font-sans font-bold text-base uppercase tracking-wider">HDA</h2>
+        </div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hda-container"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    $(document).ready(function() {
+      
+      let DATA_MAP = {};
+
+      // Layout Configuration - KEYS MATCH CSV 'Line_no' COLUMN EXACTLY
+      const sensorData = {
+        hsa: {
+          rows: [
+            ...Array.from({length: 5}, (_, i) => `ALHSA_Line${i + 1}`),
+            ...Array.from({length: 16}, (_, i) => `NLHSA_Line${i + 1}`)
+          ],
+          cols: Array.from({length: 5}, (_, i) => `STN${i + 1}`),
+          suffixMap: { 'qcq': 0, 'ypi': 1, 'lii': 2, 'efl': 3, 'uvg': 4 } 
+        },
+        disassy: {
+          rows: [
+            ...Array.from({length: 2}, (_, i) => `ALDA_Line${i + 1}`),
+            ...Array.from({length: 9}, (_, i) => `NLDA_Line${i + 1}`)
+          ],
+          cols: Array.from({length: 5}, (_, i) => `STN${i + 1}`),
+          suffixMap: { 'qcq': 0, 'ypi': 1, 'lii': 2, 'efl': 3, 'uvg': 4 }
+        },
+        aoi: { count: 10 },
+        smachine: { count: 10 },
+        wcs: { count: 21 },
+        hda: {
+          rows: Array.from({length: 14}, (_, i) => `NLHDA_Line${i + 1}`),
+          cols: Array.from({length: 18}, (_, i) => `STN${i + 1}`),
+          suffixMap: { 
+            'qcq': 0, 'ypi': 1, 'lii': 2, 'efl': 3, 'uvg': 4, 'qpx': 5, 
+            'dld': 6, 'ksy': 7, 'zwz': 8, 'qra': 9, 'xmj': 10, 'zbg': 11, 
+            'dfz': 12, 'mhj': 13, 'gey': 14, 'xzf': 15, 'ccf': 16, 'lew': 17 
+          }
+        }
+      };
+
+      function loadData() {
+        $.get('/api/data', function(response) {
+          DATA_MAP = response;
+          initSections();
+          updateCounts();
+          updateTimestamp();
+        });
+      }
+
+      function createSensorButton(sectionKey, rowKey, colKey, data) {
+        let status = 'unknown';
+        let info = { id: 'N/A', desc: 'No Data', loc: '-', status: 'unknown', stop: 0, l1: 0, l2: 0, line_no: 'N/A' };
+        
+        if (data) {
+          status = data.status;
+          info = data;
+        }
+
+        let pulseClass = '';
+        if (status === 'warn') pulseClass = 'pulse-warn';
+        if (status === 'critical') pulseClass = 'pulse-critical';
+        
+        return `<button 
+          class="sensor-btn status-${status} ${pulseClass}" 
+          data-id="${info.id}"
+          data-desc="${info.desc}"
+          data-loc="${info.loc}"
+          data-status="${status}"
+          data-stop="${info.stop}"
+          data-l1="${info.l1}"
+          data-l2="${info.l2}"
+          data-section="${sectionKey}"
+          data-row="${rowKey}"
+          data-col="${colKey}"
+        ></button>`;
+      }
+
+      function generateTableSection(containerId, sectionKey, config) {
+        const container = $(`#${containerId}`);
+        let html = '<table class="w-full border-collapse">';
+        
+        // Header row
+        html += '<tr>';
+        html += '<th class="text-left pb-1.5 text-base font-bold text-muted uppercase">Lines</th>';
+        config.cols.forEach(col => {
+          html += `<th class="col-header-custom pb-1.5 text-base font-semibold text-slate-500">${col}</th>`;
+        });
+        html += '</tr>';
+        
+        // Data rows
+        config.rows.forEach(row => {
+          html += '<tr class="border-b border-slate-100 last:border-0">';
+          // Display row key (Line_no) as text
+          html += `<td class="row-label py-1">${row}</td>`;
+          
+          config.cols.forEach((col, colIndex) => {
+            let suffix = Object.keys(config.suffixMap).find(key => config.suffixMap[key] === colIndex);
+            // Lookup key matches Python logic: "section-line_no-suffix"
+            let lookupKey = suffix ? `${sectionKey}-${row}-${suffix}` : null;
+            
+            let sensorInfo = null;
+            if (lookupKey && DATA_MAP[lookupKey]) {
+              sensorInfo = DATA_MAP[lookupKey];
+            }
+
+            html += `<td class="text-center py-1">${createSensorButton(sectionKey, row, col, sensorInfo)}</td>`;
+          });
+          html += '</tr>';
+        });
+        
+        html += '</table>';
+        container.html(html);
+      }
+
+      function generateListSection(containerId, sectionKey, count) {
+        const container = $(`#${containerId}`);
+        let html = '<div class="flex flex-col gap-1">';
+        
+        let items = DATA_MAP[sectionKey] || [];
+        
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          // Use item.line_no for display
+          html += `
+            <div class="flex items-center gap-2 bg-slate-50 rounded px-2 py-0.5 border border-slate-100">
+              ${createSensorButton(sectionKey, item.line_no, '', item)}
+              <span class="text-base text-slate-600 font-medium truncate">${item.line_no}</span>
+            </div>
+          `;
+        }
+        
+        html += '</div>';
+        container.html(html);
+      }
+
+      function generateWCSSection(containerId, sectionKey, count) {
+        const container = $(`#${containerId}`);
+        let html = '<table class="w-full border-collapse">';
+        let items = DATA_MAP[sectionKey] || [];
+        
+        for (let i = 0; i < items.length; i += 2) {
+          const item1 = items[i];
+          const item2 = i + 1 < items.length ? items[i + 1] : null;
+
+          html += '<tr class="border-b border-slate-100 last:border-0">';
+          
+          // Col 1
+          html += `
+            <td class="py-0.5 pr-1">
+              <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-0.5 border border-slate-100">
+                ${createSensorButton(sectionKey, item1.line_no, '', item1)}
+                <span class="text-base text-slate-600 font-medium">${item1.line_no}</span>
+              </div>
+            </td>
+          `;
+          
+          // Col 2
+          if (item2) {
+            html += `
+              <td class="py-0.5 pl-1">
+                <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-0.5 border border-slate-100">
+                  ${createSensorButton(sectionKey, item2.line_no, '', item2)}
+                  <span class="text-base text-slate-600 font-medium">${item2.line_no}</span>
+                </div>
+              </td>
+            `;
+          } else {
+            html += '<td class="py-0.5 pl-1"></td>';
+          }
+          
+          html += '</tr>';
+        }
+        
+        html += '</table>';
+        container.html(html);
+      }
+
+      function initSections() {
+        generateTableSection('hsa-container', 'hsa', sensorData.hsa);
+        generateTableSection('disassy-container', 'disassy', sensorData.disassy);
+        generateWCSSection('wcs-container', 'wcs', sensorData.wcs.count);
+        generateListSection('aoi-container', 'aoi', sensorData.aoi.count);
+        generateListSection('smachine-container', 'smachine', sensorData.smachine.count);
+        generateTableSection('hda-container', 'hda', sensorData.hda);
+      }
+
+      function updateCounts() {
+        let ok = 0, warn = 0, critical = 0;
+        
+        $('.sensor-btn').each(function() {
+          const status = $(this).data('status');
+          if (status === 'ok') ok++;
+          else if (status === 'warn') warn++;
+          else if (status === 'critical') critical++;
+        });
+        
+        $('#okCount').text(ok);
+        $('#warnCount').text(warn);
+        $('#criticalCount').text(critical);
+      }
+
+      function updateTimestamp() {
+        const now = new Date();
+        $('#lastUpdate').text(now.toLocaleTimeString());
+      }
+
+      // Tooltip functionality
+      const $tooltip = $('#tooltip');
+      
+      $(document).on('mouseenter', '.sensor-btn', function(e) {
+        const $btn = $(this);
+        const id = $btn.data('id');
+        const desc = $btn.data('desc');
+        const loc = $btn.data('loc');
+        const status = $btn.data('status');
+        const stop = $btn.data('stop');
+        const l1 = $btn.data('l1');
+        const l2 = $btn.data('l2');
+        
+        let statusColor = '';
+        if(status === 'ok') statusColor = '#16a34a';
+        else if(status === 'warn') statusColor = '#d97706';
+        else if(status === 'critical') statusColor = '#dc2626';
+        else statusColor = '#6b7280';
+
+        $tooltip.html(`
+          <div class="font-bold text-accent text-base uppercase mb-1">${id}</div>
+          <div class="text-slate-800 font-medium">${desc}</div>
+          <div class="text-slate-500 text-sm mb-2">Location: ${loc}</div>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm border-t border-slate-100 pt-2">
+            <div>Status: <span style="color: ${statusColor}; font-weight: 700;">${status.toUpperCase()}</span></div>
+            <div>Stops: <span class="font-bold">${stop}</span></div>
+            <div>Check L1: <span class="font-bold">${l1}</span></div>
+            <div>Check L2: <span class="font-bold">${l2}</span></div>
+          </div>
+        `);
+        
+        $tooltip.css({ display: 'block', left: e.clientX + 15, top: e.clientY + 15 });
+      });
+      
+      $(document).on('mousemove', '.sensor-btn', function(e) {
+        $tooltip.css({ left: e.clientX + 15, top: e.clientY + 15 });
+      });
+      
+      $(document).on('mouseleave', '.sensor-btn', function() {
+        $tooltip.css('display', 'none');
+      });
+
+      // Initial Load
+      loadData();
+      setInterval(updateTimestamp, 1000);
+      setInterval(loadData, 10000); 
+    });
+  </script>
+</body>
+</html>
