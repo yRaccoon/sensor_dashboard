@@ -114,7 +114,7 @@
   <main class="p-3 h-[calc(100vh-56px)] overflow-auto">
     <div class="grid grid-cols-12 gap-3">
       
-      <!-- HSA Section (Changed to col-span-4) -->
+      <!-- HSA Section -->
       <div class="col-span-4 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold text-base uppercase tracking-wider">HSA</h2>
@@ -122,7 +122,7 @@
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hsa-container"></div>
       </div>
 
-      <!-- DIS-ASSY Section (Changed to col-span-4) -->
+      <!-- DIS-ASSY Section -->
       <div class="col-span-4 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold text-base uppercase tracking-wider">DIS-ASSY</h2>
@@ -173,48 +173,94 @@
       
       let DATA_MAP = {};
 
-      // Layout Configuration - KEYS MATCH CSV 'Line_no' COLUMN EXACTLY
-      const sensorData = {
-        hsa: {
-          rows: [
-            ...Array.from({length: 5}, (_, i) => `ALHSA_Line${i + 1}`),
-            ...Array.from({length: 16}, (_, i) => `NLHSA_Line${i + 1}`)
-          ],
-          cols: Array.from({length: 5}, (_, i) => `STN${i + 1}`),
-          suffixMap: { 'qcq': 0, 'ypi': 1, 'lii': 2, 'efl': 3, 'uvg': 4 } 
-        },
-        disassy: {
-          rows: [
-            ...Array.from({length: 2}, (_, i) => `ALDA_Line${i + 1}`),
-            ...Array.from({length: 9}, (_, i) => `NLDA_Line${i + 1}`)
-          ],
-          cols: Array.from({length: 5}, (_, i) => `STN${i + 1}`),
-          suffixMap: { 'qcq': 0, 'ypi': 1, 'lii': 2, 'efl': 3, 'uvg': 4 }
-        },
-        aoi: { count: 10 },
-        smachine: { count: 10 },
-        wcs: { count: 21 },
-        hda: {
-          rows: Array.from({length: 14}, (_, i) => `NLHDA_Line${i + 1}`),
-          cols: Array.from({length: 18}, (_, i) => `STN${i + 1}`),
-          suffixMap: { 
-            'qcq': 0, 'ypi': 1, 'lii': 2, 'efl': 3, 'uvg': 4, 'qpx': 5, 
-            'dld': 6, 'ksy': 7, 'zwz': 8, 'qra': 9, 'xmj': 10, 'zbg': 11, 
-            'dfz': 12, 'mhj': 13, 'gey': 14, 'xzf': 15, 'ccf': 16, 'lew': 17 
+      // For each line, we need to collect all items and their positions
+      // This will be populated dynamically from the actual data
+      let lineItemsMap = {};
+
+      // Function to extract the prefix (AL or NL) from line name
+      function getLinePrefix(lineName) {
+        const match = lineName.match(/^(AL|NL)/);
+        return match ? match[0] : '';
+      }
+
+      // Function to extract the line type (HSA, HDA, DA, etc.) from line name
+      function getLineType(lineName) {
+        const match = lineName.match(/_(HSA|HDA|DA|Dis-Assy|Line)/);
+        return match ? match[1] : '';
+      }
+
+      // Function to extract numeric value from line name for sorting
+      function getLineNumber(lineName) {
+        // Extract number from strings like "NLHSA_Line2", "ALHSA_Line1", "NLDA_Line5", etc.
+        const match = lineName.match(/\d+$/);
+        if (match) {
+          return parseInt(match[0]);
+        }
+        return 0;
+      }
+
+      // Sort lines alphabetically by prefix first (AL before NL), then by line number
+      function sortLines(lines) {
+        return lines.sort((a, b) => {
+          const prefixA = getLinePrefix(a);
+          const prefixB = getLinePrefix(b);
+          
+          // First sort by prefix (AL comes before NL alphabetically)
+          if (prefixA !== prefixB) {
+            return prefixA.localeCompare(prefixB);
+          }
+          
+          // If same prefix, sort by line number
+          const numA = getLineNumber(a);
+          const numB = getLineNumber(b);
+          return numA - numB;
+        });
+      }
+
+      function buildLineItemsMap() {
+        lineItemsMap = {};
+        
+        // Process all keys in DATA_MAP that follow the pattern section-line_no-index
+        for (let key in DATA_MAP) {
+          const parts = key.split('-');
+          if (parts.length === 3) {
+            const section = parts[0];
+            const lineNo = parts[1];
+            const index = parseInt(parts[2]);
+            
+            if (!lineItemsMap[section]) lineItemsMap[section] = {};
+            if (!lineItemsMap[section][lineNo]) lineItemsMap[section][lineNo] = [];
+            
+            lineItemsMap[section][lineNo][index] = DATA_MAP[key];
           }
         }
-      };
+        
+        // For each line, sort the items by their index to maintain order
+        for (let section in lineItemsMap) {
+          for (let lineNo in lineItemsMap[section]) {
+            // Filter out empty slots and sort by index
+            const items = [];
+            for (let i = 0; i < lineItemsMap[section][lineNo].length; i++) {
+              if (lineItemsMap[section][lineNo][i]) {
+                items.push(lineItemsMap[section][lineNo][i]);
+              }
+            }
+            lineItemsMap[section][lineNo] = items;
+          }
+        }
+      }
 
       function loadData() {
         $.get('/api/data', function(response) {
           DATA_MAP = response;
+          buildLineItemsMap();
           initSections();
           updateCounts();
           updateTimestamp();
         });
       }
 
-      function createSensorButton(sectionKey, rowKey, colKey, data) {
+      function createSensorButton(sectionKey, rowKey, colIndex, data) {
         let status = 'unknown';
         let info = { id: 'N/A', desc: 'No Data', loc: '-', status: 'unknown', stop: 0, l1: 0, l2: 0, line_no: 'N/A' };
         
@@ -238,7 +284,7 @@
           data-l2="${info.l2}"
           data-section="${sectionKey}"
           data-row="${rowKey}"
-          data-col="${colKey}"
+          data-col="${colIndex}"
         ></button>`;
       }
 
@@ -246,51 +292,78 @@
         const container = $(`#${containerId}`);
         let html = '<table class="w-full border-collapse">';
         
+        // Determine number of columns based on max items in any line for this section
+        let maxCols = 0;
+        if (lineItemsMap[sectionKey]) {
+          for (let lineNo in lineItemsMap[sectionKey]) {
+            if (lineItemsMap[sectionKey][lineNo].length > maxCols) {
+              maxCols = lineItemsMap[sectionKey][lineNo].length;
+            }
+          }
+        }
+        
+        // If no data yet, use default columns
+        if (maxCols === 0) maxCols = config.defaultCols || 5;
+        
         // Header row
         html += '<tr>';
         html += '<th class="text-left pb-1.5 text-base font-bold text-muted uppercase">Lines</th>';
-        config.cols.forEach(col => {
-          html += `<th class="col-header-custom pb-1.5 text-base font-semibold text-slate-500">${col}</th>`;
-        });
+        for (let i = 0; i < maxCols; i++) {
+          html += `<th class="col-header-custom pb-1.5 text-base font-semibold text-slate-500">STN${i + 1}</th>`;
+        }
         html += '</tr>';
         
-        // Data rows
-        config.rows.forEach(row => {
+        // Data rows - get lines from actual data and sort them
+        let linesToShow = [];
+        if (lineItemsMap[sectionKey]) {
+          linesToShow = Object.keys(lineItemsMap[sectionKey]);
+          linesToShow = sortLines(linesToShow);
+        }
+        
+        linesToShow.forEach(row => {
           html += '<tr class="border-b border-slate-100 last:border-0">';
-          // Display row key (Line_no) as text
-          html += `<td class="row-label py-1">${row}</td>`;
+          html += `<td class="row-label py-1">${row}<\/td>`;
           
-          config.cols.forEach((col, colIndex) => {
-            let suffix = Object.keys(config.suffixMap).find(key => config.suffixMap[key] === colIndex);
-            // Lookup key matches Python logic: "section-line_no-suffix"
-            let lookupKey = suffix ? `${sectionKey}-${row}-${suffix}` : null;
-            
-            let sensorInfo = null;
-            if (lookupKey && DATA_MAP[lookupKey]) {
-              sensorInfo = DATA_MAP[lookupKey];
-            }
-
-            html += `<td class="text-center py-1">${createSensorButton(sectionKey, row, col, sensorInfo)}</td>`;
-          });
-          html += '</tr>';
+          const items = (lineItemsMap[sectionKey] && lineItemsMap[sectionKey][row]) ? lineItemsMap[sectionKey][row] : [];
+          
+          for (let i = 0; i < maxCols; i++) {
+            const sensorInfo = items[i] || null;
+            html += `<td class="text-center py-1">${createSensorButton(sectionKey, row, i, sensorInfo)}<\/td>`;
+          }
+          html += '<\/tr>';
         });
         
-        html += '</table>';
+        html += '<\/table>';
         container.html(html);
       }
 
-      function generateListSection(containerId, sectionKey, count) {
+      function generateListSection(containerId, sectionKey) {
         const container = $(`#${containerId}`);
         let html = '<div class="flex flex-col gap-1">';
         
         let items = DATA_MAP[sectionKey] || [];
         
+        // Sort list items by prefix first, then by line number
+        items.sort((a, b) => {
+          const prefixA = getLinePrefix(a.line_no);
+          const prefixB = getLinePrefix(b.line_no);
+          
+          // First sort by prefix (AL comes before NL alphabetically)
+          if (prefixA !== prefixB) {
+            return prefixA.localeCompare(prefixB);
+          }
+          
+          // If same prefix, sort by line number
+          const numA = getLineNumber(a.line_no);
+          const numB = getLineNumber(b.line_no);
+          return numA - numB;
+        });
+        
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
-          // Use item.line_no for display
           html += `
             <div class="flex items-center gap-2 bg-slate-50 rounded px-2 py-0.5 border border-slate-100">
-              ${createSensorButton(sectionKey, item.line_no, '', item)}
+              ${createSensorButton(sectionKey, item.line_no, i, item)}
               <span class="text-base text-slate-600 font-medium truncate">${item.line_no}</span>
             </div>
           `;
@@ -300,10 +373,26 @@
         container.html(html);
       }
 
-      function generateWCSSection(containerId, sectionKey, count) {
+      function generateWCSSection(containerId, sectionKey) {
         const container = $(`#${containerId}`);
         let html = '<table class="w-full border-collapse">';
         let items = DATA_MAP[sectionKey] || [];
+        
+        // Sort WCS items by prefix first, then by line number
+        items.sort((a, b) => {
+          const prefixA = getLinePrefix(a.line_no);
+          const prefixB = getLinePrefix(b.line_no);
+          
+          // First sort by prefix (AL comes before NL alphabetically)
+          if (prefixA !== prefixB) {
+            return prefixA.localeCompare(prefixB);
+          }
+          
+          // If same prefix, sort by line number
+          const numA = getLineNumber(a.line_no);
+          const numB = getLineNumber(b.line_no);
+          return numA - numB;
+        });
         
         for (let i = 0; i < items.length; i += 2) {
           const item1 = items[i];
@@ -315,10 +404,10 @@
           html += `
             <td class="py-0.5 pr-1">
               <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-0.5 border border-slate-100">
-                ${createSensorButton(sectionKey, item1.line_no, '', item1)}
+                ${createSensorButton(sectionKey, item1.line_no, i, item1)}
                 <span class="text-base text-slate-600 font-medium">${item1.line_no}</span>
               </div>
-            </td>
+             <\/td>
           `;
           
           // Col 2
@@ -326,29 +415,40 @@
             html += `
               <td class="py-0.5 pl-1">
                 <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-0.5 border border-slate-100">
-                  ${createSensorButton(sectionKey, item2.line_no, '', item2)}
+                  ${createSensorButton(sectionKey, item2.line_no, i+1, item2)}
                   <span class="text-base text-slate-600 font-medium">${item2.line_no}</span>
                 </div>
-              </td>
+               <\/td>
             `;
           } else {
-            html += '<td class="py-0.5 pl-1"></td>';
+            html += '<td class="py-0.5 pl-1"><\/td>';
           }
           
-          html += '</tr>';
+          html += '<\/tr>';
         }
         
-        html += '</table>';
+        html += '<\/table>';
         container.html(html);
       }
 
       function initSections() {
-        generateTableSection('hsa-container', 'hsa', sensorData.hsa);
-        generateTableSection('disassy-container', 'disassy', sensorData.disassy);
-        generateWCSSection('wcs-container', 'wcs', sensorData.wcs.count);
-        generateListSection('aoi-container', 'aoi', sensorData.aoi.count);
-        generateListSection('smachine-container', 'smachine', sensorData.smachine.count);
-        generateTableSection('hda-container', 'hda', sensorData.hda);
+        // HSA section
+        generateTableSection('hsa-container', 'hsa', { defaultCols: 5 });
+        
+        // DIS-ASSY section
+        generateTableSection('disassy-container', 'disassy', { defaultCols: 5 });
+        
+        // WCS section
+        generateWCSSection('wcs-container', 'wcs');
+        
+        // AOI section
+        generateListSection('aoi-container', 'aoi');
+        
+        // S MACHINE section
+        generateListSection('smachine-container', 'smachine');
+        
+        // HDA section
+        generateTableSection('hda-container', 'hda', { defaultCols: 18 });
       }
 
       function updateCounts() {
@@ -371,9 +471,42 @@
         $('#lastUpdate').text(now.toLocaleTimeString());
       }
 
-      // Tooltip functionality
+      // Tooltip functionality with smart positioning
       const $tooltip = $('#tooltip');
-      
+
+      function updateTooltipPosition(e) {
+        const tooltipWidth = $tooltip.outerWidth();
+        const tooltipHeight = $tooltip.outerHeight();
+        const windowWidth = $(window).width();
+        const windowHeight = $(window).height();
+        
+        // Calculate initial position (15px offset from cursor)
+        let left = e.clientX + 15;
+        let top = e.clientY + 15;
+        
+        // Check if tooltip would go beyond right edge
+        if (left + tooltipWidth > windowWidth - 10) {
+          left = e.clientX - tooltipWidth - 15;
+        }
+        
+        // Check if tooltip would go beyond left edge
+        if (left < 10) {
+          left = 10;
+        }
+        
+        // Check if tooltip would go beyond bottom edge
+        if (top + tooltipHeight > windowHeight - 10) {
+          top = e.clientY - tooltipHeight - 15;
+        }
+        
+        // Check if tooltip would go beyond top edge
+        if (top < 10) {
+          top = 10;
+        }
+        
+        $tooltip.css({ left: left, top: top });
+      }
+
       $(document).on('mouseenter', '.sensor-btn', function(e) {
         const $btn = $(this);
         const id = $btn.data('id');
@@ -402,11 +535,12 @@
           </div>
         `);
         
-        $tooltip.css({ display: 'block', left: e.clientX + 15, top: e.clientY + 15 });
+        $tooltip.css({ display: 'block' });
+        updateTooltipPosition(e);
       });
       
       $(document).on('mousemove', '.sensor-btn', function(e) {
-        $tooltip.css({ left: e.clientX + 15, top: e.clientY + 15 });
+        updateTooltipPosition(e);
       });
       
       $(document).on('mouseleave', '.sensor-btn', function() {

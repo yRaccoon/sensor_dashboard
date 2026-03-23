@@ -1,11 +1,12 @@
 from flask import Flask, render_template, jsonify
 import pandas as pd
 import os
+from collections import defaultdict
 
 app = Flask(__name__)
 
 def map_status(status_code):
-    """Convert numeric status to CSS class based on new rules."""
+    """Convert numeric status to CSS class."""
     try:
         code = int(status_code)
         if code == 0: return 'ok'           # Green
@@ -19,8 +20,8 @@ def map_status(status_code):
 def load_data():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    inv_path = os.path.join(base_dir, 'DCP_Inventory_R1.csv')
-    stat_path = os.path.join(base_dir, 'DCP_Status.csv')
+    inv_path = os.path.join(base_dir, 'data', 'DCP_Inventory_R1.csv')
+    stat_path = os.path.join(base_dir, 'data', 'DCP_Status.csv')
 
     try:
         df_inv = pd.read_csv(inv_path)
@@ -29,27 +30,43 @@ def load_data():
         print(f"Error loading CSV files: {e}")
         return {}
 
+    # Merge Inventory with Status
     df = pd.merge(df_inv, df_stat, on='DCP Name', how='left')
     df['Status'] = df['Status'].fillna(0)
 
-    sensor_map = {}
+    # Dictionary to hold data grouped by Line_no for table sections
+    # Structure: { 'hsa': { 'NLHSA_Line2': [ {info}, {info}... ] } }
+    grouped_data = defaultdict(lambda: defaultdict(list))
+    
+    # Dictionary for list sections (WCS, AOI, SM)
+    list_data = defaultdict(list)
 
     for _, row in df.iterrows():
-        process = row['Process']
+        process = str(row['Process']).strip()
         desc = row['Description']
-        line_no_col = str(row['Line_no']).strip()
+        line_no = str(row['Line_no']).strip()
         
+        # Determine Section
         section = None
+        is_list_section = False
+        
         if process in ['ALHSA', 'NLHSA']: section = 'hsa'
         elif process in ['ALDA', 'NLDA']: section = 'disassy'
-        elif process == 'NLHDA': section = 'hda'
-        elif process == 'WCS': section = 'wcs'
+        elif process in ['ALHDA', 'NLHDA']: section = 'hda'
+        elif process == 'WCS': 
+            section = 'wcs'
+            is_list_section = True
         elif process == 'STW':
-            if 'AOI' in desc: section = 'aoi'
-            else: section = 'smachine'
+            if 'AOI' in desc: 
+                section = 'aoi'
+                is_list_section = True
+            else: 
+                section = 'smachine'
+                is_list_section = True
 
         if not section: continue
 
+        # Create Data Object
         data = {
             'id': row['DCP Name'],
             'desc': desc,
@@ -58,20 +75,32 @@ def load_data():
             'stop': int(row.get('Stop_Count', 0)),
             'l1': int(row.get('CheckL1_Count', 0)),
             'l2': int(row.get('CheckL2_Count', 0)),
-            'line_no': line_no_col
+            'line_no': line_no
         }
 
-        if section in ['hsa', 'disassy', 'hda']:
-            parts = str(desc).split()
-            suffix = parts[-1] if parts else ''
-            
-            if line_no_col:
-                key = f"{section}-{line_no_col}-{suffix}"
-                sensor_map[key] = data
-        
+        if is_list_section:
+            list_data[section].append(data)
         else:
-            if section not in sensor_map: sensor_map[section] = []
-            sensor_map[section].append(data)
+            # For table sections, group by line number to assign columns later
+            grouped_data[section][line_no].append(data)
+
+    # Flatten grouped data into the sensor_map format expected by frontend
+    sensor_map = {}
+
+    for section, lines in grouped_data.items():
+        for line_no, items in lines.items():
+            # Sort items if necessary (assuming CSV order is correct, or sort by description)
+            # items.sort(key=lambda x: x['desc']) # Optional sort
+            
+            for idx, item in enumerate(items):
+                # Key format: "section-line_no-index"
+                # e.g., "hsa-NLHSA_Line2-0"
+                key = f"{section}-{line_no}-{idx}"
+                sensor_map[key] = item
+
+    # Add list sections to the map
+    for section, items in list_data.items():
+        sensor_map[section] = items
 
     return sensor_map
 
