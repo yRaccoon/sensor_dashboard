@@ -33,6 +33,12 @@ def load_data():
     # Merge Inventory with Status
     df = pd.merge(df_inv, df_stat, on='DCP Name', how='left')
     df['Status'] = df['Status'].fillna(0)
+    
+    # Fill NaN values for new columns
+    df['Average'] = df['Average'].fillna(0)
+    df['Stop_Cnt'] = df['Stop_Cnt'].fillna(0)
+    df['Check_L1_Cnt'] = df['Check_L1_Cnt'].fillna(0)
+    df['Check_L2_Cnt'] = df['Check_L2_Cnt'].fillna(0)
 
     # Dictionary to hold data grouped by Line_no for table sections
     # Structure: { 'hsa': { 'NLHSA_Line2': [ {info}, {info}... ] } }
@@ -66,15 +72,16 @@ def load_data():
 
         if not section: continue
 
-        # Create Data Object
+        # Create Data Object with new fields
         data = {
             'id': row['DCP Name'],
             'desc': desc,
             'loc': row['Location_Code'],
             'status': map_status(row['Status']),
-            'stop': int(row.get('Stop_Count', 0)),
-            'l1': int(row.get('CheckL1_Count', 0)),
-            'l2': int(row.get('CheckL2_Count', 0)),
+            'stop': int(row.get('Stop_Cnt', 0)),
+            'l1': int(row.get('Check_L1_Cnt', 0)),
+            'l2': int(row.get('Check_L2_Cnt', 0)),
+            'average': float(row.get('Average', 0)),  # New field
             'line_no': line_no
         }
 

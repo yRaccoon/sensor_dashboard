@@ -261,32 +261,33 @@
       }
 
       function createSensorButton(sectionKey, rowKey, colIndex, data) {
-        let status = 'unknown';
-        let info = { id: 'N/A', desc: 'No Data', loc: '-', status: 'unknown', stop: 0, l1: 0, l2: 0, line_no: 'N/A' };
-        
-        if (data) {
-          status = data.status;
-          info = data;
-        }
+  let status = 'unknown';
+  let info = { id: 'N/A', desc: 'No Data', loc: '-', status: 'unknown', stop: 0, l1: 0, l2: 0, average: 0, line_no: 'N/A' };
+  
+  if (data) {
+    status = data.status;
+    info = data;
+  }
 
-        let pulseClass = '';
-        if (status === 'warn') pulseClass = 'pulse-warn';
-        if (status === 'critical') pulseClass = 'pulse-critical';
-        
-        return `<button 
-          class="sensor-btn status-${status} ${pulseClass}" 
-          data-id="${info.id}"
-          data-desc="${info.desc}"
-          data-loc="${info.loc}"
-          data-status="${status}"
-          data-stop="${info.stop}"
-          data-l1="${info.l1}"
-          data-l2="${info.l2}"
-          data-section="${sectionKey}"
-          data-row="${rowKey}"
-          data-col="${colIndex}"
-        ></button>`;
-      }
+  let pulseClass = '';
+  if (status === 'warn') pulseClass = 'pulse-warn';
+  if (status === 'critical') pulseClass = 'pulse-critical';
+  
+  return `<button 
+    class="sensor-btn status-${status} ${pulseClass}" 
+    data-id="${info.id}"
+    data-desc="${info.desc}"
+    data-loc="${info.loc}"
+    data-status="${status}"
+    data-stop="${info.stop}"
+    data-l1="${info.l1}"
+    data-l2="${info.l2}"
+    data-average="${info.average}"
+    data-section="${sectionKey}"
+    data-row="${rowKey}"
+    data-col="${colIndex}"
+  ></button>`;
+}
 
       function generateTableSection(containerId, sectionKey, config) {
         const container = $(`#${containerId}`);
@@ -472,81 +473,82 @@
       }
 
       // Tooltip functionality with smart positioning
-      const $tooltip = $('#tooltip');
+const $tooltip = $('#tooltip');
 
-      function updateTooltipPosition(e) {
-        const tooltipWidth = $tooltip.outerWidth();
-        const tooltipHeight = $tooltip.outerHeight();
-        const windowWidth = $(window).width();
-        const windowHeight = $(window).height();
-        
-        // Calculate initial position (15px offset from cursor)
-        let left = e.clientX + 15;
-        let top = e.clientY + 15;
-        
-        // Check if tooltip would go beyond right edge
-        if (left + tooltipWidth > windowWidth - 10) {
-          left = e.clientX - tooltipWidth - 15;
-        }
-        
-        // Check if tooltip would go beyond left edge
-        if (left < 10) {
-          left = 10;
-        }
-        
-        // Check if tooltip would go beyond bottom edge
-        if (top + tooltipHeight > windowHeight - 10) {
-          top = e.clientY - tooltipHeight - 15;
-        }
-        
-        // Check if tooltip would go beyond top edge
-        if (top < 10) {
-          top = 10;
-        }
-        
-        $tooltip.css({ left: left, top: top });
-      }
+function updateTooltipPosition(e) {
+  const tooltipWidth = $tooltip.outerWidth();
+  const tooltipHeight = $tooltip.outerHeight();
+  const windowWidth = $(window).width();
+  const windowHeight = $(window).height();
+  
+  // Calculate initial position (15px offset from cursor)
+  let left = e.clientX + 15;
+  let top = e.clientY + 15;
+  
+  // Check if tooltip would go beyond right edge
+  if (left + tooltipWidth > windowWidth - 10) {
+    left = e.clientX - tooltipWidth - 15;
+  }
+  
+  // Check if tooltip would go beyond left edge
+  if (left < 10) {
+    left = 10;
+  }
+  
+  // Check if tooltip would go beyond bottom edge
+  if (top + tooltipHeight > windowHeight - 10) {
+    top = e.clientY - tooltipHeight - 15;
+  }
+  
+  // Check if tooltip would go beyond top edge
+  if (top < 10) {
+    top = 10;
+  }
+  
+  $tooltip.css({ left: left, top: top });
+}
 
-      $(document).on('mouseenter', '.sensor-btn', function(e) {
-        const $btn = $(this);
-        const id = $btn.data('id');
-        const desc = $btn.data('desc');
-        const loc = $btn.data('loc');
-        const status = $btn.data('status');
-        const stop = $btn.data('stop');
-        const l1 = $btn.data('l1');
-        const l2 = $btn.data('l2');
-        
-        let statusColor = '';
-        if(status === 'ok') statusColor = '#16a34a';
-        else if(status === 'warn') statusColor = '#d97706';
-        else if(status === 'critical') statusColor = '#dc2626';
-        else statusColor = '#6b7280';
+$(document).on('mouseenter', '.sensor-btn', function(e) {
+  const $btn = $(this);
+  const id = $btn.data('id');
+  const desc = $btn.data('desc');
+  const loc = $btn.data('loc');
+  const status = $btn.data('status');
+  const stop = $btn.data('stop');
+  const l1 = $btn.data('l1');
+  const l2 = $btn.data('l2');
+  const average = $btn.data('average'); // New field
+  
+  let statusColor = '';
+  if(status === 'ok') statusColor = '#16a34a';
+  else if(status === 'warn') statusColor = '#d97706';
+  else if(status === 'critical') statusColor = '#dc2626';
+  else statusColor = '#6b7280';
 
-        $tooltip.html(`
-          <div class="font-bold text-accent text-base uppercase mb-1">${id}</div>
-          <div class="text-slate-800 font-medium">${desc}</div>
-          <div class="text-slate-500 text-sm mb-2">Location: ${loc}</div>
-          <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm border-t border-slate-100 pt-2">
-            <div>Status: <span style="color: ${statusColor}; font-weight: 700;">${status.toUpperCase()}</span></div>
-            <div>Stops: <span class="font-bold">${stop}</span></div>
-            <div>Check L1: <span class="font-bold">${l1}</span></div>
-            <div>Check L2: <span class="font-bold">${l2}</span></div>
-          </div>
-        `);
-        
-        $tooltip.css({ display: 'block' });
-        updateTooltipPosition(e);
-      });
-      
-      $(document).on('mousemove', '.sensor-btn', function(e) {
-        updateTooltipPosition(e);
-      });
-      
-      $(document).on('mouseleave', '.sensor-btn', function() {
-        $tooltip.css('display', 'none');
-      });
+  $tooltip.html(`
+    <div class="font-bold text-accent text-base uppercase mb-1">${id}</div>
+    <div class="text-slate-800 font-medium">${desc}</div>
+    <div class="text-slate-500 text-sm mb-2">Location: ${loc}</div>
+    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm border-t border-slate-100 pt-2">
+      <div>Status: <span style="color: ${statusColor}; font-weight: 700;">${status.toUpperCase()}</span></div>
+      <div>Stops: <span class="font-bold">${stop}</span></div>
+      <div>Check L1: <span class="font-bold">${l1}</span></div>
+      <div>Check L2: <span class="font-bold">${l2}</span></div>
+      <div>Average: <span class="font-bold">${average}</span></div>
+    </div>
+  `);
+  
+  $tooltip.css({ display: 'block' });
+  updateTooltipPosition(e);
+});
 
+$(document).on('mousemove', '.sensor-btn', function(e) {
+  updateTooltipPosition(e);
+});
+
+$(document).on('mouseleave', '.sensor-btn', function() {
+  $tooltip.css('display', 'none');
+});
       // Initial Load
       loadData();
       setInterval(updateTimestamp, 1000);
