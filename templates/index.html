@@ -18,7 +18,7 @@
           colors: {
             bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
             'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827',
-            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626' }
+            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#6b7280', unknown: '#9ca3af' }
           }
         }
       }
@@ -39,6 +39,7 @@
     .status-ok { background: #16a34a; }
     .status-warn { background: #d97706; }
     .status-critical { background: #dc2626; }
+    .status-stale { background: #6b7280; }
     .status-unknown { background: #9ca3af; }
     
     .section-card {
@@ -46,7 +47,13 @@
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
     .table-header { background: #dc2626; color: white; }
+    .table-header h2 {
+      font-size: 1rem;
+    }
     .row-label { min-width: 120px; font-size: 1rem; color: #374151; font-weight: 500; }
+    .col-header-custom {
+      font-size: 1rem;
+    }
     
     @keyframes pulse-warn {
       0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
@@ -71,12 +78,17 @@
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       border-left: 3px solid #dc2626; max-width: 280px;
     }
+    
+    /* Navbar text size */
+    .navbar-text {
+      font-size: 1rem;
+    }
   </style>
 </head>
 
 <body class="bg-bg text-fg min-h-screen overflow-hidden">
   
-  <!-- Navbar -->
+  <!-- Navbar with increased text size -->
   <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-3">
       <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
@@ -85,10 +97,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
         </svg>
       </div>
-      <h1 class="font-sans font-bold text-xl tracking-tight text-accent">Viewstation</h1>
+      <h1 class="font-sans font-bold text-xl tracking-tight text-accent navbar-text">Viewstation</h1>
     </div>
 
-    <div class="flex items-center gap-6 text-base">
+    <div class="flex items-center gap-6 text-base navbar-text">
       <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
         <span class="text-muted">Updated:</span>
         <span id="lastUpdate" class="font-semibold text-fg">--:--:--</span>
@@ -106,6 +118,10 @@
           <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
           <span id="criticalCount" class="font-bold text-status-critical">0</span>
         </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-stale"></div>
+          <span id="staleCount" class="font-bold text-status-stale">0</span>
+        </div>
       </div>
     </div>
   </nav>
@@ -117,7 +133,7 @@
       <!-- HSA Section -->
       <div class="col-span-4 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
-          <h2 class="font-sans font-bold text-base uppercase tracking-wider">HSA</h2>
+          <h2 class="font-sans font-bold uppercase tracking-wider">HSA</h2>
         </div>
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hsa-container"></div>
       </div>
@@ -125,7 +141,7 @@
       <!-- DIS-ASSY Section -->
       <div class="col-span-4 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
-          <h2 class="font-sans font-bold text-base uppercase tracking-wider">DIS-ASSY</h2>
+          <h2 class="font-sans font-bold uppercase tracking-wider">DIS-ASSY</h2>
         </div>
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="disassy-container"></div>
       </div>
@@ -133,7 +149,7 @@
       <!-- WCS Section -->
       <div class="col-span-2 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
-          <h2 class="font-sans font-bold text-base uppercase tracking-wider">WCS</h2>
+          <h2 class="font-sans font-bold uppercase tracking-wider">WCS</h2>
         </div>
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="wcs-container"></div>
       </div>
@@ -141,7 +157,7 @@
       <!-- AOI Section -->
       <div class="col-span-1 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
-          <h2 class="font-sans font-bold text-base uppercase tracking-wider">AOI</h2>
+          <h2 class="font-sans font-bold uppercase tracking-wider">AOI</h2>
         </div>
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="aoi-container"></div>
       </div>
@@ -149,7 +165,7 @@
       <!-- S MACHINE Section -->
       <div class="col-span-1 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
-          <h2 class="font-sans font-bold text-base uppercase tracking-wider">S MACHINE</h2>
+          <h2 class="font-sans font-bold uppercase tracking-wider">S MACHINE</h2>
         </div>
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="smachine-container"></div>
       </div>
@@ -157,7 +173,7 @@
       <!-- HDA Section -->
       <div class="col-span-12 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
-          <h2 class="font-sans font-bold text-base uppercase tracking-wider">HDA</h2>
+          <h2 class="font-sans font-bold uppercase tracking-wider">HDA</h2>
         </div>
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hda-container"></div>
       </div>
@@ -174,7 +190,6 @@
       let DATA_MAP = {};
 
       // For each line, we need to collect all items and their positions
-      // This will be populated dynamically from the actual data
       let lineItemsMap = {};
 
       // Function to extract the prefix (AL or NL) from line name
@@ -183,20 +198,44 @@
         return match ? match[0] : '';
       }
 
-      // Function to extract the line type (HSA, HDA, DA, etc.) from line name
-      function getLineType(lineName) {
-        const match = lineName.match(/_(HSA|HDA|DA|Dis-Assy|Line)/);
-        return match ? match[1] : '';
-      }
-
       // Function to extract numeric value from line name for sorting
       function getLineNumber(lineName) {
-        // Extract number from strings like "NLHSA_Line2", "ALHSA_Line1", "NLDA_Line5", etc.
         const match = lineName.match(/\d+$/);
         if (match) {
           return parseInt(match[0]);
         }
         return 0;
+      }
+
+      // Function to sort S Machine items by S10, S20, S30 order
+      function sortSMachineItems(items) {
+        return items.sort((a, b) => {
+          const lineA = a.line_no;
+          const lineB = b.line_no;
+          
+          // Extract the S number (S10, S20, S30)
+          const matchA = lineA.match(/S(\d+)/);
+          const matchB = lineB.match(/S(\d+)/);
+          
+          if (matchA && matchB) {
+            const numA = parseInt(matchA[1]);
+            const numB = parseInt(matchB[1]);
+            return numA - numB;
+          }
+          
+          return lineA.localeCompare(lineB);
+        });
+      }
+
+      // Function to get status text for tooltip based on status code
+      function getStatusText(statusCode) {
+        const code = parseInt(statusCode);
+        if (code === 0) return 'OK';
+        if (code === 1) return 'GOOD';
+        if (code === 2) return 'CHECK L1';
+        if (code === 3) return 'CHECK L2';
+        if (code === 4) return 'STALE';
+        return 'UNKNOWN';
       }
 
       // Sort lines alphabetically by prefix first (AL before NL), then by line number
@@ -205,12 +244,10 @@
           const prefixA = getLinePrefix(a);
           const prefixB = getLinePrefix(b);
           
-          // First sort by prefix (AL comes before NL alphabetically)
           if (prefixA !== prefixB) {
             return prefixA.localeCompare(prefixB);
           }
           
-          // If same prefix, sort by line number
           const numA = getLineNumber(a);
           const numB = getLineNumber(b);
           return numA - numB;
@@ -220,7 +257,6 @@
       function buildLineItemsMap() {
         lineItemsMap = {};
         
-        // Process all keys in DATA_MAP that follow the pattern section-line_no-index
         for (let key in DATA_MAP) {
           const parts = key.split('-');
           if (parts.length === 3) {
@@ -235,10 +271,8 @@
           }
         }
         
-        // For each line, sort the items by their index to maintain order
         for (let section in lineItemsMap) {
           for (let lineNo in lineItemsMap[section]) {
-            // Filter out empty slots and sort by index
             const items = [];
             for (let i = 0; i < lineItemsMap[section][lineNo].length; i++) {
               if (lineItemsMap[section][lineNo][i]) {
@@ -257,43 +291,45 @@
           initSections();
           updateCounts();
           updateTimestamp();
+        }).fail(function(error) {
+          console.error('Error loading data:', error);
         });
       }
 
       function createSensorButton(sectionKey, rowKey, colIndex, data) {
-  let status = 'unknown';
-  let info = { id: 'N/A', desc: 'No Data', loc: '-', status: 'unknown', stop: 0, l1: 0, l2: 0, average: 0, line_no: 'N/A' };
-  
-  if (data) {
-    status = data.status;
-    info = data;
-  }
+        let status = 'unknown';
+        let info = { id: 'N/A', desc: 'No Data', loc: '-', status: 'unknown', status_code: 0, stop: 0, l1: 0, l2: 0, average: 0, line_no: 'N/A' };
+        
+        if (data) {
+          status = data.status;
+          info = data;
+        }
 
-  let pulseClass = '';
-  if (status === 'warn') pulseClass = 'pulse-warn';
-  if (status === 'critical') pulseClass = 'pulse-critical';
-  
-  return `<button 
-    class="sensor-btn status-${status} ${pulseClass}" 
-    data-id="${info.id}"
-    data-desc="${info.desc}"
-    data-loc="${info.loc}"
-    data-status="${status}"
-    data-stop="${info.stop}"
-    data-l1="${info.l1}"
-    data-l2="${info.l2}"
-    data-average="${info.average}"
-    data-section="${sectionKey}"
-    data-row="${rowKey}"
-    data-col="${colIndex}"
-  ></button>`;
-}
+        let pulseClass = '';
+        if (status === 'warn') pulseClass = 'pulse-warn';
+        if (status === 'critical') pulseClass = 'pulse-critical';
+        
+        return `<button 
+          class="sensor-btn status-${status} ${pulseClass}" 
+          data-id="${info.id}"
+          data-desc="${info.desc}"
+          data-loc="${info.loc}"
+          data-status-code="${info.status_code}"
+          data-status="${status}"
+          data-stop="${info.stop}"
+          data-l1="${info.l1}"
+          data-l2="${info.l2}"
+          data-average="${info.average}"
+          data-section="${sectionKey}"
+          data-row="${rowKey}"
+          data-col="${colIndex}"
+        ></button>`;
+      }
 
       function generateTableSection(containerId, sectionKey, config) {
         const container = $(`#${containerId}`);
         let html = '<table class="w-full border-collapse">';
         
-        // Determine number of columns based on max items in any line for this section
         let maxCols = 0;
         if (lineItemsMap[sectionKey]) {
           for (let lineNo in lineItemsMap[sectionKey]) {
@@ -303,18 +339,15 @@
           }
         }
         
-        // If no data yet, use default columns
         if (maxCols === 0) maxCols = config.defaultCols || 5;
         
-        // Header row
         html += '<tr>';
         html += '<th class="text-left pb-1.5 text-base font-bold text-muted uppercase">Lines</th>';
         for (let i = 0; i < maxCols; i++) {
-          html += `<th class="col-header-custom pb-1.5 text-base font-semibold text-slate-500">STN${i + 1}</th>`;
+          html += `<th class="col-header-custom pb-1.5 font-semibold text-slate-500">STN${i + 1}</th>`;
         }
         html += '</tr>';
         
-        // Data rows - get lines from actual data and sort them
         let linesToShow = [];
         if (lineItemsMap[sectionKey]) {
           linesToShow = Object.keys(lineItemsMap[sectionKey]);
@@ -344,21 +377,23 @@
         
         let items = DATA_MAP[sectionKey] || [];
         
-        // Sort list items by prefix first, then by line number
-        items.sort((a, b) => {
-          const prefixA = getLinePrefix(a.line_no);
-          const prefixB = getLinePrefix(b.line_no);
-          
-          // First sort by prefix (AL comes before NL alphabetically)
-          if (prefixA !== prefixB) {
-            return prefixA.localeCompare(prefixB);
-          }
-          
-          // If same prefix, sort by line number
-          const numA = getLineNumber(a.line_no);
-          const numB = getLineNumber(b.line_no);
-          return numA - numB;
-        });
+        // Special sorting for S Machine section
+        if (sectionKey === 'smachine') {
+          items = sortSMachineItems(items);
+        } else {
+          items.sort((a, b) => {
+            const prefixA = getLinePrefix(a.line_no);
+            const prefixB = getLinePrefix(b.line_no);
+            
+            if (prefixA !== prefixB) {
+              return prefixA.localeCompare(prefixB);
+            }
+            
+            const numA = getLineNumber(a.line_no);
+            const numB = getLineNumber(b.line_no);
+            return numA - numB;
+          });
+        }
         
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
@@ -379,17 +414,14 @@
         let html = '<table class="w-full border-collapse">';
         let items = DATA_MAP[sectionKey] || [];
         
-        // Sort WCS items by prefix first, then by line number
         items.sort((a, b) => {
           const prefixA = getLinePrefix(a.line_no);
           const prefixB = getLinePrefix(b.line_no);
           
-          // First sort by prefix (AL comes before NL alphabetically)
           if (prefixA !== prefixB) {
             return prefixA.localeCompare(prefixB);
           }
           
-          // If same prefix, sort by line number
           const numA = getLineNumber(a.line_no);
           const numB = getLineNumber(b.line_no);
           return numA - numB;
@@ -401,7 +433,6 @@
 
           html += '<tr class="border-b border-slate-100 last:border-0">';
           
-          // Col 1
           html += `
             <td class="py-0.5 pr-1">
               <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-0.5 border border-slate-100">
@@ -411,7 +442,6 @@
              <\/td>
           `;
           
-          // Col 2
           if (item2) {
             html += `
               <td class="py-0.5 pl-1">
@@ -433,38 +463,29 @@
       }
 
       function initSections() {
-        // HSA section
         generateTableSection('hsa-container', 'hsa', { defaultCols: 5 });
-        
-        // DIS-ASSY section
         generateTableSection('disassy-container', 'disassy', { defaultCols: 5 });
-        
-        // WCS section
         generateWCSSection('wcs-container', 'wcs');
-        
-        // AOI section
         generateListSection('aoi-container', 'aoi');
-        
-        // S MACHINE section
-        generateListSection('smachine-container', 'smachine');
-        
-        // HDA section
+        generateListSection('smachine-container', 'smachine'); // This will use special sorting
         generateTableSection('hda-container', 'hda', { defaultCols: 18 });
       }
 
       function updateCounts() {
-        let ok = 0, warn = 0, critical = 0;
+        let ok = 0, warn = 0, critical = 0, stale = 0;
         
         $('.sensor-btn').each(function() {
           const status = $(this).data('status');
           if (status === 'ok') ok++;
           else if (status === 'warn') warn++;
           else if (status === 'critical') critical++;
+          else if (status === 'stale') stale++;
         });
         
         $('#okCount').text(ok);
         $('#warnCount').text(warn);
         $('#criticalCount').text(critical);
+        $('#staleCount').text(stale);
       }
 
       function updateTimestamp() {
@@ -473,82 +494,82 @@
       }
 
       // Tooltip functionality with smart positioning
-const $tooltip = $('#tooltip');
+      const $tooltip = $('#tooltip');
 
-function updateTooltipPosition(e) {
-  const tooltipWidth = $tooltip.outerWidth();
-  const tooltipHeight = $tooltip.outerHeight();
-  const windowWidth = $(window).width();
-  const windowHeight = $(window).height();
-  
-  // Calculate initial position (15px offset from cursor)
-  let left = e.clientX + 15;
-  let top = e.clientY + 15;
-  
-  // Check if tooltip would go beyond right edge
-  if (left + tooltipWidth > windowWidth - 10) {
-    left = e.clientX - tooltipWidth - 15;
-  }
-  
-  // Check if tooltip would go beyond left edge
-  if (left < 10) {
-    left = 10;
-  }
-  
-  // Check if tooltip would go beyond bottom edge
-  if (top + tooltipHeight > windowHeight - 10) {
-    top = e.clientY - tooltipHeight - 15;
-  }
-  
-  // Check if tooltip would go beyond top edge
-  if (top < 10) {
-    top = 10;
-  }
-  
-  $tooltip.css({ left: left, top: top });
-}
+      function updateTooltipPosition(e) {
+        const tooltipWidth = $tooltip.outerWidth();
+        const tooltipHeight = $tooltip.outerHeight();
+        const windowWidth = $(window).width();
+        const windowHeight = $(window).height();
+        
+        let left = e.clientX + 15;
+        let top = e.clientY + 15;
+        
+        if (left + tooltipWidth > windowWidth - 10) {
+          left = e.clientX - tooltipWidth - 15;
+        }
+        
+        if (left < 10) {
+          left = 10;
+        }
+        
+        if (top + tooltipHeight > windowHeight - 10) {
+          top = e.clientY - tooltipHeight - 15;
+        }
+        
+        if (top < 10) {
+          top = 10;
+        }
+        
+        $tooltip.css({ left: left, top: top });
+      }
 
-$(document).on('mouseenter', '.sensor-btn', function(e) {
-  const $btn = $(this);
-  const id = $btn.data('id');
-  const desc = $btn.data('desc');
-  const loc = $btn.data('loc');
-  const status = $btn.data('status');
-  const stop = $btn.data('stop');
-  const l1 = $btn.data('l1');
-  const l2 = $btn.data('l2');
-  const average = $btn.data('average'); // New field
-  
-  let statusColor = '';
-  if(status === 'ok') statusColor = '#16a34a';
-  else if(status === 'warn') statusColor = '#d97706';
-  else if(status === 'critical') statusColor = '#dc2626';
-  else statusColor = '#6b7280';
+      $(document).on('mouseenter', '.sensor-btn', function(e) {
+        const $btn = $(this);
+        const id = $btn.data('id');
+        const desc = $btn.data('desc');
+        const loc = $btn.data('loc');
+        const statusCode = $btn.data('status-code');
+        const stop = $btn.data('stop');
+        const l1 = $btn.data('l1');
+        const l2 = $btn.data('l2');
+        const average = $btn.data('average');
+        
+        const statusText = getStatusText(statusCode);
+        
+        let statusColor = '';
+        if (statusCode === 0) statusColor = '#16a34a';
+        else if (statusCode === 1) statusColor = '#16a34a';
+        else if (statusCode === 2) statusColor = '#d97706';
+        else if (statusCode === 3) statusColor = '#dc2626';
+        else if (statusCode === 4) statusColor = '#6b7280'; // Stale - dark grey
+        else statusColor = '#9ca3af'; // Unknown - light grey
 
-  $tooltip.html(`
-    <div class="font-bold text-accent text-base uppercase mb-1">${id}</div>
-    <div class="text-slate-800 font-medium">${desc}</div>
-    <div class="text-slate-500 text-sm mb-2">Location: ${loc}</div>
-    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm border-t border-slate-100 pt-2">
-      <div>Status: <span style="color: ${statusColor}; font-weight: 700;">${status.toUpperCase()}</span></div>
-      <div>Stops: <span class="font-bold">${stop}</span></div>
-      <div>Check L1: <span class="font-bold">${l1}</span></div>
-      <div>Check L2: <span class="font-bold">${l2}</span></div>
-      <div>Average: <span class="font-bold">${average}</span></div>
-    </div>
-  `);
-  
-  $tooltip.css({ display: 'block' });
-  updateTooltipPosition(e);
-});
+        $tooltip.html(`
+          <div class="font-bold text-accent text-base uppercase mb-1">${id}</div>
+          <div class="text-slate-800 font-medium">${desc}</div>
+          <div class="text-slate-500 text-sm mb-2">Location: ${loc}</div>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm border-t border-slate-100 pt-2">
+            <div>Status: <span style="color: ${statusColor}; font-weight: 700;">${statusText}</span></div>
+            <div>Stops: <span class="font-bold">${stop}</span></div>
+            <div>Check L1: <span class="font-bold">${l1}</span></div>
+            <div>Check L2: <span class="font-bold">${l2}</span></div>
+            <div>Average: <span class="font-bold">${average}</span></div>
+          </div>
+        `);
+        
+        $tooltip.css({ display: 'block' });
+        updateTooltipPosition(e);
+      });
+      
+      $(document).on('mousemove', '.sensor-btn', function(e) {
+        updateTooltipPosition(e);
+      });
+      
+      $(document).on('mouseleave', '.sensor-btn', function() {
+        $tooltip.css('display', 'none');
+      });
 
-$(document).on('mousemove', '.sensor-btn', function(e) {
-  updateTooltipPosition(e);
-});
-
-$(document).on('mouseleave', '.sensor-btn', function() {
-  $tooltip.css('display', 'none');
-});
       // Initial Load
       loadData();
       setInterval(updateTimestamp, 1000);

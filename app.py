@@ -12,7 +12,7 @@ def map_status(status_code):
         if code == 0: return 'ok'           # Green
         if code in [1, 2]: return 'warn'    # Orange
         if code == 3: return 'critical'     # Red
-        if code == 4: return 'unknown'      # Grey
+        if code == 4: return 'stale'        # Grey - Changed from 'unknown' to 'stale'
         return 'unknown'
     except:
         return 'unknown'
@@ -41,7 +41,6 @@ def load_data():
     df['Check_L2_Cnt'] = df['Check_L2_Cnt'].fillna(0)
 
     # Dictionary to hold data grouped by Line_no for table sections
-    # Structure: { 'hsa': { 'NLHSA_Line2': [ {info}, {info}... ] } }
     grouped_data = defaultdict(lambda: defaultdict(list))
     
     # Dictionary for list sections (WCS, AOI, SM)
@@ -73,15 +72,17 @@ def load_data():
         if not section: continue
 
         # Create Data Object with new fields
+        status_code = int(row.get('Status', 0))
         data = {
             'id': row['DCP Name'],
             'desc': desc,
             'loc': row['Location_Code'],
-            'status': map_status(row['Status']),
+            'status': map_status(status_code),
+            'status_code': status_code,  # Store original status code
             'stop': int(row.get('Stop_Cnt', 0)),
             'l1': int(row.get('Check_L1_Cnt', 0)),
             'l2': int(row.get('Check_L2_Cnt', 0)),
-            'average': float(row.get('Average', 0)),  # New field
+            'average': float(row.get('Average', 0)),
             'line_no': line_no
         }
 
@@ -96,12 +97,7 @@ def load_data():
 
     for section, lines in grouped_data.items():
         for line_no, items in lines.items():
-            # Sort items if necessary (assuming CSV order is correct, or sort by description)
-            # items.sort(key=lambda x: x['desc']) # Optional sort
-            
             for idx, item in enumerate(items):
-                # Key format: "section-line_no-index"
-                # e.g., "hsa-NLHSA_Line2-0"
                 key = f"{section}-{line_no}-{idx}"
                 sensor_map[key] = item
 
