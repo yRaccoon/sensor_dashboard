@@ -316,7 +316,7 @@
       }
 
       function loadData() {
-        $.get('/api/data', function(response) {
+        $.get('api.php', function(response) {
           DATA_MAP = response;
           buildLineItemsMap();
           initSections();
