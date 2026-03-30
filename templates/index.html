@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Viewstation</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
-  
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <script>
     tailwind.config = {
       theme: {
@@ -24,138 +26,252 @@
       }
     }
   </script>
-  
+
   <style>
-    * { box-sizing: border-box; }
-    .sensor-btn {
-      width: 20px; height: 20px; border-radius: 4px; transition: all 0.15s ease;
-      cursor: pointer; border: 1px solid rgba(0,0,0,0.1);
+    * {
+      box-sizing: border-box;
     }
+
+    .sensor-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
     .sensor-btn:hover {
       transform: scale(1.2);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      z-index: 10; position: relative;
+      z-index: 10;
+      position: relative;
     }
-    .status-ok { background: #16a34a; }
-    .status-warn { background: #d97706; }
-    .status-critical { background: #dc2626; }
-    .status-stale { background: #6b7280; }
-    .status-unknown { background: #9ca3af; }
-    
+
+    .status-ok {
+      background: #16a34a;
+    }
+
+    .status-warn {
+      background: #d97706;
+    }
+
+    .status-critical {
+      background: #dc2626;
+    }
+
+    .status-stale {
+      background: #6b7280;
+    }
+
+    .status-unknown {
+      background: #9ca3af;
+    }
+
     .section-card {
-      background: #ffffff; border: 1px solid #e5e7eb;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
-    .table-header { background: #dc2626; color: white; }
+
+    .table-header {
+      background: #dc2626;
+      color: white;
+    }
+
     .table-header h2 {
       font-size: 1rem;
     }
-    .row-label { min-width: 120px; font-size: 1rem; color: #374151; font-weight: 500; }
+
+    .row-label {
+      min-width: 120px;
+      font-size: 1rem;
+      color: #374151;
+      font-weight: 500;
+    }
+
     .col-header-custom {
       font-size: 1rem;
     }
-    
-    @keyframes pulse-warn {
-      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
-      50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(217, 119, 6, 0); }
-    }
-    @keyframes pulse-critical {
-      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
-    }
-    .pulse-warn { animation: pulse-warn 2s infinite; }
-    .pulse-critical { animation: pulse-critical 1s infinite; }
 
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; }
-    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    @keyframes pulse-warn {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4);
+      }
+
+      50% {
+        opacity: 0.8;
+        box-shadow: 0 0 0 4px rgba(217, 119, 6, 0);
+      }
+    }
+
+    @keyframes pulse-critical {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+      }
+
+      50% {
+        opacity: 0.7;
+        box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+      }
+    }
+
+    .pulse-warn {
+      animation: pulse-warn 2s infinite;
+    }
+
+    .pulse-critical {
+      animation: pulse-critical 1s infinite;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
 
     .tooltip {
-      position: fixed; background: white; border: 1px solid #e5e7eb;
-      padding: 12px 16px; border-radius: 8px; font-size: 0.95rem;
+      position: fixed;
+      background: white;
+      border: 1px solid #e5e7eb;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.95rem;
       color: #111827;
-      pointer-events: none; z-index: 1000; display: none;
+      pointer-events: none;
+      z-index: 1000;
+      display: none;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      border-left: 3px solid #dc2626; max-width: 340px; min-width: 280px;
+      border-left: 3px solid #dc2626;
+      max-width: 340px;
+      min-width: 280px;
     }
-    
-    /* Navbar text size - increased by 1rem */
-    .navbar-text {
-      font-size: 1rem;
+
+    /* Navbar text size */
+    .navbar-title {
+      font-size: 1.5rem !important;
     }
-    .navbar-text .text-muted, .navbar-text .font-semibold, .navbar-text .font-bold {
-      font-size: 1rem;
-    }
-    nav .flex.items-center.gap-6 {
-      font-size: 1rem;
-    }
-    
-    /* Header text size - increased */
-    .table-header h2 {
-      font-size: 1rem;
+
+    .status-count {
+      font-size: 1.5rem !important;
       font-weight: bold;
     }
-    .col-header-custom {
-      font-size: 1rem;
-      font-weight: 600;
+
+    .filter-select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background: white;
+      font-size: 1.5rem !important;
+      cursor: pointer;
+      outline: none;
     }
-    .row-label {
-      font-size: 1rem;
+
+    .filter-select:hover {
+      border-color: #dc2626;
+    }
+
+    .filter-select:focus {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+      outline: none;
+    }
+
+    .filter-label {
+      font-size: 1.5rem !important;
       font-weight: 500;
+      color: #6b7280;
     }
   </style>
 </head>
 
 <body class="bg-bg text-fg min-h-screen overflow-hidden">
-  
-  <!-- Navbar with increased text size -->
-  <nav class="bg-card border-b border-border px-4 py-3 flex items-center justify-between shadow-sm">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-accent rounded flex items-center justify-center">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-      </div>
-      <h1 class="font-sans font-bold text-2xl tracking-tight text-accent navbar-text">Viewstation</h1>
-    </div>
 
-    <div class="flex items-center gap-8 text-base navbar-text">
-      <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-full">
-        <span class="text-muted">Updated:</span>
-        <span id="lastUpdate" class="font-semibold text-fg">--:--:--</span>
+  <!-- Navbar with integrated filters -->
+  <nav class="bg-card border-b border-border px-4 py-3 shadow-sm">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <!-- Left section: Logo and Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-accent rounded flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+            </path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
+          </svg>
+        </div>
+        <h1 class="font-sans font-bold tracking-tight text-accent navbar-title">Viewstation</h1>
       </div>
-      <div class="flex items-center gap-5 px-2">
+
+      <!-- Middle section: Filters -->
+      <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <div class="w-3 h-3 rounded-sm bg-status-ok"></div>
-          <span id="okCount" class="font-bold text-status-ok text-base">0</span>
+          <span class="filter-label">Location:</span>
+          <select id="locationFilter" class="filter-select">
+            <option value="all">All Locations</option>
+          </select>
         </div>
         <div class="flex items-center gap-2">
-          <div class="w-3 h-3 rounded-sm bg-status-warn"></div>
-          <span id="warnCount" class="font-bold text-status-warn text-base">0</span>
+          <span class="filter-label">Process:</span>
+          <select id="processFilter" class="filter-select">
+            <option value="all">All Processes</option>
+          </select>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="w-3 h-3 rounded-sm bg-status-critical"></div>
-          <span id="criticalCount" class="font-bold text-status-critical text-base">0</span>
+      </div>
+
+      <!-- Right section: Status and Timestamp -->
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-full">
+          <span class="text-muted text-base">Updated:</span>
+          <span id="lastUpdate" class="font-semibold text-fg text-base">--:--:--</span>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="w-3 h-3 rounded-sm bg-status-stale"></div>
-          <span id="staleCount" class="font-bold text-status-stale text-base">0</span>
+        <div class="flex items-center gap-5">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-sm bg-status-ok"></div>
+            <span id="okCount" class="font-bold text-status-ok status-count">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-sm bg-status-warn"></div>
+            <span id="warnCount" class="font-bold text-status-warn status-count">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-sm bg-status-critical"></div>
+            <span id="criticalCount" class="font-bold text-status-critical status-count">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-sm bg-status-stale"></div>
+            <span id="staleCount" class="font-bold text-status-stale status-count">0</span>
+          </div>
         </div>
       </div>
     </div>
   </nav>
 
   <!-- Main Content -->
-  <main class="p-3 h-[calc(100vh-64px)] overflow-auto">
+  <main class="p-3 h-[calc(100vh-85px)] overflow-auto">
     <div class="grid grid-cols-12 gap-3">
-      
+
       <!-- HSA Section -->
       <div class="col-span-4 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2.5">
           <h2 class="font-sans font-bold uppercase tracking-wider">HSA</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hsa-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="hsa-container"></div>
       </div>
 
       <!-- DIS-ASSY Section -->
@@ -163,7 +279,7 @@
         <div class="table-header px-3 py-2.5">
           <h2 class="font-sans font-bold uppercase tracking-wider">DIS-ASSY</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="disassy-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="disassy-container"></div>
       </div>
 
       <!-- WCS Section -->
@@ -171,7 +287,7 @@
         <div class="table-header px-3 py-2.5">
           <h2 class="font-sans font-bold uppercase tracking-wider">WCS</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="wcs-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="wcs-container"></div>
       </div>
 
       <!-- AOI Section -->
@@ -179,15 +295,15 @@
         <div class="table-header px-3 py-2.5">
           <h2 class="font-sans font-bold uppercase tracking-wider">AOI</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="aoi-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="aoi-container"></div>
       </div>
 
       <!-- S MACHINE Section -->
       <div class="col-span-1 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2.5">
-          <h2 class="font-sans font-bold uppercase tracking-wider">S MACHINE</h2>
+          <h2 class="font-sans font-bold uppercase tracking-wider">S10, S20, S30</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="smachine-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="smachine-container"></div>
       </div>
 
       <!-- HDA Section -->
@@ -195,7 +311,7 @@
         <div class="table-header px-3 py-2.5">
           <h2 class="font-sans font-bold uppercase tracking-wider">HDA</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hda-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="hda-container"></div>
       </div>
 
     </div>
@@ -205,20 +321,20 @@
   <div id="tooltip" class="tooltip"></div>
 
   <script>
-    $(document).ready(function() {
-      
-      let DATA_MAP = {};
+    $(document).ready(function () {
 
-      // For each line, we need to collect all items and their positions
+      let originalDataMap = {};
+      let filteredDataMap = {};
       let lineItemsMap = {};
+      let currentFilter = { location: 'all', process: 'all' };
+      let uniqueLocations = new Set();
+      let uniqueProcesses = new Set();
 
-      // Function to extract the prefix (AL or NL) from line name
       function getLinePrefix(lineName) {
         const match = lineName.match(/^(AL|NL)/);
         return match ? match[0] : '';
       }
 
-      // Function to extract numeric value from line name for sorting
       function getLineNumber(lineName) {
         const match = lineName.match(/\d+$/);
         if (match) {
@@ -227,27 +343,19 @@
         return 0;
       }
 
-      // Function to sort S Machine items by S10, S20, S30 order
       function sortSMachineItems(items) {
         return items.sort((a, b) => {
           const lineA = a.line_no;
           const lineB = b.line_no;
-          
-          // Extract the S number (S10, S20, S30)
           const matchA = lineA.match(/S(\d+)/);
           const matchB = lineB.match(/S(\d+)/);
-          
           if (matchA && matchB) {
-            const numA = parseInt(matchA[1]);
-            const numB = parseInt(matchB[1]);
-            return numA - numB;
+            return parseInt(matchA[1]) - parseInt(matchB[1]);
           }
-          
           return lineA.localeCompare(lineB);
         });
       }
 
-      // Function to get status text for tooltip based on status code
       function getStatusText(statusCode) {
         const code = parseInt(statusCode);
         if (code === 0) return 'GOOD';
@@ -258,27 +366,23 @@
         return 'UNKNOWN';
       }
 
-      // Function to get status color based on status code
       function getStatusColor(statusCode) {
         const code = parseInt(statusCode);
-        if (code === 0) return '#16a34a'; // Green - GOOD
-        if (code === 1) return '#d97706'; // Orange - CHECK L1
-        if (code === 2) return '#d97706'; // Orange - CHECK L2
-        if (code === 3) return '#dc2626'; // Red - STOP
-        if (code === 4) return '#6b7280'; // Grey - STALE
-        return '#9ca3af'; // Light grey - UNKNOWN
+        if (code === 0) return '#16a34a';
+        if (code === 1) return '#d97706';
+        if (code === 2) return '#d97706';
+        if (code === 3) return '#dc2626';
+        if (code === 4) return '#6b7280';
+        return '#9ca3af';
       }
 
-      // Sort lines alphabetically by prefix first (AL before NL), then by line number
       function sortLines(lines) {
         return lines.sort((a, b) => {
           const prefixA = getLinePrefix(a);
           const prefixB = getLinePrefix(b);
-          
           if (prefixA !== prefixB) {
             return prefixA.localeCompare(prefixB);
           }
-          
           const numA = getLineNumber(a);
           const numB = getLineNumber(b);
           return numA - numB;
@@ -287,21 +391,17 @@
 
       function buildLineItemsMap() {
         lineItemsMap = {};
-        
-        for (let key in DATA_MAP) {
+        for (let key in filteredDataMap) {
           const parts = key.split('-');
           if (parts.length === 3) {
             const section = parts[0];
             const lineNo = parts[1];
             const index = parseInt(parts[2]);
-            
             if (!lineItemsMap[section]) lineItemsMap[section] = {};
             if (!lineItemsMap[section][lineNo]) lineItemsMap[section][lineNo] = [];
-            
-            lineItemsMap[section][lineNo][index] = DATA_MAP[key];
+            lineItemsMap[section][lineNo][index] = filteredDataMap[key];
           }
         }
-        
         for (let section in lineItemsMap) {
           for (let lineNo in lineItemsMap[section]) {
             const items = [];
@@ -315,14 +415,71 @@
         }
       }
 
+      function applyFilters() {
+        filteredDataMap = {};
+        for (let key in originalDataMap) {
+          const item = originalDataMap[key];
+          if (Array.isArray(item)) {
+            const filteredArray = item.filter(sensor => {
+              let match = true;
+              if (currentFilter.location !== 'all' && sensor.loc !== currentFilter.location) match = false;
+              if (currentFilter.process !== 'all' && sensor.process !== currentFilter.process) match = false;
+              return match;
+            });
+            if (filteredArray.length > 0) {
+              filteredDataMap[key] = filteredArray;
+            }
+          } else {
+            let match = true;
+            if (currentFilter.location !== 'all' && item.loc !== currentFilter.location) match = false;
+            if (currentFilter.process !== 'all' && item.process !== currentFilter.process) match = false;
+            if (match) {
+              filteredDataMap[key] = item;
+            }
+          }
+        }
+        buildLineItemsMap();
+        initSections();
+        updateCounts();
+      }
+
       function loadData() {
-        $.get('/api/data', function(response) {
-          DATA_MAP = response;
-          buildLineItemsMap();
-          initSections();
-          updateCounts();
+        $.get('/api/data', function (response) {
+          originalDataMap = response;
+          uniqueLocations.clear();
+          uniqueProcesses.clear();
+
+          for (let key in originalDataMap) {
+            const item = originalDataMap[key];
+            if (Array.isArray(item)) {
+              item.forEach(sensor => {
+                if (sensor.loc) uniqueLocations.add(sensor.loc);
+                if (sensor.process) uniqueProcesses.add(sensor.process);
+              });
+            } else {
+              if (item.loc) uniqueLocations.add(item.loc);
+              if (item.process) uniqueProcesses.add(item.process);
+            }
+          }
+
+          const locationSelect = $('#locationFilter');
+          locationSelect.empty().append('<option value="all">All Locations</option>');
+          Array.from(uniqueLocations).sort().forEach(loc => {
+            locationSelect.append(`<option value="${loc}">${loc}</option>`);
+          });
+
+          const processSelect = $('#processFilter');
+          processSelect.empty().append('<option value="all">All Processes</option>');
+          Array.from(uniqueProcesses).sort().forEach(proc => {
+            processSelect.append(`<option value="${proc}">${proc}</option>`);
+          });
+
+          currentFilter = { location: 'all', process: 'all' };
+          locationSelect.val('all');
+          processSelect.val('all');
+          applyFilters();
           updateTimestamp();
-        }).fail(function(error) {
+        }).fail(function (error) {
           console.error('Error loading data:', error);
         });
       }
@@ -330,16 +487,13 @@
       function createSensorButton(sectionKey, rowKey, colIndex, data) {
         let status = 'unknown';
         let info = { id: 'N/A', desc: 'No Data', loc: '-', status: 'unknown', status_code: 0, stop: 0, l1: 0, l2: 0, average: 0, line_no: 'N/A' };
-        
         if (data) {
           status = data.status;
           info = data;
         }
-
         let pulseClass = '';
         if (status === 'warn') pulseClass = 'pulse-warn';
         if (status === 'critical') pulseClass = 'pulse-critical';
-        
         return `<button 
           class="sensor-btn status-${status} ${pulseClass}" 
           data-id="${info.id}"
@@ -360,7 +514,6 @@
       function generateTableSection(containerId, sectionKey, config) {
         const container = $(`#${containerId}`);
         let html = '<table class="w-full border-collapse">';
-        
         let maxCols = 0;
         if (lineItemsMap[sectionKey]) {
           for (let lineNo in lineItemsMap[sectionKey]) {
@@ -369,35 +522,28 @@
             }
           }
         }
-        
         if (maxCols === 0) maxCols = config.defaultCols || 5;
-        
         html += '<tr>';
         html += '<th class="text-left pb-2 text-base font-bold text-muted uppercase">Lines</th>';
         for (let i = 0; i < maxCols; i++) {
           html += `<th class="col-header-custom pb-2 font-semibold text-slate-500">STN${i + 1}</th>`;
         }
-        html += '</tr>';
-        
+        html += '<tr>';
         let linesToShow = [];
         if (lineItemsMap[sectionKey]) {
           linesToShow = Object.keys(lineItemsMap[sectionKey]);
           linesToShow = sortLines(linesToShow);
         }
-        
         linesToShow.forEach(row => {
           html += '<tr class="border-b border-slate-100 last:border-0">';
           html += `<td class="row-label py-1.5">${row}<\/td>`;
-          
           const items = (lineItemsMap[sectionKey] && lineItemsMap[sectionKey][row]) ? lineItemsMap[sectionKey][row] : [];
-          
           for (let i = 0; i < maxCols; i++) {
             const sensorInfo = items[i] || null;
             html += `<td class="text-center py-1.5">${createSensorButton(sectionKey, row, i, sensorInfo)}<\/td>`;
           }
           html += '<\/tr>';
         });
-        
         html += '<\/table>';
         container.html(html);
       }
@@ -405,27 +551,21 @@
       function generateListSection(containerId, sectionKey) {
         const container = $(`#${containerId}`);
         let html = '<div class="flex flex-col gap-1.5">';
-        
-        let items = DATA_MAP[sectionKey] || [];
-        
-        // Special sorting for S Machine section
+        let items = filteredDataMap[sectionKey] || [];
         if (sectionKey === 'smachine') {
           items = sortSMachineItems(items);
         } else {
           items.sort((a, b) => {
             const prefixA = getLinePrefix(a.line_no);
             const prefixB = getLinePrefix(b.line_no);
-            
             if (prefixA !== prefixB) {
               return prefixA.localeCompare(prefixB);
             }
-            
             const numA = getLineNumber(a.line_no);
             const numB = getLineNumber(b.line_no);
             return numA - numB;
           });
         }
-        
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
           html += `
@@ -435,7 +575,6 @@
             </div>
           `;
         }
-        
         html += '</div>';
         container.html(html);
       }
@@ -443,27 +582,21 @@
       function generateWCSSection(containerId, sectionKey) {
         const container = $(`#${containerId}`);
         let html = '<table class="w-full border-collapse">';
-        let items = DATA_MAP[sectionKey] || [];
-        
+        let items = filteredDataMap[sectionKey] || [];
         items.sort((a, b) => {
           const prefixA = getLinePrefix(a.line_no);
           const prefixB = getLinePrefix(b.line_no);
-          
           if (prefixA !== prefixB) {
             return prefixA.localeCompare(prefixB);
           }
-          
           const numA = getLineNumber(a.line_no);
           const numB = getLineNumber(b.line_no);
           return numA - numB;
         });
-        
         for (let i = 0; i < items.length; i += 2) {
           const item1 = items[i];
           const item2 = i + 1 < items.length ? items[i + 1] : null;
-
           html += '<tr class="border-b border-slate-100 last:border-0">';
-          
           html += `
             <td class="py-1 pr-1">
               <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-1 border border-slate-100">
@@ -472,12 +605,11 @@
               </div>
              <\/td>
           `;
-          
           if (item2) {
             html += `
               <td class="py-1 pl-1">
                 <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-1 border border-slate-100">
-                  ${createSensorButton(sectionKey, item2.line_no, i+1, item2)}
+                  ${createSensorButton(sectionKey, item2.line_no, i + 1, item2)}
                   <span class="text-base text-slate-600 font-medium">${item2.line_no}</span>
                 </div>
                <\/td>
@@ -485,10 +617,8 @@
           } else {
             html += '<td class="py-1 pl-1"><\/td>';
           }
-          
           html += '<\/tr>';
         }
-        
         html += '<\/table>';
         container.html(html);
       }
@@ -504,15 +634,13 @@
 
       function updateCounts() {
         let ok = 0, warn = 0, critical = 0, stale = 0;
-        
-        $('.sensor-btn').each(function() {
+        $('.sensor-btn').each(function () {
           const status = $(this).data('status');
           if (status === 'ok') ok++;
           else if (status === 'warn') warn++;
           else if (status === 'critical') critical++;
           else if (status === 'stale') stale++;
         });
-        
         $('#okCount').text(ok);
         $('#warnCount').text(warn);
         $('#criticalCount').text(critical);
@@ -524,38 +652,23 @@
         $('#lastUpdate').text(now.toLocaleTimeString());
       }
 
-      // Tooltip functionality with smart positioning
+      // Tooltip functionality
       const $tooltip = $('#tooltip');
-
       function updateTooltipPosition(e) {
         const tooltipWidth = $tooltip.outerWidth();
         const tooltipHeight = $tooltip.outerHeight();
         const windowWidth = $(window).width();
         const windowHeight = $(window).height();
-        
         let left = e.clientX + 15;
         let top = e.clientY + 15;
-        
-        if (left + tooltipWidth > windowWidth - 10) {
-          left = e.clientX - tooltipWidth - 15;
-        }
-        
-        if (left < 10) {
-          left = 10;
-        }
-        
-        if (top + tooltipHeight > windowHeight - 10) {
-          top = e.clientY - tooltipHeight - 15;
-        }
-        
-        if (top < 10) {
-          top = 10;
-        }
-        
+        if (left + tooltipWidth > windowWidth - 10) left = e.clientX - tooltipWidth - 15;
+        if (left < 10) left = 10;
+        if (top + tooltipHeight > windowHeight - 10) top = e.clientY - tooltipHeight - 15;
+        if (top < 10) top = 10;
         $tooltip.css({ left: left, top: top });
       }
 
-      $(document).on('mouseenter', '.sensor-btn', function(e) {
+      $(document).on('mouseenter', '.sensor-btn', function (e) {
         const $btn = $(this);
         const id = $btn.data('id');
         const desc = $btn.data('desc');
@@ -565,10 +678,8 @@
         const l1 = $btn.data('l1');
         const l2 = $btn.data('l2');
         const average = $btn.data('average');
-        
         const statusText = getStatusText(statusCode);
         const statusColor = getStatusColor(statusCode);
-
         $tooltip.html(`
           <div class="font-bold text-accent text-lg uppercase mb-2">${id}</div>
           <div class="text-slate-800 font-medium text-base mb-1">${desc}</div>
@@ -581,24 +692,42 @@
             <div class="col-span-2">Average: <span class="font-bold">${average}</span></div>
           </div>
         `);
-        
         $tooltip.css({ display: 'block' });
         updateTooltipPosition(e);
       });
-      
-      $(document).on('mousemove', '.sensor-btn', function(e) {
+
+      $(document).on('mousemove', '.sensor-btn', function (e) {
         updateTooltipPosition(e);
       });
-      
-      $(document).on('mouseleave', '.sensor-btn', function() {
+
+      $(document).on('mouseleave', '.sensor-btn', function () {
         $tooltip.css('display', 'none');
       });
 
-      // Initial Load
+      // Filter event handlers
+      $('#locationFilter').on('change', function () {
+        currentFilter.location = $(this).val();
+        applyFilters();
+      });
+
+      $('#processFilter').on('change', function () {
+        currentFilter.process = $(this).val();
+        applyFilters();
+      });
+
+      $('#resetFilters').on('click', function () {
+        currentFilter = { location: 'all', process: 'all' };
+        $('#locationFilter').val('all');
+        $('#processFilter').val('all');
+        applyFilters();
+      });
+
+      // Start
       loadData();
       setInterval(updateTimestamp, 1000);
-      setInterval(loadData, 10000); 
+      setInterval(loadData, 30000);
     });
   </script>
 </body>
+
 </html>
