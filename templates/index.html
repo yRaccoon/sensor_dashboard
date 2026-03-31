@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Viewstation</title>
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
-
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+  
   <script>
     tailwind.config = {
       theme: {
@@ -26,309 +24,176 @@
       }
     }
   </script>
-
+  
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     .sensor-btn {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      transition: all 0.15s ease;
-      cursor: pointer;
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      width: 20px; height: 20px; border-radius: 4px; transition: all 0.15s ease;
+      cursor: pointer; border: 1px solid rgba(0,0,0,0.1);
     }
-
     .sensor-btn:hover {
       transform: scale(1.2);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-      position: relative;
+      z-index: 10; position: relative;
     }
-
-    .status-ok {
-      background: #16a34a;
-    }
-
-    .status-warn {
-      background: #d97706;
-    }
-
-    .status-critical {
-      background: #dc2626;
-    }
-
-    .status-stale {
-      background: #6b7280;
-    }
-
-    .status-unknown {
-      background: #9ca3af;
-    }
-
+    .status-ok { background: #16a34a; }
+    .status-warn { background: #d97706; }
+    .status-critical { background: #dc2626; }
+    .status-stale { background: #6b7280; }
+    .status-unknown { background: #9ca3af; }
+    
     .section-card {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
+      background: #ffffff; border: 1px solid #e5e7eb;
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
-
-    .table-header {
-      background: #dc2626;
-      color: white;
-    }
-
+    .table-header { background: #1303ee; color: white; }
     .table-header h2 {
       font-size: 1rem;
-    }
-
-    .row-label {
-      min-width: 120px;
-      font-size: 1rem;
-      color: #374151;
-      font-weight: 500;
-    }
-
-    .col-header-custom {
-      font-size: 1rem;
-    }
-
-    @keyframes pulse-warn {
-
-      0%,
-      100% {
-        opacity: 1;
-        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4);
-      }
-
-      50% {
-        opacity: 0.8;
-        box-shadow: 0 0 0 4px rgba(217, 119, 6, 0);
-      }
-    }
-
-    @keyframes pulse-critical {
-
-      0%,
-      100% {
-        opacity: 1;
-        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
-      }
-
-      50% {
-        opacity: 0.7;
-        box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
-      }
-    }
-
-    .pulse-warn {
-      animation: pulse-warn 2s infinite;
-    }
-
-    .pulse-critical {
-      animation: pulse-critical 1s infinite;
-    }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #d1d5db;
-      border-radius: 3px;
-    }
-
-    .tooltip {
-      position: fixed;
-      background: white;
-      border: 1px solid #e5e7eb;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      color: #111827;
-      pointer-events: none;
-      z-index: 1000;
-      display: none;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      border-left: 3px solid #dc2626;
-      max-width: 340px;
-      min-width: 280px;
-    }
-
-    /* Navbar text size */
-    .navbar-title {
-      font-size: 1.5rem !important;
-    }
-
-    .status-count {
-      font-size: 1.5rem !important;
       font-weight: bold;
     }
-
-    .filter-select {
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      background: white;
-      font-size: 1.5rem !important;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .filter-select:hover {
-      border-color: #dc2626;
-    }
-
-    .filter-select:focus {
-      border-color: #dc2626;
-      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
-      outline: none;
-    }
-
-    .filter-label {
-      font-size: 1.5rem !important;
+    .row-label { 
+      min-width: 120px; 
+      font-size: 1rem; 
+      color: #374151; 
       font-weight: 500;
-      color: #6b7280;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+    .col-header-custom {
+      font-size: 1rem;
+      font-weight: 600;
+      padding-bottom: 0.5rem;
+    }
+    
+    @keyframes pulse-warn {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(217, 119, 6, 0); }
+    }
+    @keyframes pulse-critical {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+    }
+    .pulse-warn { animation: pulse-warn 2s infinite; }
+    .pulse-critical { animation: pulse-critical 1s infinite; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+    .tooltip {
+      position: fixed; background: white; border: 1px solid #e5e7eb;
+      padding: 12px 16px; border-radius: 8px; font-size: 0.95rem;
+      color: #111827;
+      pointer-events: none; z-index: 1000; display: none;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-left: 3px solid #dc2626; max-width: 340px; min-width: 280px;
+    }
+    
+    /* Navbar text size */
+    .navbar-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .status-count-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .navbar-text {
+      font-size: 1rem;
     }
   </style>
 </head>
 
 <body class="bg-bg text-fg min-h-screen overflow-hidden">
-
-  <!-- Navbar with integrated filters -->
-  <nav class="bg-card border-b border-border px-4 py-3 shadow-sm">
-    <div class="flex items-center justify-between flex-wrap gap-3">
-      <!-- Left section: Logo and Title -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-accent rounded flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-            </path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
-            </path>
-          </svg>
-        </div>
-        <h1 class="font-sans font-bold tracking-tight text-accent navbar-title">Viewstation</h1>
+  
+  <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
       </div>
+      <h1 class="font-sans font-bold tracking-tight text-accent navbar-title">Viewstation</h1>
+    </div>
 
-      <!-- Middle section: Filters -->
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <span class="filter-label">Location:</span>
-          <select id="locationFilter" class="filter-select">
-            <option value="all">All Locations</option>
-          </select>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="filter-label">Process:</span>
-          <select id="processFilter" class="filter-select">
-            <option value="all">All Processes</option>
-          </select>
-        </div>
+    <div class="flex items-center gap-6 text-base">
+      <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+        <span class="text-muted navbar-text">Updated:</span>
+        <span id="lastUpdate" class="font-semibold text-fg navbar-text">--:--:--</span>
       </div>
-
-      <!-- Right section: Status and Timestamp -->
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-full">
-          <span class="text-muted text-base">Updated:</span>
-          <span id="lastUpdate" class="font-semibold text-fg text-base">--:--:--</span>
+      <div class="flex items-center gap-4 px-2">
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-ok"></div>
+          <span id="totalCount" class="font-bold text-status-ok status-count-number">0</span>
         </div>
-        <div class="flex items-center gap-5">
-          <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-sm bg-status-ok"></div>
-            <span id="okCount" class="font-bold text-status-ok status-count">0</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-sm bg-status-warn"></div>
-            <span id="warnCount" class="font-bold text-status-warn status-count">0</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-sm bg-status-critical"></div>
-            <span id="criticalCount" class="font-bold text-status-critical status-count">0</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-sm bg-status-stale"></div>
-            <span id="staleCount" class="font-bold text-status-stale status-count">0</span>
-          </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
+          <span id="checkSum" class="font-bold text-status-warn status-count-number">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
+          <span id="stopSum" class="font-bold text-status-critical status-count-number">0</span>
         </div>
       </div>
     </div>
   </nav>
 
-  <!-- Main Content -->
-  <main class="p-3 h-[calc(100vh-85px)] overflow-auto">
+  <main class="p-3 h-[calc(100vh-56px)] overflow-auto">
     <div class="grid grid-cols-12 gap-3">
-
-      <!-- HSA Section -->
+      
       <div class="col-span-4 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-3 py-2.5">
+        <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold uppercase tracking-wider">HSA</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="hsa-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hsa-container"></div>
       </div>
 
-      <!-- DIS-ASSY Section -->
       <div class="col-span-4 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-3 py-2.5">
+        <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold uppercase tracking-wider">DIS-ASSY</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="disassy-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="disassy-container"></div>
       </div>
 
-      <!-- WCS Section -->
       <div class="col-span-2 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-3 py-2.5">
+        <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold uppercase tracking-wider">WCS</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="wcs-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="wcs-container"></div>
       </div>
 
-      <!-- AOI Section -->
       <div class="col-span-1 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-3 py-2.5">
+        <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold uppercase tracking-wider">AOI</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="aoi-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="aoi-container"></div>
       </div>
 
-      <!-- S MACHINE Section -->
       <div class="col-span-1 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-3 py-2.5">
-          <h2 class="font-sans font-bold uppercase tracking-wider">S10, S20, S30</h2>
+        <div class="table-header px-3 py-2">
+          <h2 class="font-sans font-bold uppercase tracking-wider">S MACHINE</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="smachine-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="smachine-container"></div>
       </div>
 
-      <!-- HDA Section -->
       <div class="col-span-12 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-3 py-2.5">
+        <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold uppercase tracking-wider">HDA</h2>
         </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-100px)]" id="hda-container"></div>
+        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="hda-container"></div>
       </div>
 
     </div>
   </main>
 
-  <!-- Tooltip -->
   <div id="tooltip" class="tooltip"></div>
 
   <script>
-    $(document).ready(function () {
-
-      let originalDataMap = {};
-      let filteredDataMap = {};
+    $(document).ready(function() {
+      
+      let DATA_MAP = {};
       let lineItemsMap = {};
-      let currentFilter = { location: 'all', process: 'all' };
-      let uniqueLocations = new Set();
-      let uniqueProcesses = new Set();
 
       function getLinePrefix(lineName) {
         const match = lineName.match(/^(AL|NL)/);
@@ -337,9 +202,7 @@
 
       function getLineNumber(lineName) {
         const match = lineName.match(/\d+$/);
-        if (match) {
-          return parseInt(match[0]);
-        }
+        if (match) return parseInt(match[0]);
         return 0;
       }
 
@@ -369,8 +232,7 @@
       function getStatusColor(statusCode) {
         const code = parseInt(statusCode);
         if (code === 0) return '#16a34a';
-        if (code === 1) return '#d97706';
-        if (code === 2) return '#d97706';
+        if (code === 1 || code === 2) return '#d97706';
         if (code === 3) return '#dc2626';
         if (code === 4) return '#6b7280';
         return '#9ca3af';
@@ -380,18 +242,14 @@
         return lines.sort((a, b) => {
           const prefixA = getLinePrefix(a);
           const prefixB = getLinePrefix(b);
-          if (prefixA !== prefixB) {
-            return prefixA.localeCompare(prefixB);
-          }
-          const numA = getLineNumber(a);
-          const numB = getLineNumber(b);
-          return numA - numB;
+          if (prefixA !== prefixB) return prefixA.localeCompare(prefixB);
+          return getLineNumber(a) - getLineNumber(b);
         });
       }
 
       function buildLineItemsMap() {
         lineItemsMap = {};
-        for (let key in filteredDataMap) {
+        for (let key in DATA_MAP) {
           const parts = key.split('-');
           if (parts.length === 3) {
             const section = parts[0];
@@ -399,112 +257,48 @@
             const index = parseInt(parts[2]);
             if (!lineItemsMap[section]) lineItemsMap[section] = {};
             if (!lineItemsMap[section][lineNo]) lineItemsMap[section][lineNo] = [];
-            lineItemsMap[section][lineNo][index] = filteredDataMap[key];
+            lineItemsMap[section][lineNo][index] = DATA_MAP[key];
           }
         }
         for (let section in lineItemsMap) {
           for (let lineNo in lineItemsMap[section]) {
             const items = [];
             for (let i = 0; i < lineItemsMap[section][lineNo].length; i++) {
-              if (lineItemsMap[section][lineNo][i]) {
-                items.push(lineItemsMap[section][lineNo][i]);
-              }
+              if (lineItemsMap[section][lineNo][i]) items.push(lineItemsMap[section][lineNo][i]);
             }
             lineItemsMap[section][lineNo] = items;
           }
         }
       }
 
-      function applyFilters() {
-        filteredDataMap = {};
-        for (let key in originalDataMap) {
-          const item = originalDataMap[key];
-          if (Array.isArray(item)) {
-            const filteredArray = item.filter(sensor => {
-              let match = true;
-              if (currentFilter.location !== 'all' && sensor.loc !== currentFilter.location) match = false;
-              if (currentFilter.process !== 'all' && sensor.process !== currentFilter.process) match = false;
-              return match;
-            });
-            if (filteredArray.length > 0) {
-              filteredDataMap[key] = filteredArray;
-            }
-          } else {
-            let match = true;
-            if (currentFilter.location !== 'all' && item.loc !== currentFilter.location) match = false;
-            if (currentFilter.process !== 'all' && item.process !== currentFilter.process) match = false;
-            if (match) {
-              filteredDataMap[key] = item;
-            }
-          }
-        }
-        buildLineItemsMap();
-        initSections();
-        updateCounts();
-      }
-
       function loadData() {
-        $.get('/api/data', function (response) {
-          originalDataMap = response;
-          uniqueLocations.clear();
-          uniqueProcesses.clear();
-
-          for (let key in originalDataMap) {
-            const item = originalDataMap[key];
-            if (Array.isArray(item)) {
-              item.forEach(sensor => {
-                if (sensor.loc) uniqueLocations.add(sensor.loc);
-                if (sensor.process) uniqueProcesses.add(sensor.process);
-              });
-            } else {
-              if (item.loc) uniqueLocations.add(item.loc);
-              if (item.process) uniqueProcesses.add(item.process);
-            }
-          }
-
-          const locationSelect = $('#locationFilter');
-          locationSelect.empty().append('<option value="all">All Locations</option>');
-          Array.from(uniqueLocations).sort().forEach(loc => {
-            locationSelect.append(`<option value="${loc}">${loc}</option>`);
-          });
-
-          const processSelect = $('#processFilter');
-          processSelect.empty().append('<option value="all">All Processes</option>');
-          Array.from(uniqueProcesses).sort().forEach(proc => {
-            processSelect.append(`<option value="${proc}">${proc}</option>`);
-          });
-
-          currentFilter = { location: 'all', process: 'all' };
-          locationSelect.val('all');
-          processSelect.val('all');
-          applyFilters();
+        $.get('/api/data', function(response) {
+          DATA_MAP = response;
+          buildLineItemsMap();
+          initSections();
+          updateCounts();
           updateTimestamp();
-        }).fail(function (error) {
+        }).fail(function(error) {
           console.error('Error loading data:', error);
         });
       }
 
       function createSensorButton(sectionKey, rowKey, colIndex, data) {
-        let status = 'unknown';
-        let info = { id: 'N/A', desc: 'No Data', loc: '-', status: 'unknown', status_code: 0, stop: 0, l1: 0, l2: 0, average: 0, line_no: 'N/A' };
-        if (data) {
-          status = data.status;
-          info = data;
-        }
+        if (!data || data.id === 'N/A') return '';
         let pulseClass = '';
-        if (status === 'warn') pulseClass = 'pulse-warn';
-        if (status === 'critical') pulseClass = 'pulse-critical';
+        if (data.status === 'warn') pulseClass = 'pulse-warn';
+        if (data.status === 'critical') pulseClass = 'pulse-critical';
         return `<button 
-          class="sensor-btn status-${status} ${pulseClass}" 
-          data-id="${info.id}"
-          data-desc="${info.desc}"
-          data-loc="${info.loc}"
-          data-status-code="${info.status_code}"
-          data-status="${status}"
-          data-stop="${info.stop}"
-          data-l1="${info.l1}"
-          data-l2="${info.l2}"
-          data-average="${info.average}"
+          class="sensor-btn status-${data.status} ${pulseClass}" 
+          data-id="${data.id}"
+          data-desc="${data.desc}"
+          data-loc="${data.loc}"
+          data-status-code="${data.status_code}"
+          data-status="${data.status}"
+          data-stop="${data.stop}"
+          data-l1="${data.l1}"
+          data-l2="${data.l2}"
+          data-average="${data.average}"
           data-section="${sectionKey}"
           data-row="${rowKey}"
           data-col="${colIndex}"
@@ -517,64 +311,57 @@
         let maxCols = 0;
         if (lineItemsMap[sectionKey]) {
           for (let lineNo in lineItemsMap[sectionKey]) {
-            if (lineItemsMap[sectionKey][lineNo].length > maxCols) {
-              maxCols = lineItemsMap[sectionKey][lineNo].length;
-            }
+            maxCols = Math.max(maxCols, lineItemsMap[sectionKey][lineNo].length);
           }
         }
         if (maxCols === 0) maxCols = config.defaultCols || 5;
-        html += '<tr>';
-        html += '<th class="text-left pb-2 text-base font-bold text-muted uppercase">Lines</th>';
+
+        html += ' <thead><tr>';
+        html += '<th class="text-left pb-1.5 text-base font-bold text-muted uppercase">Lines</th>';
         for (let i = 0; i < maxCols; i++) {
-          html += `<th class="col-header-custom pb-2 font-semibold text-slate-500">STN${i + 1}</th>`;
+          html += `<th class="col-header-custom pb-1.5 font-semibold text-slate-500">STN${i + 1}</th>`;
         }
-        html += '<tr>';
-        let linesToShow = [];
-        if (lineItemsMap[sectionKey]) {
-          linesToShow = Object.keys(lineItemsMap[sectionKey]);
-          linesToShow = sortLines(linesToShow);
-        }
+        html += '</tr></thead><tbody>';
+
+        let linesToShow = lineItemsMap[sectionKey] ? Object.keys(lineItemsMap[sectionKey]) : [];
+        linesToShow = sortLines(linesToShow);
+
         linesToShow.forEach(row => {
           html += '<tr class="border-b border-slate-100 last:border-0">';
-          html += `<td class="row-label py-1.5">${row}<\/td>`;
-          const items = (lineItemsMap[sectionKey] && lineItemsMap[sectionKey][row]) ? lineItemsMap[sectionKey][row] : [];
+          html += `<td class="row-label py-1">${row}</td>`;
+          const items = lineItemsMap[sectionKey]?.[row] || [];
           for (let i = 0; i < maxCols; i++) {
             const sensorInfo = items[i] || null;
-            html += `<td class="text-center py-1.5">${createSensorButton(sectionKey, row, i, sensorInfo)}<\/td>`;
+            html += `<td class="text-center py-1">${createSensorButton(sectionKey, row, i, sensorInfo)}</td>`;
           }
-          html += '<\/tr>';
+          html += '</tr>';
         });
-        html += '<\/table>';
+        html += '</tbody></table>';
         container.html(html);
       }
 
       function generateListSection(containerId, sectionKey) {
         const container = $(`#${containerId}`);
-        let html = '<div class="flex flex-col gap-1.5">';
-        let items = filteredDataMap[sectionKey] || [];
+        let html = '<div class="flex flex-col gap-1">';
+        let items = DATA_MAP[sectionKey] || [];
         if (sectionKey === 'smachine') {
           items = sortSMachineItems(items);
         } else {
           items.sort((a, b) => {
             const prefixA = getLinePrefix(a.line_no);
             const prefixB = getLinePrefix(b.line_no);
-            if (prefixA !== prefixB) {
-              return prefixA.localeCompare(prefixB);
-            }
-            const numA = getLineNumber(a.line_no);
-            const numB = getLineNumber(b.line_no);
-            return numA - numB;
+            if (prefixA !== prefixB) return prefixA.localeCompare(prefixB);
+            return getLineNumber(a.line_no) - getLineNumber(b.line_no);
           });
         }
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
+        items.forEach((item, i) => {
           html += `
-            <div class="flex items-center gap-2 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+            <div class="flex items-center gap-2 bg-slate-50 rounded px-2 py-0.5 border border-slate-100">
               ${createSensorButton(sectionKey, item.line_no, i, item)}
               <span class="text-base text-slate-600 font-medium truncate">${item.line_no}</span>
             </div>
           `;
-        }
+        });
         html += '</div>';
         container.html(html);
       }
@@ -582,44 +369,40 @@
       function generateWCSSection(containerId, sectionKey) {
         const container = $(`#${containerId}`);
         let html = '<table class="w-full border-collapse">';
-        let items = filteredDataMap[sectionKey] || [];
+        let items = DATA_MAP[sectionKey] || [];
         items.sort((a, b) => {
           const prefixA = getLinePrefix(a.line_no);
           const prefixB = getLinePrefix(b.line_no);
-          if (prefixA !== prefixB) {
-            return prefixA.localeCompare(prefixB);
-          }
-          const numA = getLineNumber(a.line_no);
-          const numB = getLineNumber(b.line_no);
-          return numA - numB;
+          if (prefixA !== prefixB) return prefixA.localeCompare(prefixB);
+          return getLineNumber(a.line_no) - getLineNumber(b.line_no);
         });
         for (let i = 0; i < items.length; i += 2) {
           const item1 = items[i];
-          const item2 = i + 1 < items.length ? items[i + 1] : null;
+          const item2 = items[i + 1];
           html += '<tr class="border-b border-slate-100 last:border-0">';
           html += `
-            <td class="py-1 pr-1">
-              <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-1 border border-slate-100">
+            <td class="py-0.5 pr-1">
+              <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-0.5 border border-slate-100">
                 ${createSensorButton(sectionKey, item1.line_no, i, item1)}
                 <span class="text-base text-slate-600 font-medium">${item1.line_no}</span>
               </div>
-             <\/td>
+            </td>
           `;
           if (item2) {
             html += `
-              <td class="py-1 pl-1">
-                <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-1 border border-slate-100">
-                  ${createSensorButton(sectionKey, item2.line_no, i + 1, item2)}
+              <td class="py-0.5 pl-1">
+                <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-0.5 border border-slate-100">
+                  ${createSensorButton(sectionKey, item2.line_no, i+1, item2)}
                   <span class="text-base text-slate-600 font-medium">${item2.line_no}</span>
                 </div>
-               <\/td>
+              </td>
             `;
           } else {
-            html += '<td class="py-1 pl-1"><\/td>';
+            html += '<td class="py-0.5 pl-1"></td>';
           }
-          html += '<\/tr>';
+          html += '</tr>';
         }
-        html += '<\/table>';
+        html += '</table>';
         container.html(html);
       }
 
@@ -633,101 +416,58 @@
       }
 
       function updateCounts() {
-        let ok = 0, warn = 0, critical = 0, stale = 0;
-        $('.sensor-btn').each(function () {
-          const status = $(this).data('status');
-          if (status === 'ok') ok++;
-          else if (status === 'warn') warn++;
-          else if (status === 'critical') critical++;
-          else if (status === 'stale') stale++;
+        let totalInventory = 0, totalCheckSum = 0, totalStopSum = 0;
+        $('.sensor-btn').each(function() {
+          totalInventory++;
+          totalCheckSum += (parseInt($(this).data('l1')) || 0) + (parseInt($(this).data('l2')) || 0);
+          totalStopSum += parseInt($(this).data('stop')) || 0;
         });
-        $('#okCount').text(ok);
-        $('#warnCount').text(warn);
-        $('#criticalCount').text(critical);
-        $('#staleCount').text(stale);
+        $('#totalCount').text(totalInventory);
+        $('#checkSum').text(totalCheckSum);
+        $('#stopSum').text(totalStopSum);
       }
 
       function updateTimestamp() {
-        const now = new Date();
-        $('#lastUpdate').text(now.toLocaleTimeString());
+        $('#lastUpdate').text(new Date().toLocaleTimeString());
       }
 
-      // Tooltip functionality
       const $tooltip = $('#tooltip');
       function updateTooltipPosition(e) {
-        const tooltipWidth = $tooltip.outerWidth();
-        const tooltipHeight = $tooltip.outerHeight();
-        const windowWidth = $(window).width();
-        const windowHeight = $(window).height();
-        let left = e.clientX + 15;
-        let top = e.clientY + 15;
-        if (left + tooltipWidth > windowWidth - 10) left = e.clientX - tooltipWidth - 15;
+        const tw = $tooltip.outerWidth(), th = $tooltip.outerHeight();
+        const ww = $(window).width(), wh = $(window).height();
+        let left = e.clientX + 15, top = e.clientY + 15;
+        if (left + tw > ww - 10) left = e.clientX - tw - 15;
         if (left < 10) left = 10;
-        if (top + tooltipHeight > windowHeight - 10) top = e.clientY - tooltipHeight - 15;
+        if (top + th > wh - 10) top = e.clientY - th - 15;
         if (top < 10) top = 10;
-        $tooltip.css({ left: left, top: top });
+        $tooltip.css({ left, top });
       }
 
-      $(document).on('mouseenter', '.sensor-btn', function (e) {
+      $(document).on('mouseenter', '.sensor-btn', function(e) {
         const $btn = $(this);
-        const id = $btn.data('id');
-        const desc = $btn.data('desc');
-        const loc = $btn.data('loc');
         const statusCode = $btn.data('status-code');
-        const stop = $btn.data('stop');
-        const l1 = $btn.data('l1');
-        const l2 = $btn.data('l2');
-        const average = $btn.data('average');
-        const statusText = getStatusText(statusCode);
-        const statusColor = getStatusColor(statusCode);
         $tooltip.html(`
-          <div class="font-bold text-accent text-lg uppercase mb-2">${id}</div>
-          <div class="text-slate-800 font-medium text-base mb-1">${desc}</div>
-          <div class="text-slate-500 text-sm mb-3">Location: ${loc}</div>
+          <div class="font-bold text-accent text-lg uppercase mb-2">${$btn.data('id')}</div>
+          <div class="text-slate-800 font-medium text-base mb-1">${$btn.data('desc')}</div>
+          <div class="text-slate-500 text-sm mb-3">Location: ${$btn.data('loc')}</div>
           <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm border-t border-slate-100 pt-2">
-            <div>Status: <span style="color: ${statusColor}; font-weight: 700;">${statusText}</span></div>
-            <div>Stops: <span class="font-bold">${stop}</span></div>
-            <div>Check L1: <span class="font-bold">${l1}</span></div>
-            <div>Check L2: <span class="font-bold">${l2}</span></div>
-            <div class="col-span-2">Average: <span class="font-bold">${average}</span></div>
+            <div>Status: <span style="color: ${getStatusColor(statusCode)}; font-weight: 700;">${getStatusText(statusCode)}</span></div>
+            <div>Stops: <span class="font-bold">${$btn.data('stop')}</span></div>
+            <div>Check L1: <span class="font-bold">${$btn.data('l1')}</span></div>
+            <div>Check L2: <span class="font-bold">${$btn.data('l2')}</span></div>
+            <div class="col-span-2">Average: <span class="font-bold">${$btn.data('average')}</span></div>
           </div>
         `);
         $tooltip.css({ display: 'block' });
         updateTooltipPosition(e);
       });
+      $(document).on('mousemove', '.sensor-btn', updateTooltipPosition);
+      $(document).on('mouseleave', '.sensor-btn', () => $tooltip.css('display', 'none'));
 
-      $(document).on('mousemove', '.sensor-btn', function (e) {
-        updateTooltipPosition(e);
-      });
-
-      $(document).on('mouseleave', '.sensor-btn', function () {
-        $tooltip.css('display', 'none');
-      });
-
-      // Filter event handlers
-      $('#locationFilter').on('change', function () {
-        currentFilter.location = $(this).val();
-        applyFilters();
-      });
-
-      $('#processFilter').on('change', function () {
-        currentFilter.process = $(this).val();
-        applyFilters();
-      });
-
-      $('#resetFilters').on('click', function () {
-        currentFilter = { location: 'all', process: 'all' };
-        $('#locationFilter').val('all');
-        $('#processFilter').val('all');
-        applyFilters();
-      });
-
-      // Start
       loadData();
       setInterval(updateTimestamp, 1000);
-      setInterval(loadData, 30000);
+      setInterval(loadData, 10000);
     });
   </script>
 </body>
-
 </html>

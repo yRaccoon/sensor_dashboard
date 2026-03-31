@@ -12,7 +12,7 @@ def map_status(status_code):
         if code == 0: return 'ok'           # Green
         if code in [1, 2]: return 'warn'    # Orange
         if code == 3: return 'critical'     # Red
-        if code == 4: return 'stale'        # Grey 
+        if code == 4: return 'stale'        # Grey - Changed from 'unknown' to 'stale'
         return 'unknown'
     except:
         return 'unknown'
@@ -73,14 +73,12 @@ def load_data():
 
         # Create Data Object with new fields
         status_code = int(row.get('Status', 0))
-        # In load_data(), after creating data dictionary:
         data = {
             'id': row['DCP Name'],
             'desc': desc,
             'loc': row['Location_Code'],
-            'process': process,                    
             'status': map_status(status_code),
-            'status_code': status_code,
+            'status_code': status_code,  # Store original status code
             'stop': int(row.get('Stop_Cnt', 0)),
             'l1': int(row.get('Check_L1_Cnt', 0)),
             'l2': int(row.get('Check_L2_Cnt', 0)),
