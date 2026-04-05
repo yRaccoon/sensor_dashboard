@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viewstation - Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
+            'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827',
+            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#6b7280', unknown: '#9ca3af' }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    * { box-sizing: border-box; }
+    body { background-color: #f8f9fa; }
+    .stat-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .stat-card.active {
+      box-shadow: 0 0 0 2px #dc2626;
+    }
+  </style>
+</head>
+
+<body class="bg-bg text-fg min-h-screen">
+  
+  <!-- Navbar -->
+  <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+      </div>
+      <h1 class="font-sans font-bold tracking-tight text-accent text-xl">Viewstation</h1>
+    </div>
+    
+    <div class="flex items-center gap-4">
+      <a href="/dashboard" class="text-accent hover:text-accent-hover transition-colors font-bold underline underline-offset-4">Dashboard View</a>
+      <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+        <span class="text-muted text-sm">Updated:</span>
+        <span id="lastUpdate" class="font-semibold text-fg text-sm">--:--:--</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="p-6 max-w-7xl mx-auto">
+    
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <!-- Total Inventory (Toggles Table) -->
+      <div id="cardTotal" class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center" data-filter="all">
+        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
+        </div>
+        <span class="text-2xl font-bold text-gray-800" id="textTotal">0</span>
+        <span class="text-sm text-gray-500 font-medium">Total Inventory</span>
+      </div>
+
+      <!-- Good -->
+      <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center" data-filter="status" data-value="0">
+        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <span class="text-2xl font-bold text-green-600" id="textGood">0</span>
+        <span class="text-sm text-gray-500 font-medium">Good</span>
+      </div>
+
+      <!-- Stop -->
+      <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center" data-filter="status" data-value="3">
+        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>
+        </div>
+        <span class="text-2xl font-bold text-red-600" id="textStop">0</span>
+        <span class="text-sm text-gray-500 font-medium">Stop</span>
+      </div>
+
+      <!-- Check L1 -->
+      <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center" data-filter="status" data-value="1">
+        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <span class="text-2xl font-bold text-yellow-600" id="textL1">0</span>
+        <span class="text-sm text-gray-500 font-medium">Check L1</span>
+      </div>
+
+      <!-- Check L2 -->
+      <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center" data-filter="status" data-value="2">
+        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <span class="text-2xl font-bold text-orange-600" id="textL2">0</span>
+        <span class="text-sm text-gray-500 font-medium">Check L2</span>
+      </div>
+
+      <!-- Stale -->
+      <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center" data-filter="status" data-value="4">
+        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <span class="text-2xl font-bold text-gray-500" id="textStale">0</span>
+        <span class="text-sm text-gray-500 font-medium">Stale</span>
+      </div>
+    </div>
+
+    <!-- Filters & Table Section (Wrapped for Toggle) -->
+    <div id="tableWrapper">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        <div class="flex flex-wrap gap-4 mb-4 items-center justify-between border-b pb-4">
+          <div class="flex gap-4 items-center">
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Location</label>
+              <select id="filterLocation" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md border bg-white">
+                <option value="all">All Locations</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Process</label>
+              <select id="filterProcess" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md border bg-white">
+                <option value="all">All Processes</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Show entries</label>
+            <select id="pageSize" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md border bg-white">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Process</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Line</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stop Cnt</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">L1</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">L2</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="flex items-center justify-between mt-4 border-t pt-4">
+          <div class="text-sm text-gray-500">
+            Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span id="totalEntries">0</span> entries
+          </div>
+          <div class="flex gap-2">
+            <button id="prevPage" class="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50">Previous</button>
+            <span id="pageInfo" class="px-3 py-1 text-sm text-gray-700">Page 1</span>
+            <button id="nextPage" class="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Temporary JPEG Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <h3 class="text-lg font-semibold text-gray-700 mb-3">Reference Layout</h3>
+      <div class="bg-gray-100 border-dashed border-2 border-gray-300 rounded h-64 flex items-center justify-center text-gray-400">
+        <img src="https://via.placeholder.com/800x300?text=Temporary+JPEG+Placeholder" alt="Placeholder" class="max-h-full object-contain rounded">
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    $(document).ready(function() {
+      let allData = [];
+      let filteredData = [];
+      let currentPage = 1;
+      let pageSize = 10;
+      let activeStatusFilter = 'all'; 
+
+      function getStatusColor(code) {
+        if (code === 0) return 'bg-green-100 text-green-800';
+        if (code === 1) return 'bg-yellow-100 text-yellow-800';
+        if (code === 2) return 'bg-orange-100 text-orange-800';
+        if (code === 3) return 'bg-red-100 text-red-800';
+        if (code === 4) return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800';
+      }
+
+      function getStatusText(code) {
+        if (code === 0) return 'GOOD';
+        if (code === 1) return 'CHECK L1';
+        if (code === 2) return 'CHECK L2';
+        if (code === 3) return 'STOP';
+        if (code === 4) return 'STALE';
+        return 'UNKNOWN';
+      }
+
+      function flattenData(dataMap) {
+        let list = [];
+        for (let key in dataMap) {
+          let val = dataMap[key];
+          // Handle array sections (wcs, aoi, etc.)
+          if (Array.isArray(val)) {
+            list = list.concat(val);
+          } 
+          // Handle grouped sections (hsa, hda, etc.)
+          else if (typeof val === 'object' && val !== null && val.id) {
+             // This case handles if the backend returns a flat object of items, 
+             // but based on previous code, grouped data is { 'hsa-AL1-0': {...} }
+             // Let's adjust to handle the 'section-line-index' structure if that's what DATA_MAP is.
+             // However, load_data in python seems to return a map where values are either lists or objects?
+             // Looking at app.py: sensor_map[key] = item. So the values in DATA_MAP are the item objects directly.
+             list.push(val);
+          }
+        }
+        
+        // Wait, looking at app.py logic:
+        // For grouped sections: sensor_map['hsa-AL1-0'] = {id: ..., desc: ...}
+        // For list sections: sensor_map['wcs'] = [{id:...}, {id:...}]
+        
+        // So if val is an array, concat. If val is an object (the item itself), push.
+        // My flattenData logic above was slightly confused. Let's refine.
+        
+        list = []; // Reset
+        for (let key in dataMap) {
+          let val = dataMap[key];
+          if (Array.isArray(val)) {
+            list = list.concat(val);
+          } else if (typeof val === 'object' && val !== null) {
+             // It's a single sensor entry mapped by a complex key
+             if (val.id) list.push(val);
+          }
+        }
+        return list;
+      }
+
+      function loadData() {
+        $.get('/api/data', function(response) {
+          allData = flattenData(response);
+          populateFilters();
+          applyFilters();
+          updateTimestamp();
+        });
+      }
+
+      function populateFilters() {
+        const locations = new Set();
+        const processes = new Set();
+        
+        allData.forEach(item => {
+          if(item.loc) locations.add(item.loc);
+          if(item.process) processes.add(item.process);
+        });
+
+        const locSelect = $('#filterLocation');
+        [...locations].sort().forEach(loc => {
+          locSelect.append(`<option value="${loc}">${loc}</option>`);
+        });
+
+        const procSelect = $('#filterProcess');
+        [...processes].sort().forEach(proc => {
+          procSelect.append(`<option value="${proc}">${proc}</option>`);
+        });
+      }
+
+      function calculateStats() {
+        let total = allData.length;
+        let good = 0, stop = 0, l1 = 0, l2 = 0, stale = 0;
+        
+        allData.forEach(item => {
+           if (item.status_code === 0) good++;
+           else if (item.status_code === 3) stop++;
+           else if (item.status_code === 1) l1++;
+           else if (item.status_code === 2) l2++;
+           else if (item.status_code === 4) stale++;
+        });
+
+        $('#textTotal').text(total);
+        $('#textGood').text(good);
+        $('#textStop').text(stop);
+        $('#textL1').text(l1);
+        $('#textL2').text(l2);
+        $('#textStale').text(stale);
+      }
+
+      function applyFilters() {
+        const locFilter = $('#filterLocation').val();
+        const procFilter = $('#filterProcess').val();
+
+        filteredData = allData.filter(item => {
+          const matchLoc = (locFilter === 'all' || item.loc === locFilter);
+          const matchProc = (procFilter === 'all' || item.process === procFilter);
+          
+          let matchStatus = true;
+          if (activeStatusFilter !== 'all') {
+             matchStatus = (parseInt(item.status_code) === parseInt(activeStatusFilter));
+          }
+
+          return matchLoc && matchProc && matchStatus;
+        });
+
+        calculateStats();
+        currentPage = 1;
+        renderTable();
+      }
+
+      function renderTable() {
+        const tbody = $('#tableBody');
+        tbody.empty();
+
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = filteredData.slice(start, end);
+
+        if (pageData.length === 0) {
+          tbody.append('<tr><td colspan="10" class="text-center py-4 text-gray-500">No data found</td></tr>');
+        } else {
+          pageData.forEach(item => {
+            const row = `
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${item.id || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${item.desc || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.loc || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.process || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.line_no || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                  <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(item.status_code)}">
+                    ${getStatusText(item.status_code)}
+                  </span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.stop || 0}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.l1 || 0}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.l2 || 0}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.average || 0}</td>
+              </tr>
+            `;
+            tbody.append(row);
+          });
+        }
+
+        updatePaginationInfo();
+      }
+
+      function updatePaginationInfo() {
+        const total = filteredData.length;
+        const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+        const end = Math.min(currentPage * pageSize, total);
+
+        $('#showingStart').text(start);
+        $('#showingEnd').text(end);
+        $('#totalEntries').text(total);
+        
+        const totalPages = Math.ceil(total / pageSize) || 1;
+        $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
+        
+        $('#prevPage').prop('disabled', currentPage === 1);
+        $('#nextPage').prop('disabled', currentPage >= totalPages);
+      }
+
+      // Filter Listeners
+      $('#filterLocation, #filterProcess').change(function() {
+        applyFilters();
+      });
+
+      $('#pageSize').change(function() {
+        pageSize = parseInt($(this).val());
+        currentPage = 1;
+        renderTable();
+      });
+
+      $('#prevPage').click(function() {
+        if (currentPage > 1) {
+          currentPage--;
+          renderTable();
+        }
+      });
+
+      $('#nextPage').click(function() {
+        const totalPages = Math.ceil(filteredData.length / pageSize);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderTable();
+        }
+      });
+
+      // Card Click Logic
+      $('.stat-card').click(function() {
+        const filterType = $(this).data('filter');
+        const filterValue = $(this).data('value');
+
+        // Total Inventory Click: Toggle Table
+        if (filterType === 'all') {
+          $('#tableWrapper').toggleClass('hidden');
+          $(this).toggleClass('active'); // Visual feedback
+          return;
+        }
+
+        // Status Filter Click: Show Table & Filter
+        // Ensure table is visible when clicking a specific status
+        if ($('#tableWrapper').hasClass('hidden')) {
+          $('#tableWrapper').removeClass('hidden');
+        }
+        
+        // Remove active state from Total Inventory if switching to specific filter
+        $('#cardTotal').removeClass('active');
+
+        if ($(this).hasClass('active')) {
+          $(this).removeClass('active');
+          activeStatusFilter = 'all';
+        } else {
+          $('.stat-card[data-filter="status"]').removeClass('active');
+          $(this).addClass('active');
+          activeStatusFilter = filterValue;
+        }
+        applyFilters();
+      });
+
+      function updateTimestamp() {
+        $('#lastUpdate').text(new Date().toLocaleTimeString());
+      }
+
+      // Initial Load
+      loadData();
+      setInterval(updateTimestamp, 1000);
+    });
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viewstation</title>
+  <title>Viewstation - Monitor</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,8 @@
       z-index: 10; position: relative;
     }
     .status-ok { background: #16a34a; }
-    .status-warn { background: #d97706; }
+    .status-l1 { background: #eab308; }   /* <-- ADD THIS LINE (Yellow) */
+    .status-l2 { background: #d97706; } /* This is for Check L2 (Orange) */
     .status-critical { background: #dc2626; }
     .status-stale { background: #6b7280; }
     .status-unknown { background: #9ca3af; }
@@ -89,52 +90,57 @@
       border-left: 3px solid #dc2626; max-width: 340px; min-width: 280px;
     }
     
-    /* Navbar text size */
-    .navbar-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    .status-count-number {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    .navbar-text {
-      font-size: 1rem;
-    }
+    .navbar-title { font-size: 1.5rem; font-weight: bold; }
+    .status-count-number { font-size: 1.5rem; font-weight: bold; }
+    .navbar-text { font-size: 1rem; }
   </style>
 </head>
 
 <body class="bg-bg text-fg min-h-screen overflow-hidden">
   
-  <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-      </div>
-      <h1 class="font-sans font-bold tracking-tight text-accent navbar-title">Viewstation</h1>
+<nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
+      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
     </div>
+    <h1 class="font-sans font-bold tracking-tight text-accent navbar-title">Viewstation Dashboard</h1>
+  </div>
 
-    <div class="flex items-center gap-6 text-base">
-      <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
-        <span class="text-muted navbar-text">Updated:</span>
-        <span id="lastUpdate" class="font-semibold text-fg navbar-text">--:--:--</span>
+  <div class="flex items-center gap-6 text-base">
+    <!-- Navigation Link to Home -->
+    <a href="/" class="text-accent hover:text-accent-hover transition-colors font-bold underline underline-offset-4">Home</a>
+    
+    <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+      <span class="text-muted navbar-text">Updated:</span>
+      <span id="lastUpdate" class="font-semibold text-fg navbar-text">--:--:--</span>
+    </div>
+    
+    <div class="flex items-center gap-4 px-2">
+      <div class="flex items-center gap-1.5">
+        <div class="w-2.5 h-2.5 rounded-sm bg-status-ok"></div>
+        <span id="goodCount" class="font-bold text-status-ok status-count-number">0</span>
       </div>
-      <div class="flex items-center gap-4 px-2">
-        <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-sm bg-status-ok"></div>
-          <span id="totalCount" class="font-bold text-status-ok status-count-number">0</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
-          <span id="checkSum" class="font-bold text-status-warn status-count-number">0</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
-          <span id="stopSum" class="font-bold text-status-critical status-count-number">0</span>
-        </div>
+      <div class="flex items-center gap-1.5">
+        <div class="w-2.5 h-2.5 rounded-sm bg-status-stale"></div>
+        <span id="staleCount" class="font-bold text-status-stale status-count-number">0</span>
+      </div>
+      
+      <div class="w-px h-6 bg-gray-300 mx-1"></div>
+      
+      <div class="flex items-center gap-1.5">
+        <div class="w-2.5 h-2.5 rounded-sm" style="background-color: #eab308;"></div>
+        <span id="checkL1Count" class="font-bold" style="color: #eab308; font-size: 1.5rem; font-weight: bold;">0</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
+        <span id="checkL2Count" class="font-bold text-status-warn status-count-number">0</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
+        <span id="stopCount" class="font-bold text-status-critical status-count-number">0</span>
       </div>
     </div>
   </nav>
@@ -231,10 +237,11 @@
 
       function getStatusColor(statusCode) {
         const code = parseInt(statusCode);
-        if (code === 0) return '#16a34a';
-        if (code === 1 || code === 2) return '#d97706';
-        if (code === 3) return '#dc2626';
-        if (code === 4) return '#6b7280';
+        if (code === 0) return '#16a34a';      // GOOD (Green)
+        if (code === 1) return '#eab308';      // CHECK L1 (Yellow)
+        if (code === 2) return '#d97706';      // CHECK L2 (Orange)
+        if (code === 3) return '#dc2626';      // STOP (Red)
+        if (code === 4) return '#6b7280';      // STALE (Gray)
         return '#9ca3af';
       }
 
@@ -285,11 +292,24 @@
 
       function createSensorButton(sectionKey, rowKey, colIndex, data) {
         if (!data || data.id === 'N/A') return '';
+        
+        let statusClass = data.status;
         let pulseClass = '';
-        if (data.status === 'warn') pulseClass = 'pulse-warn';
-        if (data.status === 'critical') pulseClass = 'pulse-critical';
+        
+        // UPDATED LOGIC: Differentiate L1 (Yellow) from L2 (Orange)
+        const code = parseInt(data.status_code);
+        if (code === 1) {
+            statusClass = 'l1'; // Uses the new .status-l1 class
+            pulseClass = 'pulse-warn';
+        } else if (code === 2) {
+            statusClass = 'l2'; // Uses the existing .status-warn class
+            pulseClass = 'pulse-warn';
+        } else if (code === 3) {
+            pulseClass = 'pulse-critical';
+        }
+
         return `<button 
-          class="sensor-btn status-${data.status} ${pulseClass}" 
+          class="sensor-btn status-${statusClass} ${pulseClass}" 
           data-id="${data.id}"
           data-desc="${data.desc}"
           data-loc="${data.loc}"
@@ -416,15 +436,25 @@
       }
 
       function updateCounts() {
-        let totalInventory = 0, totalCheckSum = 0, totalStopSum = 0;
+        let goodCount = 0, staleCount = 0, checkL1Count = 0, checkL2Count = 0, stopCount = 0;
         $('.sensor-btn').each(function() {
-          totalInventory++;
-          totalCheckSum += (parseInt($(this).data('l1')) || 0) + (parseInt($(this).data('l2')) || 0);
-          totalStopSum += parseInt($(this).data('stop')) || 0;
+          const statusCode = parseInt($(this).data('status-code'));
+          const l1 = parseInt($(this).data('l1')) || 0;
+          const l2 = parseInt($(this).data('l2')) || 0;
+          const stop = parseInt($(this).data('stop')) || 0;
+          
+          if (statusCode === 0) goodCount++;
+          if (statusCode === 4) staleCount++;
+          
+          checkL1Count += l1;
+          checkL2Count += l2;
+          stopCount += stop;
         });
-        $('#totalCount').text(totalInventory);
-        $('#checkSum').text(totalCheckSum);
-        $('#stopSum').text(totalStopSum);
+        $('#goodCount').text(goodCount);
+        $('#staleCount').text(staleCount);
+        $('#checkL1Count').text(checkL1Count);
+        $('#checkL2Count').text(checkL2Count);
+        $('#stopCount').text(stopCount);
       }
 
       function updateTimestamp() {
