@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viewstation - Monitor</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
-  
+  <title>Viewstation - Dashboard</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <script>
     tailwind.config = {
       theme: {
@@ -18,136 +20,229 @@
           colors: {
             bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
             'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827',
-            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#6b7280', unknown: '#9ca3af' }
+            status: { activeCount: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#6b7280', unknown: '#9ca3af' }
           }
         }
       }
     }
   </script>
-  
+
   <style>
-    * { box-sizing: border-box; }
-    .sensor-btn {
-      width: 20px; height: 20px; border-radius: 4px; transition: all 0.15s ease;
-      cursor: pointer; border: 1px solid rgba(0,0,0,0.1);
+    * {
+      box-sizing: border-box;
     }
+
+    .sensor-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
     .sensor-btn:hover {
       transform: scale(1.2);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      z-index: 10; position: relative;
+      z-index: 10;
+      position: relative;
     }
-    .status-ok { background: #16a34a; }
-    .status-l1 { background: #eab308; }   /* <-- ADD THIS LINE (Yellow) */
-    .status-l2 { background: #d97706; } /* This is for Check L2 (Orange) */
-    .status-critical { background: #dc2626; }
-    .status-stale { background: #6b7280; }
-    .status-unknown { background: #9ca3af; }
-    
+
+    .status-active {
+      background: #16a34a;
+    }
+
+    .status-l1 {
+      background: #eab308;
+    }
+
+    .status-l2 {
+      background: #d97706;
+    }
+
+    .status-critical {
+      background: #dc2626;
+    }
+
+    .status-stale {
+      background: #6b7280;
+    }
+
+    .status-unknown {
+      background: #9ca3af;
+    }
+
     .section-card {
-      background: #ffffff; border: 1px solid #e5e7eb;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
-    .table-header { background: #1303ee; color: white; }
+
+    .table-header {
+      background: #1303ee;
+      color: white;
+    }
+
     .table-header h2 {
       font-size: 1rem;
       font-weight: bold;
     }
-    .row-label { 
-      min-width: 120px; 
-      font-size: 1rem; 
-      color: #374151; 
+
+    .row-label {
+      min-width: 120px;
+      font-size: 1rem;
+      color: #374151;
       font-weight: 500;
       padding-top: 0.5rem;
       padding-bottom: 0.5rem;
     }
+
     .col-header-custom {
       font-size: 1rem;
       font-weight: 600;
       padding-bottom: 0.5rem;
     }
-    
-    @keyframes pulse-warn {
-      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
-      50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(217, 119, 6, 0); }
-    }
-    @keyframes pulse-critical {
-      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
-    }
-    .pulse-warn { animation: pulse-warn 2s infinite; }
-    .pulse-critical { animation: pulse-critical 1s infinite; }
 
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; }
-    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    @keyframes pulse-warn {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4);
+      }
+
+      50% {
+        opacity: 0.8;
+        box-shadow: 0 0 0 4px rgba(217, 119, 6, 0);
+      }
+    }
+
+    @keyframes pulse-critical {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+      }
+
+      50% {
+        opacity: 0.7;
+        box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+      }
+    }
+
+    .pulse-warn {
+      animation: pulse-warn 2s infinite;
+    }
+
+    .pulse-critical {
+      animation: pulse-critical 1s infinite;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
 
     .tooltip {
-      position: fixed; background: white; border: 1px solid #e5e7eb;
-      padding: 12px 16px; border-radius: 8px; font-size: 0.95rem;
+      position: fixed;
+      background: white;
+      border: 1px solid #e5e7eb;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.95rem;
       color: #111827;
-      pointer-events: none; z-index: 1000; display: none;
+      pointer-events: none;
+      z-index: 1000;
+      display: none;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      border-left: 3px solid #dc2626; max-width: 340px; min-width: 280px;
+      border-left: 3px solid #dc2626;
+      max-width: 340px;
+      min-width: 280px;
     }
-    
-    .navbar-title { font-size: 1.5rem; font-weight: bold; }
-    .status-count-number { font-size: 1.5rem; font-weight: bold; }
-    .navbar-text { font-size: 1rem; }
+
+    .navbar-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .status-count-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .navbar-text {
+      font-size: 1rem;
+    }
   </style>
 </head>
 
 <body class="bg-bg text-fg min-h-screen overflow-hidden">
-  
-<nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
-  <div class="flex items-center gap-3">
-    <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
-      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-      </svg>
-    </div>
-    <h1 class="font-sans font-bold tracking-tight text-accent navbar-title">Viewstation Dashboard</h1>
-  </div>
 
-  <div class="flex items-center gap-6 text-base">
-    <!-- Navigation Link to Home -->
-    <a href="/" class="text-accent hover:text-accent-hover transition-colors font-bold underline underline-offset-4">Home</a>
-    
-    <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
-      <span class="text-muted navbar-text">Updated:</span>
-      <span id="lastUpdate" class="font-semibold text-fg navbar-text">--:--:--</span>
+  <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+          </path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+          </path>
+        </svg>
+      </div>
+      <h1 class="font-sans font-bold tracking-tight text-accent navbar-title">Viewstation Dashboard</h1>
     </div>
-    
-    <div class="flex items-center gap-4 px-2">
-      <div class="flex items-center gap-1.5">
-        <div class="w-2.5 h-2.5 rounded-sm bg-status-ok"></div>
-        <span id="goodCount" class="font-bold text-status-ok status-count-number">0</span>
+
+    <div class="flex items-center gap-6 text-base">
+      <!-- Navigation Link to Home -->
+      <a href="/"
+        class="text-accent hover:text-accent-hover transition-colors font-bold underline underline-offset-4">Home</a>
+
+      <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+        <span class="text-muted navbar-text">Updated:</span>
+        <span id="lastUpdate" class="font-semibold text-fg navbar-text">--:--:--</span>
       </div>
-      <div class="flex items-center gap-1.5">
-        <div class="w-2.5 h-2.5 rounded-sm bg-status-stale"></div>
-        <span id="staleCount" class="font-bold text-status-stale status-count-number">0</span>
+
+      <div class="flex items-center gap-4 px-2">
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-activeCount"></div>
+          <span id="activeCount" class="font-bold text-status-activeCount status-count-number">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-stale"></div>
+          <span id="staleCount" class="font-bold text-status-stale status-count-number">0</span>
+        </div>
+
+        <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm" style="background-color: #eab308;"></div>
+          <span id="checkL1Count" class="font-bold"
+            style="color: #eab308; font-size: 1.5rem; font-weight: bold;">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
+          <span id="checkL2Count" class="font-bold text-status-warn status-count-number">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
+          <span id="stopCount" class="font-bold text-status-critical status-count-number">0</span>
+        </div>
       </div>
-      
-      <div class="w-px h-6 bg-gray-300 mx-1"></div>
-      
-      <div class="flex items-center gap-1.5">
-        <div class="w-2.5 h-2.5 rounded-sm" style="background-color: #eab308;"></div>
-        <span id="checkL1Count" class="font-bold" style="color: #eab308; font-size: 1.5rem; font-weight: bold;">0</span>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
-        <span id="checkL2Count" class="font-bold text-status-warn status-count-number">0</span>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
-        <span id="stopCount" class="font-bold text-status-critical status-count-number">0</span>
-      </div>
-    </div>
   </nav>
 
   <main class="p-3 h-[calc(100vh-56px)] overflow-auto">
     <div class="grid grid-cols-12 gap-3">
-      
+
       <div class="col-span-4 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold uppercase tracking-wider">HSA</h2>
@@ -178,7 +273,7 @@
 
       <div class="col-span-1 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
-          <h2 class="font-sans font-bold uppercase tracking-wider">S MACHINE</h2>
+          <h2 class="font-sans font-bold uppercase tracking-wider">S10, S20, S30</h2>
         </div>
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="smachine-container"></div>
       </div>
@@ -196,8 +291,8 @@
   <div id="tooltip" class="tooltip"></div>
 
   <script>
-    $(document).ready(function() {
-      
+    $(document).ready(function () {
+
       let DATA_MAP = {};
       let lineItemsMap = {};
 
@@ -227,7 +322,7 @@
 
       function getStatusText(statusCode) {
         const code = parseInt(statusCode);
-        if (code === 0) return 'GOOD';
+        if (code === 0) return 'ACTIVE';
         if (code === 1) return 'CHECK L1';
         if (code === 2) return 'CHECK L2';
         if (code === 3) return 'STOP';
@@ -237,7 +332,7 @@
 
       function getStatusColor(statusCode) {
         const code = parseInt(statusCode);
-        if (code === 0) return '#16a34a';      // GOOD (Green)
+        if (code === 0) return '#16a34a';      // ACTIVE (Green)
         if (code === 1) return '#eab308';      // CHECK L1 (Yellow)
         if (code === 2) return '#d97706';      // CHECK L2 (Orange)
         if (code === 3) return '#dc2626';      // STOP (Red)
@@ -279,33 +374,33 @@
       }
 
       function loadData() {
-        $.get('/api/data', function(response) {
+        $.get('/api/data', function (response) {
           DATA_MAP = response;
           buildLineItemsMap();
           initSections();
           updateCounts();
           updateTimestamp();
-        }).fail(function(error) {
+        }).fail(function (error) {
           console.error('Error loading data:', error);
         });
       }
 
       function createSensorButton(sectionKey, rowKey, colIndex, data) {
         if (!data || data.id === 'N/A') return '';
-        
+
         let statusClass = data.status;
         let pulseClass = '';
-        
+
         // UPDATED LOGIC: Differentiate L1 (Yellow) from L2 (Orange)
         const code = parseInt(data.status_code);
         if (code === 1) {
-            statusClass = 'l1'; // Uses the new .status-l1 class
-            pulseClass = 'pulse-warn';
+          statusClass = 'l1'; // Uses the new .status-l1 class
+          pulseClass = 'pulse-warn';
         } else if (code === 2) {
-            statusClass = 'l2'; // Uses the existing .status-warn class
-            pulseClass = 'pulse-warn';
+          statusClass = 'l2'; // Uses the existing .status-warn class
+          pulseClass = 'pulse-warn';
         } else if (code === 3) {
-            pulseClass = 'pulse-critical';
+          pulseClass = 'pulse-critical';
         }
 
         return `<button 
@@ -412,7 +507,7 @@
             html += `
               <td class="py-0.5 pl-1">
                 <div class="flex items-center gap-1.5 bg-slate-50 rounded px-1.5 py-0.5 border border-slate-100">
-                  ${createSensorButton(sectionKey, item2.line_no, i+1, item2)}
+                  ${createSensorButton(sectionKey, item2.line_no, i + 1, item2)}
                   <span class="text-base text-slate-600 font-medium">${item2.line_no}</span>
                 </div>
               </td>
@@ -436,21 +531,24 @@
       }
 
       function updateCounts() {
-        let goodCount = 0, staleCount = 0, checkL1Count = 0, checkL2Count = 0, stopCount = 0;
-        $('.sensor-btn').each(function() {
+        let activeCount = 0, staleCount = 0, checkL1Count = 0, checkL2Count = 0, stopCount = 0;
+        $('.sensor-btn').each(function () {
           const statusCode = parseInt($(this).data('status-code'));
           const l1 = parseInt($(this).data('l1')) || 0;
           const l2 = parseInt($(this).data('l2')) || 0;
           const stop = parseInt($(this).data('stop')) || 0;
-          
-          if (statusCode === 0) goodCount++;
+
+          // ACTIVE count includes: GOOD(0), STOP(3), CHECK L1(1), CHECK L2(2)
+          if (statusCode === 0 || statusCode === 1 || statusCode === 2 || statusCode === 3) {
+            activeCount++;
+          }
           if (statusCode === 4) staleCount++;
-          
+
           checkL1Count += l1;
           checkL2Count += l2;
           stopCount += stop;
         });
-        $('#goodCount').text(goodCount);
+        $('#activeCount').text(activeCount);  // This now shows total ACTIVE (Good + Stop + L1 + L2)
         $('#staleCount').text(staleCount);
         $('#checkL1Count').text(checkL1Count);
         $('#checkL2Count').text(checkL2Count);
@@ -473,7 +571,7 @@
         $tooltip.css({ left, top });
       }
 
-      $(document).on('mouseenter', '.sensor-btn', function(e) {
+      $(document).on('mouseenter', '.sensor-btn', function (e) {
         const $btn = $(this);
         const statusCode = $btn.data('status-code');
         $tooltip.html(`
@@ -500,4 +598,5 @@
     });
   </script>
 </body>
+
 </html>

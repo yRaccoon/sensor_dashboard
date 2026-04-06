@@ -8,7 +8,7 @@ app = Flask(__name__)
 def map_status(status_code):
     try:
         code = int(status_code)
-        if code == 0: return 'ok'
+        if code == 0: return 'active'  
         if code in [1, 2]: return 'warn'
         if code == 3: return 'critical'
         if code == 4: return 'stale'
