@@ -1,43 +1,30 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Viewstation - Home</title>
   <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>" />
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            sans: ["Inter", "sans-serif"],
-          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
           colors: {
-            bg: "#f8f9fa",
-            card: "#ffffff",
-            border: "#e5e7eb",
-            accent: "#dc2626",
-            "accent-hover": "#b91c1c",
-            muted: "#6b7280",
-            fg: "#111827",
-            status: {
-              ok: "#16a34a",
-              warn: "#d97706",
-              critical: "#dc2626",
-              stale: "#6b7280",
-              unknown: "#9ca3af",
-            },
-          },
-        },
-      },
-    };
+            bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
+            'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827',
+            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#6b7280', unknown: '#9ca3af' }
+          }
+        }
+      }
+    }
   </script>
 
   <style>
@@ -50,11 +37,10 @@
     }
 
     .stat-card {
-      transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       cursor: pointer;
       user-select: none;
+      position: relative;
     }
 
     .stat-card:hover {
@@ -65,10 +51,74 @@
     .stat-card.active {
       box-shadow: 0 0 0 2px #dc2626;
     }
+
+    /* Tooltip Styles - matching dashboard.html */
+    .stat-tooltip {
+      position: fixed;
+      background: white;
+      border: 1px solid #e5e7eb;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #111827;
+      pointer-events: none;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-left: 3px solid #dc2626;
+      max-width: 340px;
+      min-width: 280px;
+    }
+
+    .stat-tooltip h4 {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 4px;
+    }
+
+    .stat-tooltip .process-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 0.85rem;
+    }
+
+    .stat-tooltip .process-name {
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .stat-tooltip .process-count {
+      font-weight: 600;
+      color: #dc2626;
+    }
+
+    .stat-tooltip .total-row {
+      border-top: 1px solid #e5e7eb;
+      margin-top: 6px;
+      padding-top: 6px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stat-tooltip .total-label {
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .stat-tooltip .total-value {
+      font-weight: 800;
+      color: #dc2626;
+      font-size: 1rem;
+    }
   </style>
 </head>
 
 <body class="bg-bg text-fg min-h-screen">
+
   <!-- Navbar -->
   <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-3">
@@ -81,9 +131,7 @@
           </path>
         </svg>
       </div>
-      <h1 class="font-sans font-bold tracking-tight text-accent text-xl">
-        Viewstation
-      </h1>
+      <h1 class="font-sans font-bold tracking-tight text-accent text-xl">Viewstation</h1>
     </div>
 
     <div class="flex items-center gap-4">
@@ -97,12 +145,13 @@
   </nav>
 
   <main class="p-6 max-w-7xl mx-auto">
+
     <!-- Summary Cards -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
       <!-- Total Inventory (Toggles Table) -->
       <div id="cardTotal"
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-        data-filter="all">
+        data-filter="all" data-card-type="total">
         <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
           <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -117,7 +166,7 @@
       <!-- ACTIVE (Good + Stop + L1 + L2) -->
       <div
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-        data-filter="status" data-value="active">
+        data-filter="status" data-value="active" data-card-type="active">
         <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2">
           <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -131,7 +180,7 @@
       <!-- Stale -->
       <div
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-        data-filter="status" data-value="4">
+        data-filter="status" data-value="4" data-card-type="stale">
         <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mb-2">
           <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -145,7 +194,7 @@
       <!-- Check L1 -->
       <div
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-        data-filter="status" data-value="1">
+        data-filter="accumulated" data-value="l1" data-card-type="l1">
         <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
           <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -160,7 +209,7 @@
       <!-- Check L2 -->
       <div
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-        data-filter="status" data-value="2">
+        data-filter="accumulated" data-value="l2" data-card-type="l2">
         <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2">
           <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -174,7 +223,7 @@
       <!-- Stop -->
       <div
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-        data-filter="status" data-value="3">
+        data-filter="accumulated" data-value="stop" data-card-type="stop">
         <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2">
           <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -225,36 +274,17 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Location
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Process
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Line
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stop Cnt
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  L1
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  L2
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Average
-                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Process</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Line</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stop Cnt</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">L1</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">L2</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average</th>
               </tr>
             </thead>
             <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
@@ -266,18 +296,15 @@
         <!-- Pagination Controls -->
         <div class="flex items-center justify-between mt-4 border-t pt-4">
           <div class="text-sm text-gray-500">
-            Showing <span id="showingStart">0</span> to
-            <span id="showingEnd">0</span> of
-            <span id="totalEntries">0</span> entries
+            Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span
+              id="totalEntries">0</span> entries
           </div>
           <div class="flex gap-2">
-            <button id="prevPage" class="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50">
-              Previous
-            </button>
+            <button id="prevPage"
+              class="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50">Previous</button>
             <span id="pageInfo" class="px-3 py-1 text-sm text-gray-700">Page 1</span>
-            <button id="nextPage" class="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50">
-              Next
-            </button>
+            <button id="nextPage"
+              class="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50">Next</button>
           </div>
         </div>
       </div>
@@ -285,16 +312,18 @@
 
     <!-- Temporary JPEG Section -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-      <h3 class="text-lg font-semibold text-gray-700 mb-3">
-        Reference Layout
-      </h3>
+      <h3 class="text-lg font-semibold text-gray-700 mb-3">Reference Layout</h3>
       <div
         class="bg-gray-100 border-dashed border-2 border-gray-300 rounded h-64 flex items-center justify-center text-gray-400">
         <img src="https://via.placeholder.com/800x300?text=Temporary+JPEG+Placeholder" alt="Placeholder"
-          class="max-h-full object-contain rounded" />
+          class="max-h-full object-contain rounded">
       </div>
     </div>
+
   </main>
+
+  <!-- Tooltip -->
+  <div id="statTooltip" class="stat-tooltip"></div>
 
   <script>
     $(document).ready(function () {
@@ -302,59 +331,284 @@
       let filteredData = [];
       let currentPage = 1;
       let pageSize = 10;
-      let activeStatusFilter = "all";
+      let activeStatusFilter = 'all';
       let activeAccumulatedFilter = null;
 
       function getStatusColor(code) {
-        if (code === 0) return "bg-green-100 text-green-800";
-        if (code === 1) return "bg-yellow-100 text-yellow-800";
-        if (code === 2) return "bg-orange-100 text-orange-800";
-        if (code === 3) return "bg-red-100 text-red-800";
-        if (code === 4) return "bg-gray-100 text-gray-800";
-        return "bg-gray-100 text-gray-800";
+        if (code === 0) return 'bg-green-100 text-green-800';
+        if (code === 1) return 'bg-yellow-100 text-yellow-800';
+        if (code === 2) return 'bg-orange-100 text-orange-800';
+        if (code === 3) return 'bg-red-100 text-red-800';
+        if (code === 4) return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800';
       }
 
       function getStatusText(code) {
-        if (code === 0) return "ACTIVE";
-        if (code === 1) return "CHECK L1";
-        if (code === 2) return "CHECK L2";
-        if (code === 3) return "STOP";
-        if (code === 4) return "STALE";
-        return "UNKNOWN";
+        if (code === 0) return 'ACTIVE';
+        if (code === 1) return 'CHECK L1';
+        if (code === 2) return 'CHECK L2';
+        if (code === 3) return 'STOP';
+        if (code === 4) return 'STALE';
+        return 'UNKNOWN';
       }
 
       function flattenData(dataMap) {
         let list = [];
         for (let key in dataMap) {
           let val = dataMap[key];
-          // Handle array sections (wcs, aoi, etc.)
           if (Array.isArray(val)) {
             list = list.concat(val);
-          }
-          // Handle grouped sections (hsa, hda, etc.)
-          else if (typeof val === "object" && val !== null && val.id) {
-            list.push(val);
-          }
-        }
-        list = []; // Reset
-        for (let key in dataMap) {
-          let val = dataMap[key];
-          if (Array.isArray(val)) {
-            list = list.concat(val);
-          } else if (typeof val === "object" && val !== null) {
-            // It's a single sensor entry mapped by a complex key
+          } else if (typeof val === 'object' && val !== null) {
             if (val.id) list.push(val);
           }
         }
         return list;
       }
 
+      // Get accumulated sums for tooltip (for L1, L2, STOP)
+      function getAccumulatedSumsForCard(cardType) {
+        let processSums = {};
+        let totalSum = 0;
+
+        allData.forEach(item => {
+          let process = item.process || 'Unknown';
+          let value = 0;
+
+          if (cardType === 'l1') {
+            value = parseInt(item.l1) || 0;
+          } else if (cardType === 'l2') {
+            value = parseInt(item.l2) || 0;
+          } else if (cardType === 'stop') {
+            value = parseInt(item.stop) || 0;
+          }
+
+          if (value > 0) {
+            processSums[process] = (processSums[process] || 0) + value;
+            totalSum += value;
+          }
+        });
+
+        return { processSums, totalSum };
+      }
+
+      // Get count of items for tooltip (for Total Inventory, ACTIVE, STALE)
+      function getItemCountsForCard(cardType) {
+        let processCounts = {};
+        let totalCount = 0;
+
+        allData.forEach(item => {
+          let process = item.process || 'Unknown';
+          let include = false;
+
+          if (cardType === 'total') {
+            include = true;
+          } else if (cardType === 'active') {
+            const statusCode = parseInt(item.status_code);
+            include = (statusCode === 0 || statusCode === 1 || statusCode === 2 || statusCode === 3);
+          } else if (cardType === 'stale') {
+            include = (parseInt(item.status_code) === 4);
+          }
+
+          if (include) {
+            processCounts[process] = (processCounts[process] || 0) + 1;
+            totalCount++;
+          }
+        });
+
+        return { processCounts, totalCount };
+      }
+
+      // Tooltip handlers
+      const $tooltip = $('#statTooltip');
+
+      function updateTooltipPosition(e) {
+        const tw = $tooltip.outerWidth(), th = $tooltip.outerHeight();
+        const ww = $(window).width(), wh = $(window).height();
+        let left = e.clientX + 15, top = e.clientY + 15;
+        if (left + tw > ww - 10) left = e.clientX - tw - 15;
+        if (left < 10) left = 10;
+        if (top + th > wh - 10) top = e.clientY - th - 15;
+        if (top < 10) top = 10;
+        $tooltip.css({ left, top });
+      }
+
+      $(document).on('mouseenter', '.stat-card', function (e) {
+        const $card = $(this);
+        const cardType = $card.data('card-type');
+        const cardValue = $card.find('span:first-of-type').text().trim();
+
+        let titleText = '';
+        let tooltipHtml = '';
+
+        // Handle L1, L2, STOP cards (show sums)
+        if (cardType === 'l1') {
+          const { processSums, totalSum } = getAccumulatedSumsForCard('l1');
+          titleText = `⚠️ CHECK L1 Total Counts by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+
+          const sortedProcesses = Object.keys(processSums).sort();
+
+          if (sortedProcesses.length === 0) {
+            tooltipHtml += '<div class="process-item"><span class="process-name">No data available</span><span class="process-count">0</span></div>';
+          } else {
+            sortedProcesses.forEach(process => {
+              tooltipHtml += `
+                <div class="process-item">
+                  <span class="process-name">${process}</span>
+                  <span class="process-count">${processSums[process]}</span>
+                </div>
+              `;
+            });
+          }
+
+          tooltipHtml += `
+            <div class="total-row">
+              <span class="total-label">📋 TOTAL CHECK L1</span>
+              <span class="total-value">${totalSum}</span>
+            </div>
+          `;
+        }
+        else if (cardType === 'l2') {
+          const { processSums, totalSum } = getAccumulatedSumsForCard('l2');
+          titleText = `⚠️ CHECK L2 Total Counts by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+
+          const sortedProcesses = Object.keys(processSums).sort();
+
+          if (sortedProcesses.length === 0) {
+            tooltipHtml += '<div class="process-item"><span class="process-name">No data available</span><span class="process-count">0</span></div>';
+          } else {
+            sortedProcesses.forEach(process => {
+              tooltipHtml += `
+                <div class="process-item">
+                  <span class="process-name">${process}</span>
+                  <span class="process-count">${processSums[process]}</span>
+                </div>
+              `;
+            });
+          }
+
+          tooltipHtml += `
+            <div class="total-row">
+              <span class="total-label">📋 TOTAL CHECK L2</span>
+              <span class="total-value">${totalSum}</span>
+            </div>
+          `;
+        }
+        else if (cardType === 'stop') {
+          const { processSums, totalSum } = getAccumulatedSumsForCard('stop');
+          titleText = `🛑 STOP Total Counts by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+
+          const sortedProcesses = Object.keys(processSums).sort();
+
+          if (sortedProcesses.length === 0) {
+            tooltipHtml += '<div class="process-item"><span class="process-name">No data available</span><span class="process-count">0</span></div>';
+          } else {
+            sortedProcesses.forEach(process => {
+              tooltipHtml += `
+                <div class="process-item">
+                  <span class="process-name">${process}</span>
+                  <span class="process-count">${processSums[process]}</span>
+                </div>
+              `;
+            });
+          }
+
+          tooltipHtml += `
+            <div class="total-row">
+              <span class="total-label">📋 TOTAL STOP</span>
+              <span class="total-value">${totalSum}</span>
+            </div>
+          `;
+        }
+        // Handle Total Inventory, ACTIVE, STALE cards (show item counts)
+        else if (cardType === 'total') {
+          const { processCounts, totalCount } = getItemCountsForCard('total');
+          titleText = `📊 Total Inventory by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+
+          const sortedProcesses = Object.keys(processCounts).sort();
+
+          sortedProcesses.forEach(process => {
+            tooltipHtml += `
+              <div class="process-item">
+                <span class="process-name">${process}</span>
+                <span class="process-count">${processCounts[process]}</span>
+              </div>
+            `;
+          });
+
+          tooltipHtml += `
+            <div class="total-row">
+              <span class="total-label">📋 TOTAL ITEMS</span>
+              <span class="total-value">${totalCount}</span>
+            </div>
+          `;
+        }
+        else if (cardType === 'active') {
+          const { processCounts, totalCount } = getItemCountsForCard('active');
+          titleText = `✅ ACTIVE Items by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+
+          const sortedProcesses = Object.keys(processCounts).sort();
+
+          sortedProcesses.forEach(process => {
+            tooltipHtml += `
+              <div class="process-item">
+                <span class="process-name">${process}</span>
+                <span class="process-count">${processCounts[process]}</span>
+              </div>
+            `;
+          });
+
+          tooltipHtml += `
+            <div class="total-row">
+              <span class="total-label">📋 TOTAL ACTIVE</span>
+              <span class="total-value">${totalCount}</span>
+            </div>
+          `;
+        }
+        else if (cardType === 'stale') {
+          const { processCounts, totalCount } = getItemCountsForCard('stale');
+          titleText = `⏰ STALE Items by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+
+          const sortedProcesses = Object.keys(processCounts).sort();
+
+          sortedProcesses.forEach(process => {
+            tooltipHtml += `
+              <div class="process-item">
+                <span class="process-name">${process}</span>
+                <span class="process-count">${processCounts[process]}</span>
+              </div>
+            `;
+          });
+
+          tooltipHtml += `
+            <div class="total-row">
+              <span class="total-label">📋 TOTAL STALE</span>
+              <span class="total-value">${totalCount}</span>
+            </div>
+          `;
+        }
+
+        $tooltip.html(tooltipHtml);
+        $tooltip.css({ display: 'block' });
+        updateTooltipPosition(e);
+      });
+
+      $(document).on('mousemove', '.stat-card', updateTooltipPosition);
+      $(document).on('mouseleave', '.stat-card', () => $tooltip.css('display', 'none'));
+
       function loadData() {
-        $.get("/api/data", function (response) {
+        $.get('/api/data', function (response) {
           allData = flattenData(response);
           populateFilters();
           applyFilters();
           updateTimestamp();
+        }).fail(function (error) {
+          console.error('Error loading data:', error);
         });
       }
 
@@ -362,99 +616,76 @@
         const locations = new Set();
         const processes = new Set();
 
-        allData.forEach((item) => {
+        allData.forEach(item => {
           if (item.loc) locations.add(item.loc);
           if (item.process) processes.add(item.process);
         });
 
-        const locSelect = $("#filterLocation");
-        [...locations].sort().forEach((loc) => {
+        const locSelect = $('#filterLocation');
+        locSelect.empty().append('<option value="all">All Locations</option>');
+        [...locations].sort().forEach(loc => {
           locSelect.append(`<option value="${loc}">${loc}</option>`);
         });
 
-        const procSelect = $("#filterProcess");
-        [...processes].sort().forEach((proc) => {
+        const procSelect = $('#filterProcess');
+        procSelect.empty().append('<option value="all">All Processes</option>');
+        [...processes].sort().forEach(proc => {
           procSelect.append(`<option value="${proc}">${proc}</option>`);
         });
       }
 
       function calculateStats() {
         let total = allData.length;
-        let activeCount = 0,
-          stale = 0;
-        let stopSum = 0,
-          l1Sum = 0,
-          l2Sum = 0;
-        let stopCount = 0,
-          l1Count = 0,
-          l2Count = 0;
+        let activeCount = 0, stale = 0;
+        let stopSum = 0, l1Sum = 0, l2Sum = 0;
 
-        allData.forEach((item) => {
+        allData.forEach(item => {
           const statusCode = parseInt(item.status_code);
 
           // ACTIVE count includes: GOOD(0), STOP(3), CHECK L1(1), CHECK L2(2)
-          if (
-            statusCode === 0 ||
-            statusCode === 1 ||
-            statusCode === 2 ||
-            statusCode === 3
-          ) {
+          if (statusCode === 0 || statusCode === 1 || statusCode === 2 || statusCode === 3) {
             activeCount++;
           }
           if (statusCode === 4) stale++;
 
           // Sum for display on cards
-          l1Sum += parseInt(item.l1) || 0;
-          l2Sum += parseInt(item.l2) || 0;
-          stopSum += parseInt(item.stop) || 0;
-
-          // Count items with value >= 1 for filtering
-          if ((parseInt(item.stop) || 0) >= 1) stopCount++;
-          if ((parseInt(item.l1) || 0) >= 1) l1Count++;
-          if ((parseInt(item.l2) || 0) >= 1) l2Count++;
+          l1Sum += (parseInt(item.l1) || 0);
+          l2Sum += (parseInt(item.l2) || 0);
+          stopSum += (parseInt(item.stop) || 0);
         });
 
-        $("#textTotal").text(total);
-        $("#textActive").text(activeCount); // Changed from #textGood to #textActive
-        $("#textStale").text(stale);
-        $("#textL1").text(l1Sum);
-        $("#textL2").text(l2Sum);
-        $("#textStop").text(stopSum);
+        $('#textTotal').text(total);
+        $('#textActive').text(activeCount);
+        $('#textStale').text(stale);
+        $('#textL1').text(l1Sum);
+        $('#textL2').text(l2Sum);
+        $('#textStop').text(stopSum);
       }
 
       function applyFilters() {
-        const locFilter = $("#filterLocation").val();
-        const procFilter = $("#filterProcess").val();
+        const locFilter = $('#filterLocation').val();
+        const procFilter = $('#filterProcess').val();
 
-        filteredData = allData.filter((item) => {
-          const matchLoc = locFilter === "all" || item.loc === locFilter;
-          const matchProc =
-            procFilter === "all" || item.process === procFilter;
+        filteredData = allData.filter(item => {
+          const matchLoc = (locFilter === 'all' || item.loc === locFilter);
+          const matchProc = (procFilter === 'all' || item.process === procFilter);
 
           let matchStatus = true;
-          if (activeStatusFilter === "active") {
+          if (activeStatusFilter === 'active') {
             // ACTIVE includes status codes 0, 1, 2, 3
             const statusCode = parseInt(item.status_code);
-            matchStatus =
-              statusCode === 0 ||
-              statusCode === 1 ||
-              statusCode === 2 ||
-              statusCode === 3;
-          } else if (
-            activeStatusFilter !== "all" &&
-            activeStatusFilter !== null
-          ) {
-            matchStatus =
-              parseInt(item.status_code) === parseInt(activeStatusFilter);
+            matchStatus = (statusCode === 0 || statusCode === 1 || statusCode === 2 || statusCode === 3);
+          } else if (activeStatusFilter !== 'all' && activeStatusFilter !== null) {
+            matchStatus = (parseInt(item.status_code) === parseInt(activeStatusFilter));
           }
 
           // Apply accumulated filter (stop, l1, l2 >= 1)
           let matchAccumulated = true;
-          if (activeAccumulatedFilter === "stop") {
+          if (activeAccumulatedFilter === 'stop') {
             matchAccumulated = (parseInt(item.stop) || 0) >= 1;
-          } else if (activeAccumulatedFilter === "checkl1") {
+          } else if (activeAccumulatedFilter === 'l1') {
             matchAccumulated = (parseInt(item.l1) || 0) >= 1;
-          } else if (activeAccumulatedFilter === "checkl2") {
+          } else if (activeAccumulatedFilter === 'l2') {
             matchAccumulated = (parseInt(item.l2) || 0) >= 1;
           }
 
@@ -467,7 +698,7 @@
       }
 
       function renderTable() {
-        const tbody = $("#tableBody");
+        const tbody = $('#tableBody');
         tbody.empty();
 
         const start = (currentPage - 1) * pageSize;
@@ -475,18 +706,16 @@
         const pageData = filteredData.slice(start, end);
 
         if (pageData.length === 0) {
-          tbody.append(
-            '<tr><td colspan="10" class="text-center py-4 text-gray-500">No data found</td></tr>',
-          );
+          tbody.append('<tr><td colspan="10" class="text-center py-4 text-gray-500">No data found</td></tr>');
         } else {
-          pageData.forEach((item) => {
+          pageData.forEach(item => {
             const row = `
               <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${item.id || "N/A"}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${item.desc || "N/A"}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.loc || "N/A"}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.process || "N/A"}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.line_no || "N/A"}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${item.id || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${item.desc || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.loc || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.process || 'N/A'}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.line_no || 'N/A'}</td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm">
                   <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(item.status_code)}">
                     ${getStatusText(item.status_code)}
@@ -510,36 +739,40 @@
         const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
         const end = Math.min(currentPage * pageSize, total);
 
-        $("#showingStart").text(start);
-        $("#showingEnd").text(end);
-        $("#totalEntries").text(total);
+        $('#showingStart').text(start);
+        $('#showingEnd').text(end);
+        $('#totalEntries').text(total);
 
         const totalPages = Math.ceil(total / pageSize) || 1;
-        $("#pageInfo").text(`Page ${currentPage} of ${totalPages}`);
+        $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
 
-        $("#prevPage").prop("disabled", currentPage === 1);
-        $("#nextPage").prop("disabled", currentPage >= totalPages);
+        $('#prevPage').prop('disabled', currentPage === 1);
+        $('#nextPage').prop('disabled', currentPage >= totalPages);
+      }
+
+      function updateTimestamp() {
+        $('#lastUpdate').text(new Date().toLocaleTimeString());
       }
 
       // Filter Listeners
-      $("#filterLocation, #filterProcess").change(function () {
+      $('#filterLocation, #filterProcess').change(function () {
         applyFilters();
       });
 
-      $("#pageSize").change(function () {
+      $('#pageSize').change(function () {
         pageSize = parseInt($(this).val());
         currentPage = 1;
         renderTable();
       });
 
-      $("#prevPage").click(function () {
+      $('#prevPage').click(function () {
         if (currentPage > 1) {
           currentPage--;
           renderTable();
         }
       });
 
-      $("#nextPage").click(function () {
+      $('#nextPage').click(function () {
         const totalPages = Math.ceil(filteredData.length / pageSize);
         if (currentPage < totalPages) {
           currentPage++;
@@ -548,96 +781,67 @@
       });
 
       // Card Click Logic
-      $(".stat-card").click(function () {
-        const filterType = $(this).data("filter");
-        const filterValue = $(this).data("value");
-        const cardText = $(this).find("span:last-child").text().trim(); // Get card label (STOP, CHECK L1, CHECK L2)
+      $('.stat-card').click(function () {
+        const filterType = $(this).data('filter');
+        const filterValue = $(this).data('value');
+        const cardType = $(this).data('card-type');
 
         // Total Inventory Click: Toggle Table
-        if (filterType === "all") {
-          $("#tableWrapper").toggleClass("hidden");
-          $(this).toggleClass("active");
-          // Reset accumulated filter when toggling total inventory
+        if (filterType === 'all') {
+          $('#tableWrapper').toggleClass('hidden');
+          $(this).toggleClass('active');
+          // Reset filters when toggling total inventory
           activeAccumulatedFilter = null;
+          activeStatusFilter = 'all';
+          $('.stat-card[data-filter="status"], .stat-card[data-filter="accumulated"]').removeClass('active');
           applyFilters();
           return;
         }
 
         // Ensure table is visible
-        if ($("#tableWrapper").hasClass("hidden")) {
-          $("#tableWrapper").removeClass("hidden");
+        if ($('#tableWrapper').hasClass('hidden')) {
+          $('#tableWrapper').removeClass('hidden');
         }
 
-        $("#cardTotal").removeClass("active");
+        $('#cardTotal').removeClass('active');
 
-        // Handle STOP, CHECK L1, CHECK L2 cards (accumulated value filter)
-        if (
-          cardText === "Stop" ||
-          cardText === "Check L1" ||
-          cardText === "Check L2"
-        ) {
-          if ($(this).hasClass("active")) {
-            $(this).removeClass("active");
+        // Handle accumulated filter cards (Stop, Check L1, Check L2)
+        if (filterType === 'accumulated') {
+          if ($(this).hasClass('active')) {
+            $(this).removeClass('active');
             activeAccumulatedFilter = null;
           } else {
             // Remove active from other accumulated filter cards
-            $(".stat-card").each(function () {
-              const text = $(this).find("span:last-child").text().trim();
-              if (
-                text === "Stop" ||
-                text === "Check L1" ||
-                text === "Check L2"
-              ) {
-                $(this).removeClass("active");
-              }
-            });
+            $('.stat-card[data-filter="accumulated"]').removeClass('active');
             // Remove active from status filter cards
-            $('.stat-card[data-filter="status"]').removeClass("active");
-            $(this).addClass("active");
-            activeAccumulatedFilter = cardText.toLowerCase().replace(" ", "");
-            activeStatusFilter = "all"; // Reset status filter
+            $('.stat-card[data-filter="status"]').removeClass('active');
+            $(this).addClass('active');
+            activeAccumulatedFilter = filterValue;
+            activeStatusFilter = 'all'; // Reset status filter
           }
           applyFilters();
         }
         // Handle status filter cards (ACTIVE, STALE)
-        else if (filterType === "status") {
+        else if (filterType === 'status') {
           // Remove active from accumulated filter cards
-          $(".stat-card").each(function () {
-            const text = $(this).find("span:last-child").text().trim();
-            if (
-              text === "Stop" ||
-              text === "Check L1" ||
-              text === "Check L2"
-            ) {
-              $(this).removeClass("active");
-            }
-          });
+          $('.stat-card[data-filter="accumulated"]').removeClass('active');
           activeAccumulatedFilter = null;
 
-          if ($(this).hasClass("active")) {
-            $(this).removeClass("active");
-            activeStatusFilter = "all";
+          if ($(this).hasClass('active')) {
+            $(this).removeClass('active');
+            activeStatusFilter = 'all';
           } else {
-            $('.stat-card[data-filter="status"]').removeClass("active");
-            $(this).addClass("active");
-            // Handle 'active' filter specially
-            if (filterValue === "active") {
-              activeStatusFilter = "active"; // Special value for active
-            } else {
-              activeStatusFilter = filterValue;
-            }
+            $('.stat-card[data-filter="status"]').removeClass('active');
+            $(this).addClass('active');
+            activeStatusFilter = filterValue;
           }
           applyFilters();
         }
       });
 
-      function updateTimestamp() {
-        $("#lastUpdate").text(new Date().toLocaleTimeString());
-      }
-
-      // Initial Load
+      // Initial Load 
       loadData();
-      setInterval(updateTimestamp, 1000);
+      setInterval(updateTimestamp, 1000); // Only timestamp updates every second
     });
   </script>
 </body>
