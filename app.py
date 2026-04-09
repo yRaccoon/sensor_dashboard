@@ -1,7 +1,9 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import pandas as pd
 import os
 from collections import defaultdict
+import glob
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -93,6 +95,46 @@ def load_data():
         sensor_map[section] = items
 
     return sensor_map
+
+@app.route('/api/sensor/<sensor_id>/data')
+def sensor_data(sensor_id):
+    start_str = request.args.get('start')
+    end_str = request.args.get('end')
+    
+    folder = os.path.join(os.path.dirname(__file__), 'data', 'sensors', sensor_id)
+    if not os.path.isdir(folder):
+        return jsonify({'error': 'Sensor folder not found'}), 404
+    
+    csv_files = glob.glob(os.path.join(folder, '*.csv'))
+    if not csv_files:
+        return jsonify({'error': 'No CSV files found'}), 404
+    
+    dfs = []
+    for f in csv_files:
+        try:
+            df = pd.read_csv(f)
+            dfs.append(df)
+        except Exception as e:
+            print(f"Error reading {f}: {e}")
+    
+    if not dfs:
+        return jsonify({'error': 'Could not read any CSV files'}), 500
+    
+    combined = pd.concat(dfs, ignore_index=True)
+    combined['date_time'] = pd.to_datetime(combined['date_time'])
+    combined = combined.sort_values('date_time')
+    
+    if start_str:
+        start_dt = datetime.fromisoformat(start_str)
+        combined = combined[combined['date_time'] >= start_dt]
+    if end_str:
+        end_dt = datetime.fromisoformat(end_str)
+        combined = combined[combined['date_time'] <= end_dt]
+    
+    times = combined['date_time'].dt.strftime('%Y-%m-%d %H:%M:%S').tolist()
+    values = combined['value1'].tolist()
+    
+    return jsonify({'times': times, 'values': values})
 
 @app.route('/')
 def home():

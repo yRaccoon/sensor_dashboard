@@ -11,7 +11,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+  <!-- Chart.js and dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -113,6 +118,129 @@
       font-weight: 800;
       color: #dc2626;
       font-size: 1rem;
+    }
+
+    /* Very Light Blue Theme for Table */
+    .table-row-hover:hover {
+      background-color: #e0f2fe !important;
+      transition: background-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .status-badge {
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    /* Alternating row colors - Light blue shades */
+    tbody tr:nth-child(even) {
+      background-color: #f0f9ff;
+      /* Very light blue */
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: #f8fafc;
+      /* Off-white with slight blue tint */
+    }
+
+    /* Better number alignment */
+    .number-cell {
+      font-family: 'Inter', monospace;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* Status badge enhancements - Keep original colors for status badges */
+    .badge-active {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 3px solid #22c55e;
+    }
+
+    .badge-l1 {
+      background: #fef9c3;
+      color: #854d0e;
+      border-left: 3px solid #eab308;
+    }
+
+    .badge-l2 {
+      background: #ffedd5;
+      color: #9a3412;
+      border-left: 3px solid #f97316;
+    }
+
+    .badge-stop {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 3px solid #ef4444;
+    }
+
+    .badge-stale {
+      background: #f3f4f6;
+      color: #374151;
+      border-left: 3px solid #6b7280;
+    }
+
+    /* Table header enhancement - Blue theme */
+    .table-header th {
+      background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+      border-bottom: 2px solid #bfdbfe;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      color: #1e40af;
+      padding: 14px 16px;
+      border-top: 1px solid #bfdbfe;
+    }
+
+    /* Row dividers - Light blue */
+    tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    /* Table container border - Blue tint */
+    .table-container {
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    /* ID column styling */
+    .id-cell {
+      font-weight: 700;
+      color: #1e40af;
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    }
+
+    /* Process column pill */
+    .process-pill {
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    /* Number cells background */
+    .number-cell-bg {
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 2px 6px;
+      display: inline-block;
+      min-width: 40px;
+    }
+
+    /* Description cell */
+    .desc-cell {
+      color: #334155;
+      font-weight: 500;
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   </style>
 </head>
@@ -239,20 +367,21 @@
 
     <!-- Filters & Table Section (Wrapped for Toggle) -->
     <div id="tableWrapper">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+      <div
+        class="bg-white rounded-lg shadow-md border border-blue-200 p-4 mb-6 hover:shadow-lg transition-shadow duration-300 table-container">
         <div class="flex flex-wrap gap-4 mb-4 items-center justify-between border-b pb-4">
           <div class="flex gap-4 items-center">
             <div>
               <label class="block text-xs font-medium text-gray-500 mb-1">Location</label>
               <select id="filterLocation"
-                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md border bg-white">
+                class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
                 <option value="all">All Locations</option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-500 mb-1">Process</label>
               <select id="filterProcess"
-                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md border bg-white">
+                class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
                 <option value="all">All Processes</option>
               </select>
             </div>
@@ -260,7 +389,7 @@
           <div>
             <label class="block text-xs font-medium text-gray-500 mb-1">Show entries</label>
             <select id="pageSize"
-              class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md border bg-white">
+              class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
               <option value="10">10</option>
               <option value="25">25</option>
               <option value="50">50</option>
@@ -272,19 +401,18 @@
         <!-- Table -->
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="table-header">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Process</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Line</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stop Cnt</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">L1</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">L2</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average</th>
+                <th class="px-4 py-3 text-left rounded-tl-lg">📌 ID</th>
+                <th class="px-4 py-3 text-left">📝 Description</th>
+                <th class="px-4 py-3 text-left">📍 Location</th>
+                <th class="px-4 py-3 text-left">⚙️ Process</th>
+                <th class="px-4 py-3 text-left">🔢 Line</th>
+                <th class="px-4 py-3 text-left">📊 Status</th>
+                <th class="px-4 py-3 text-center">🛑 Stop Cnt</th>
+                <th class="px-4 py-3 text-center">⚠️ L1</th>
+                <th class="px-4 py-3 text-center">⚠️ L2</th>
+                <th class="px-4 py-3 text-center rounded-tr-lg">📈 Average</th>
               </tr>
             </thead>
             <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
@@ -310,6 +438,34 @@
       </div>
     </div>
 
+    <!-- Sensor Graph Section (hidden by default) -->
+    <div id="graphSection" class="mt-6 hidden bg-white rounded-lg shadow-md border border-blue-200 p-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-700">
+          📈 Sensor: <span id="currentSensorId" class="text-accent font-mono"></span>
+        </h3>
+        <div class="flex gap-4 items-center">
+          <div>
+            <label class="text-xs text-gray-500 block">Start</label>
+            <input type="datetime-local" id="graphStart" class="border rounded px-2 py-1 text-sm">
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 block">End</label>
+            <input type="datetime-local" id="graphEnd" class="border rounded px-2 py-1 text-sm">
+          </div>
+          <button id="applyGraphRange"
+            class="bg-accent text-white px-3 py-1 rounded text-sm hover:bg-accent-hover">Apply</button>
+          <button id="copyChartBtn" class="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-300">📋
+            Copy Chart</button>
+          <button id="closeGraphBtn" class="text-gray-500 hover:text-gray-700 text-xl leading-5">&times;</button>
+        </div>
+      </div>
+      <div class="relative" style="height: 300px;">
+        <canvas id="sensorChart"></canvas>
+      </div>
+      <div id="graphLoading" class="text-center py-8 text-gray-500 hidden">Loading data...</div>
+      <div id="graphError" class="text-center py-8 text-red-500 hidden"></div>
+    </div>
     <!-- Temporary JPEG Section -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
       <h3 class="text-lg font-semibold text-gray-700 mb-3">Reference Layout</h3>
@@ -333,13 +489,209 @@
       let pageSize = 10;
       let activeStatusFilter = 'all';
       let activeAccumulatedFilter = null;
+      // Add after existing variables
+      let chartInstance = null;
+      let currentSensor = null;
+      let currentSensorDesc = '';
+      // Row click handler (delegated)
+      $('#tableBody').on('click', 'tr', function () {
+        const idCell = $(this).find('td:first-child span').text();
+        if (idCell && idCell !== 'N/A') {
+          // Find description from the loaded data
+          const sensorData = allData.find(item => item.id === idCell);
+          const description = sensorData ? sensorData.desc : idCell;
+          openSensorGraph(idCell, description);
+        }
+      });
+
+      function openSensorGraph(sensorId, description) {
+        currentSensor = sensorId;
+        currentSensorDesc = description;
+        $('#currentSensorId').text(sensorId);           // Keep ID in header
+        $('#currentSensorDesc').text(description);      // Show description in a new span
+        $('#graphSection').removeClass('hidden');
+
+        // Set default date range
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        $('#graphStart').val(formatDateTimeLocal(yesterday));
+        $('#graphEnd').val(formatDateTimeLocal(now));
+
+        loadSensorData();
+      }
+
+      function formatDateTimeLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = '00';  // Force minutes to 00 for hour-level precision
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+
+      function loadSensorData() {
+        if (!currentSensor) return;
+
+        const start = $('#graphStart').val();
+        const end = $('#graphEnd').val();
+        let url = `/api/sensor/${encodeURIComponent(currentSensor)}/data`;
+        const params = new URLSearchParams();
+        if (start) params.append('start', start);
+        if (end) params.append('end', end);
+        if (params.toString()) url += '?' + params.toString();
+
+        $('#graphLoading').removeClass('hidden');
+        $('#graphError').addClass('hidden');
+        $('#sensorChart').addClass('hidden');
+
+        $.getJSON(url)
+          .done(function (response) {
+            $('#graphLoading').addClass('hidden');
+            $('#sensorChart').removeClass('hidden');
+            renderChart(response.times, response.values, currentSensorDesc);  // ← Pass sensor ID
+          })
+          .fail(function (xhr) {
+            $('#graphLoading').addClass('hidden');
+            $('#graphError').removeClass('hidden').text('Error loading data: ' +
+              (xhr.responseJSON?.error || 'Unknown error'));
+          });
+      }
+      function renderChart(labels, values, description) {
+        const ctx = document.getElementById('sensorChart').getContext('2d');
+
+        // Destroy existing chart instance if any
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: description,                     // This won't show since legend is hidden
+              data: values,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.1,
+              fill: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false                       // ← Hide the legend
+              },
+              title: {
+                display: true,
+                text: description,                   // Description as chart title
+                font: { size: 16, weight: 'bold' },
+                padding: { top: 10, bottom: 10 }
+              },
+              annotation: {
+                annotations: {
+                  threshold5: {
+                    type: 'line',
+                    yMin: 5,
+                    yMax: 5,
+                    borderColor: '#eab308',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                      content: 'Threshold 5',
+                      enabled: true,
+                      position: 'end',
+                      backgroundColor: '#eab308'
+                    }
+                  },
+                  threshold20: {
+                    type: 'line',
+                    yMin: 20,
+                    yMax: 20,
+                    borderColor: '#dc2626',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                      content: 'Threshold 20',
+                      enabled: true,
+                      position: 'end',
+                      backgroundColor: '#dc2626'
+                    }
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'hour',                    // ← Base unit: hour
+                  displayFormats: {
+                    hour: 'yyyy-MM-dd HH:00'     // ← Format: Year-Month-Day Hour
+                  },
+                  tooltipFormat: 'yyyy-MM-dd HH:mm'
+                },
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                min: 0,
+                max: 100,
+                title: {
+                  display: true,
+                  text: 'Value'
+                }
+              }
+            }
+          }
+        });
+      }
+      // Apply button
+      $('#applyGraphRange').on('click', loadSensorData);
+
+      // Close graph
+      $('#closeGraphBtn').on('click', function () {
+        $('#graphSection').addClass('hidden');
+        if (chartInstance) {
+          chartInstance.destroy();
+          chartInstance = null;
+        }
+        currentSensor = null;
+      });
+
+      // Copy chart as image
+      $('#copyChartBtn').on('click', async function () {
+        const canvas = document.getElementById('sensorChart');
+        if (!canvas) return;
+
+        try {
+          // Convert canvas to blob
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              [blob.type]: blob
+            })
+          ]);
+          alert('Chart copied to clipboard!');
+        } catch (err) {
+          console.error('Copy failed:', err);
+          alert('Could not copy chart. You may need to grant clipboard permissions.');
+        }
+      });
+
 
       function getStatusColor(code) {
-        if (code === 0) return 'bg-green-100 text-green-800';
-        if (code === 1) return 'bg-yellow-100 text-yellow-800';
-        if (code === 2) return 'bg-orange-100 text-orange-800';
-        if (code === 3) return 'bg-red-100 text-red-800';
-        if (code === 4) return 'bg-gray-100 text-gray-800';
+        if (code === 0) return 'badge-active';
+        if (code === 1) return 'badge-l1';
+        if (code === 2) return 'badge-l2';
+        if (code === 3) return 'badge-stop';
+        if (code === 4) return 'badge-stale';
         return 'bg-gray-100 text-gray-800';
       }
 
@@ -710,23 +1062,41 @@
         } else {
           pageData.forEach(item => {
             const row = `
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${item.id || 'N/A'}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${item.desc || 'N/A'}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.loc || 'N/A'}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.process || 'N/A'}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.line_no || 'N/A'}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm">
-                  <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(item.status_code)}">
-                    ${getStatusText(item.status_code)}
-                  </span>
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.stop || 0}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.l1 || 0}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.l2 || 0}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${item.average || 0}</td>
-              </tr>
-            `;
+  <tr class="table-row-hover">
+    <td class="px-4 py-3 whitespace-nowrap text-sm id-cell">
+      <span class="font-bold">${item.id || 'N/A'}</span>
+    </td>
+    <td class="px-4 py-3 text-sm desc-cell" title="${item.desc || 'N/A'}">
+      <span class="desc-cell">${item.desc || 'N/A'}</span>
+    </td>
+    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+      <span class="font-medium">${item.loc || 'N/A'}</span>
+    </td>
+    <td class="px-4 py-3 whitespace-nowrap text-sm">
+      <span class="process-pill">${item.process || 'N/A'}</span>
+    </td>
+    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+      <span class="font-mono">${item.line_no || 'N/A'}</span>
+    </td>
+    <td class="px-4 py-3 whitespace-nowrap text-sm">
+      <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-md status-badge ${getStatusColor(item.status_code)}">
+        ${getStatusText(item.status_code)}
+      </span>
+    </td>
+    <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
+      <span class="number-cell-bg text-gray-700">${item.stop || 0}</span>
+    </td>
+    <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
+      <span class="number-cell-bg text-amber-700 font-bold">${item.l1 || 0}</span>
+    </td>
+    <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
+      <span class="number-cell-bg text-orange-700 font-bold">${item.l2 || 0}</span>
+    </td>
+    <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
+      <span class="number-cell-bg text-gray-700 font-semibold">${item.average || 0}</span>
+    </td>
+  </tr>
+`;
             tbody.append(row);
           });
         }
