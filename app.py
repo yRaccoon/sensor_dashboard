@@ -141,7 +141,8 @@ def sensor_plot(sensor_id):
     try:
         start_str = request.args.get('start')
         end_str = request.args.get('end')
-        
+        description = request.args.get('description', sensor_id) 
+
         folder = os.path.join(os.path.dirname(__file__), 'data', 'sensors', sensor_id)
         if not os.path.isdir(folder):
             return jsonify({'error': f'Sensor folder not found: {sensor_id}'}), 404
@@ -218,7 +219,7 @@ def sensor_plot(sensor_id):
         plt.ylim(0, 100)
         plt.xlabel('Time')
         plt.ylabel('Value')
-        plt.title(f'{sensor_id}')
+        plt.title(description)
         
         ax = plt.gca()
         ax.set_xlim(x_min, x_max)
