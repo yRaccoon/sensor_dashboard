@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive - LMS Files</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'/></svg>">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
+                        'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .stat-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.active {
+            box-shadow: 0 0 0 2px #dc2626;
+        }
+
+        .table-container {
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header th {
+            background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+            border-bottom: 2px solid #bfdbfe;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            color: #1e40af;
+            padding: 14px 16px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f0f9ff;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #f8fafc;
+        }
+
+        tbody tr:hover {
+            background-color: #e0f2fe !important;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            font-weight: 600;
+        }
+
+        .badge-l1 {
+            background: #fef9c3;
+            color: #854d0e;
+            border-left: 3px solid #eab308;
+        }
+
+        .badge-l2 {
+            background: #ffedd5;
+            color: #9a3412;
+            border-left: 3px solid #f97316;
+        }
+
+        .badge-stop {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 3px solid #ef4444;
+        }
+
+        .badge-other {
+            background: #f3f4f6;
+            color: #374151;
+            border-left: 3px solid #6b7280;
+        }
+    </style>
+</head>
+
+<body class="bg-bg text-fg min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </div>
+            <h1 class="font-sans font-bold tracking-tight text-accent text-xl">Viewstation Archive</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/"
+                class="px-4 py-1.5 rounded-full text-sm font-medium transition border border-gray-300 text-gray-700 hover:bg-gray-100">Home</a>
+            <a href="/dashboard"
+                class="px-4 py-1.5 rounded-full text-sm font-medium transition border border-gray-300 text-gray-700 hover:bg-gray-100">Dashboard</a>
+            <a href="/archive"
+                class="px-4 py-1.5 rounded-full text-sm font-medium transition bg-accent text-white hover:bg-accent-hover shadow-sm">Archive</a>
+        </div>
+    </nav>
+
+    <main class="p-6 max-w-7xl mx-auto">
+        <!-- File Selector -->
+        <div class="bg-white rounded-lg shadow-md border border-blue-200 p-4 mb-6">
+            <div class="flex items-center gap-4">
+                <label class="text-sm font-medium text-gray-700">Select LMS File:</label>
+                <select id="fileSelect"
+                    class="border border-gray-300 rounded px-3 py-2 text-sm bg-white w-64 focus:outline-none focus:ring-2 focus:ring-accent">
+                    <option value="">-- Loading files --</option>
+                </select>
+                <button id="loadBtn"
+                    class="bg-accent text-white px-4 py-2 rounded text-sm hover:bg-accent-hover transition">Load
+                    Data</button>
+                <span id="recordCount" class="text-sm text-gray-500 ml-auto"></span>
+            </div>
+        </div>
+
+        <!-- Summary Cards (4 cards) -->
+        <div id="cardsSection" class="hidden">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+                <!-- Total Alarms -->
+                <div id="cardTotal"
+                    class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+                    data-filter="all">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-800" id="textTotal">0</span>
+                    <span class="text-sm text-gray-500 font-medium">Total Alarms</span>
+                </div>
+                <!-- Check L1 -->
+                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+                    data-filter="status" data-value="Check L1">
+                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-yellow-600" id="textL1">0</span>
+                    <span class="text-sm text-gray-500 font-medium">Check L1</span>
+                </div>
+                <!-- Check L2 -->
+                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+                    data-filter="status" data-value="Check L2">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-orange-600" id="textL2">0</span>
+                    <span class="text-sm text-gray-500 font-medium">Check L2</span>
+                </div>
+                <!-- Stop -->
+                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+                    data-filter="status" data-value="STOP">
+                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-red-600" id="textStop">0</span>
+                    <span class="text-sm text-gray-500 font-medium">Stop</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div id="tableWrapper" class="bg-white rounded-lg shadow-md border border-blue-200 p-4 table-container hidden">
+            <div class="flex flex-wrap gap-4 mb-4 items-center justify-between border-b pb-4">
+                <div class="flex gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Search DCP Name</label>
+                        <input type="text" id="tableSearchId" placeholder="Enter ID..."
+                            class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Show entries</label>
+                    <select id="pageSize"
+                        class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="table-header" id="tableHead"></thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex items-center justify-between mt-4 border-t pt-4">
+                <div class="text-sm text-gray-500">
+                    Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span
+                        id="totalEntries">0</span> entries
+                </div>
+                <div class="flex gap-2">
+                    <button id="prevPage"
+                        class="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50">Previous</button>
+                    <span id="pageInfo" class="px-3 py-1 text-sm text-gray-700">Page 1</span>
+                    <button id="nextPage"
+                        class="px-3 py-1 border rounded text-sm hover:bg-gray-100 disabled:opacity-50">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicators -->
+        <div id="loadingIndicator" class="text-center py-8 text-gray-500 hidden">Loading file data...</div>
+        <div id="errorIndicator" class="text-center py-8 text-red-500 hidden"></div>
+        <div id="emptyIndicator" class="text-center py-8 text-gray-500">Select an LMS file and click Load</div>
+    </main>
+
+    <script>
+        $(document).ready(function () {
+            // State
+            let allData = [];
+            let filteredData = [];
+            let currentPage = 1;
+            let pageSize = 25;
+            let activeStatusFilter = 'all';
+            let tableSearchTerm = '';
+
+            // Helper: get badge class based on alarm text
+            function getBadgeClass(alarmText) {
+                if (!alarmText) return 'badge-other';
+                const text = alarmText.toString().trim().toUpperCase();
+                if (text.includes('L1') || text === 'CHECK L1') return 'badge-l1';
+                if (text.includes('L2') || text === 'CHECK L2') return 'badge-l2';
+                if (text === 'STOP') return 'badge-stop';
+                return 'badge-other';
+            }
+
+            // Load available files
+            function loadFileList() {
+                $.getJSON('/api/archive/files')
+                    .done(files => {
+                        const select = $('#fileSelect');
+                        select.empty();
+                        if (files.length === 0) {
+                            select.append('<option value="">No LMS files found</option>');
+                        } else {
+                            select.append('<option value="">-- Select a file --</option>');
+                            files.forEach(f => select.append(`<option value="${f}">${f}</option>`));
+                        }
+                    })
+                    .fail(() => $('#fileSelect').html('<option value="">Error loading files</option>'));
+            }
+            loadFileList();
+
+            // Load and process file
+            function loadFileData(filename) {
+                if (!filename) return;
+
+                $('#cardsSection').addClass('hidden');
+                $('#tableWrapper').addClass('hidden');
+                $('#emptyIndicator').addClass('hidden');
+                $('#loadingIndicator').removeClass('hidden');
+                $('#errorIndicator').addClass('hidden');
+                $('#recordCount').text('');
+
+                $.getJSON(`/api/archive/data/${encodeURIComponent(filename)}`)
+                    .done(response => {
+                        $('#loadingIndicator').addClass('hidden');
+                        if (response.error) {
+                            $('#errorIndicator').removeClass('hidden').text('Error: ' + response.error);
+                            return;
+                        }
+
+                        allData = response.data;
+                        console.log('Loaded data sample:', allData[0]); // Debug
+
+                        if (allData.length === 0) {
+                            $('#emptyIndicator').removeClass('hidden').text('No data in file');
+                            return;
+                        }
+
+                        $('#cardsSection').removeClass('hidden');
+                        $('#tableWrapper').removeClass('hidden');
+
+                        // Reset filters
+                        activeStatusFilter = 'all';
+                        tableSearchTerm = '';
+                        $('#tableSearchId').val('');
+                        $('.stat-card').removeClass('active');
+                        $('#cardTotal').addClass('active');
+
+                        applyFilters();
+                    })
+                    .fail(xhr => {
+                        $('#loadingIndicator').addClass('hidden');
+                        let msg = 'Failed to load file';
+                        if (xhr.responseJSON?.error) msg = xhr.responseJSON.error;
+                        $('#errorIndicator').removeClass('hidden').text('Error: ' + msg);
+                    });
+            }
+
+            // Calculate card stats
+            function calculateStats() {
+                let total = allData.length;
+                let l1 = 0, l2 = 0, stop = 0;
+                allData.forEach(row => {
+                    const alarm = (row['Alarm Code'] || '').toString().trim().toUpperCase();
+                    if (alarm.includes('L1') || alarm === 'CHECK L1') l1++;
+                    else if (alarm.includes('L2') || alarm === 'CHECK L2') l2++;
+                    else if (alarm === 'STOP') stop++;
+                });
+                $('#textTotal').text(total);
+                $('#textL1').text(l1);
+                $('#textL2').text(l2);
+                $('#textStop').text(stop);
+            }
+
+            // Apply filters
+            function applyFilters() {
+                filteredData = allData.filter(row => {
+                    const id = (row['DCP Name'] || '').toString();
+                    const matchId = !tableSearchTerm || id.toLowerCase().includes(tableSearchTerm.toLowerCase());
+
+                    let matchStatus = true;
+                    if (activeStatusFilter !== 'all' && activeStatusFilter !== null) {
+                        const alarm = (row['Alarm Code'] || '').toString().trim().toUpperCase();
+                        if (activeStatusFilter === 'Check L1') {
+                            matchStatus = alarm.includes('L1') || alarm === 'CHECK L1';
+                        } else if (activeStatusFilter === 'Check L2') {
+                            matchStatus = alarm.includes('L2') || alarm === 'CHECK L2';
+                        } else if (activeStatusFilter === 'STOP') {
+                            matchStatus = alarm === 'STOP';
+                        }
+                    }
+                    return matchId && matchStatus;
+                });
+
+                calculateStats();
+                currentPage = 1;
+                renderTable();
+            }
+
+            // Render table
+            function renderTable() {
+                const thead = $('#tableHead');
+                const tbody = $('#tableBody');
+                const start = (currentPage - 1) * pageSize;
+                const end = start + pageSize;
+                const pageData = filteredData.slice(start, end);
+
+                const columns = ['Date_Time', 'Process / Line No.', 'DCP Name', 'Description', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data', 'Alarm Code', 'Process'];
+
+                let headerRow = '<tr>';
+                columns.forEach(col => headerRow += `<th class="px-4 py-3 text-left">${col}</th>`);
+                headerRow += '</tr>';
+                thead.html(headerRow);
+
+                tbody.empty();
+                if (pageData.length === 0) {
+                    tbody.append('<tr><td colspan="12" class="text-center py-4 text-gray-500">No matching records</td></tr>');
+                } else {
+                    pageData.forEach(row => {
+                        const alarmText = row['Alarm Code'] || '';
+                        const badgeClass = getBadgeClass(alarmText);
+
+                        // Helper to safely get value (show 0 as '0', not empty)
+                        const getVal = (key) => {
+                            const val = row[key];
+                            return (val !== undefined && val !== null) ? val : '';
+                        };
+
+                        let tr = '<tr class="hover:bg-blue-50">';
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${getVal('Date_Time')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${getVal('Process / Line No.')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm font-mono font-bold text-blue-700">${getVal('DCP Name')}</td>`;
+                        tr += `<td class="px-4 py-2 text-sm max-w-xs truncate" title="${getVal('Description')}">${getVal('Description')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('1st data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('2nd data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('3rd data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('4th data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('5th data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center font-semibold">${getVal('Average Data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm"><span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-md status-badge ${badgeClass}">${alarmText}</span></td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${getVal('Process')}</td>`;
+                        tr += '</tr>';
+                        tbody.append(tr);
+                    });
+                }
+
+                updatePagination();
+                $('#recordCount').text(`${filteredData.length} rows (filtered)`);
+            }
+
+            function updatePagination() {
+                const total = filteredData.length;
+                const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+                const end = Math.min(currentPage * pageSize, total);
+                $('#showingStart').text(start);
+                $('#showingEnd').text(end);
+                $('#totalEntries').text(total);
+                const totalPages = Math.ceil(total / pageSize) || 1;
+                $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
+                $('#prevPage').prop('disabled', currentPage === 1);
+                $('#nextPage').prop('disabled', currentPage >= totalPages);
+            }
+
+            // Event Handlers
+            $('#loadBtn').click(() => {
+                const file = $('#fileSelect').val();
+                if (file) loadFileData(file);
+                else alert('Please select a file');
+            });
+
+            $('#tableSearchId').on('input', function () {
+                tableSearchTerm = $(this).val().trim().toLowerCase();
+                applyFilters();
+            });
+
+            $('#pageSize').change(function () {
+                pageSize = parseInt($(this).val());
+                currentPage = 1;
+                renderTable();
+            });
+
+            $('#prevPage').click(() => { if (currentPage > 1) { currentPage--; renderTable(); } });
+            $('#nextPage').click(() => {
+                const totalPages = Math.ceil(filteredData.length / pageSize);
+                if (currentPage < totalPages) { currentPage++; renderTable(); }
+            });
+
+            // Card filtering (using alarm text)
+            $('.stat-card').click(function () {
+                const filterType = $(this).data('filter');
+                const filterValue = $(this).data('value');
+
+                $('.stat-card').removeClass('active');
+                $(this).addClass('active');
+
+                if (filterType === 'all') {
+                    activeStatusFilter = 'all';
+                } else {
+                    activeStatusFilter = filterValue;
+                }
+                applyFilters();
+            });
+        });
+    </script>
+</body>
+
+</html>

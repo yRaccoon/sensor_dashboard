@@ -104,6 +104,38 @@ def load_data():
         sensor_map[section] = items
 
     return sensor_map
+
+@app.route('/api/archive/files')
+def api_archive_files():
+    """Return list of CSV files in data/ that start with 'LMS'"""
+    data_dir = os.path.join(os.path.dirname(__file__), 'data')
+    pattern = os.path.join(data_dir, 'LMS*.csv')
+    files = glob.glob(pattern)
+    # Return just the base filenames
+    filenames = [os.path.basename(f) for f in files]
+    filenames.sort(reverse=True)  # newest first typically
+    return jsonify(filenames)
+
+@app.route('/api/archive/data/<filename>')
+def api_archive_data(filename):
+    if not filename.startswith('LMS') or not filename.endswith('.csv'):
+        return jsonify({'error': 'Invalid filename'}), 400
+    
+    data_dir = os.path.join(os.path.dirname(__file__), 'data')
+    filepath = os.path.join(data_dir, filename)
+    if not os.path.isfile(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    
+    try:
+        # Read CSV, keep Alarm Code as string
+        df = pd.read_csv(filepath, dtype={'Alarm Code': str})
+        df = df.fillna('')
+        data = df.to_dict(orient='records')
+        columns = df.columns.tolist()
+        return jsonify({'columns': columns, 'data': data})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 @app.route('/api/sensor/<sensor_id>/plot')
 def sensor_plot(sensor_id):
     try:
@@ -216,9 +248,14 @@ def sensor_plot(sensor_id):
     except Exception as e:
         print(f"Plot generation error: {e}")
         return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
 @app.route('/')
 def home():
     return render_template('home.html')
+
+@app.route('/archive')
+def archive():
+    return render_template('archive.html')
 
 @app.route('/dashboard')
 def dashboard():

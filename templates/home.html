@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <script>
     tailwind.config = {
       theme: {
@@ -298,13 +298,13 @@
       <h1 class="font-sans font-bold tracking-tight text-accent text-xl">Viewstation</h1>
     </div>
 
-    <div class="flex items-center gap-4">
-      <a href="/dashboard"
-        class="text-accent hover:text-accent-hover transition-colors font-bold underline underline-offset-4">Dashboard</a>
-      <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
-        <span class="text-muted text-sm">Updated:</span>
-        <span id="lastUpdate" class="font-semibold text-fg text-sm">--:--:--</span>
-      </div>
+    <div class="flex items-center gap-2">
+      <a href="/" class="px-4 py-1.5 rounded-full text-sm font-medium transition 
+              bg-accent text-white hover:bg-accent-hover shadow-sm">Home</a>
+      <a href="/dashboard" class="px-4 py-1.5 rounded-full text-sm font-medium transition 
+              border border-gray-300 text-gray-700 hover:bg-gray-100">Dashboard</a>
+      <a href="/archive" class="px-4 py-1.5 rounded-full text-sm font-medium transition 
+              border border-gray-300 text-gray-700 hover:bg-gray-100">Archive</a>
     </div>
   </nav>
 
@@ -657,8 +657,9 @@
         };
       }
 
-      // ---------- Tooltip Logic (unchanged) ----------
+      // Tooltip handlers (place inside your existing script)
       const $tooltip = $('#statTooltip');
+
       function updateTooltipPosition(e) {
         const tw = $tooltip.outerWidth(), th = $tooltip.outerHeight();
         const ww = $(window).width(), wh = $(window).height();
@@ -670,14 +671,125 @@
         $tooltip.css({ left, top });
       }
 
+      // Helper functions (if not already present)
+      function getAccumulatedSumsForCard(cardType) {
+        let processSums = {};
+        let totalSum = 0;
+        allData.forEach(item => {
+          let process = item.process || 'Unknown';
+          let value = 0;
+          if (cardType === 'l1') value = parseInt(item.l1) || 0;
+          else if (cardType === 'l2') value = parseInt(item.l2) || 0;
+          else if (cardType === 'stop') value = parseInt(item.stop) || 0;
+          if (value > 0) {
+            processSums[process] = (processSums[process] || 0) + value;
+            totalSum += value;
+          }
+        });
+        return { processSums, totalSum };
+      }
+
+      function getItemCountsForCard(cardType) {
+        let processCounts = {};
+        let totalCount = 0;
+        allData.forEach(item => {
+          let process = item.process || 'Unknown';
+          let include = false;
+          if (cardType === 'total') include = true;
+          else if (cardType === 'active') {
+            const code = parseInt(item.status_code);
+            include = (code === 0 || code === 1 || code === 2 || code === 3);
+          } else if (cardType === 'stale') {
+            include = (parseInt(item.status_code) === 4);
+          }
+          if (include) {
+            processCounts[process] = (processCounts[process] || 0) + 1;
+            totalCount++;
+          }
+        });
+        return { processCounts, totalCount };
+      }
+
+      // Main tooltip event
       $(document).on('mouseenter', '.stat-card', function (e) {
         const $card = $(this);
         const cardType = $card.data('card-type');
+
         let titleText = '';
         let tooltipHtml = '';
 
-        // (Tooltip content generation same as before – omitted for brevity but keep your existing implementation)
-        // ... (copy your existing tooltip logic here)
+        if (cardType === 'l1') {
+          const { processSums, totalSum } = getAccumulatedSumsForCard('l1');
+          titleText = `⚠️ CHECK L1 Total Counts by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+          const sorted = Object.keys(processSums).sort();
+          if (sorted.length === 0) {
+            tooltipHtml += '<div class="process-item"><span class="process-name">No data</span><span class="process-count">0</span></div>';
+          } else {
+            sorted.forEach(proc => {
+              tooltipHtml += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${processSums[proc]}</span></div>`;
+            });
+          }
+          tooltipHtml += `<div class="total-row"><span class="total-label">📋 TOTAL CHECK L1</span><span class="total-value">${totalSum}</span></div>`;
+        }
+        else if (cardType === 'l2') {
+          const { processSums, totalSum } = getAccumulatedSumsForCard('l2');
+          titleText = `⚠️ CHECK L2 Total Counts by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+          const sorted = Object.keys(processSums).sort();
+          if (sorted.length === 0) {
+            tooltipHtml += '<div class="process-item"><span class="process-name">No data</span><span class="process-count">0</span></div>';
+          } else {
+            sorted.forEach(proc => {
+              tooltipHtml += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${processSums[proc]}</span></div>`;
+            });
+          }
+          tooltipHtml += `<div class="total-row"><span class="total-label">📋 TOTAL CHECK L2</span><span class="total-value">${totalSum}</span></div>`;
+        }
+        else if (cardType === 'stop') {
+          const { processSums, totalSum } = getAccumulatedSumsForCard('stop');
+          titleText = `🛑 STOP Total Counts by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+          const sorted = Object.keys(processSums).sort();
+          if (sorted.length === 0) {
+            tooltipHtml += '<div class="process-item"><span class="process-name">No data</span><span class="process-count">0</span></div>';
+          } else {
+            sorted.forEach(proc => {
+              tooltipHtml += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${processSums[proc]}</span></div>`;
+            });
+          }
+          tooltipHtml += `<div class="total-row"><span class="total-label">📋 TOTAL STOP</span><span class="total-value">${totalSum}</span></div>`;
+        }
+        else if (cardType === 'total') {
+          const { processCounts, totalCount } = getItemCountsForCard('total');
+          titleText = `📊 Total Inventory by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+          const sorted = Object.keys(processCounts).sort();
+          sorted.forEach(proc => {
+            tooltipHtml += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${processCounts[proc]}</span></div>`;
+          });
+          tooltipHtml += `<div class="total-row"><span class="total-label">📋 TOTAL ITEMS</span><span class="total-value">${totalCount}</span></div>`;
+        }
+        else if (cardType === 'active') {
+          const { processCounts, totalCount } = getItemCountsForCard('active');
+          titleText = `✅ ACTIVE Items by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+          const sorted = Object.keys(processCounts).sort();
+          sorted.forEach(proc => {
+            tooltipHtml += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${processCounts[proc]}</span></div>`;
+          });
+          tooltipHtml += `<div class="total-row"><span class="total-label">📋 TOTAL ACTIVE</span><span class="total-value">${totalCount}</span></div>`;
+        }
+        else if (cardType === 'stale') {
+          const { processCounts, totalCount } = getItemCountsForCard('stale');
+          titleText = `⏰ STALE Items by Process`;
+          tooltipHtml = `<h4>${titleText}</h4>`;
+          const sorted = Object.keys(processCounts).sort();
+          sorted.forEach(proc => {
+            tooltipHtml += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${processCounts[proc]}</span></div>`;
+          });
+          tooltipHtml += `<div class="total-row"><span class="total-label">📋 TOTAL STALE</span><span class="total-value">${totalCount}</span></div>`;
+        }
 
         $tooltip.html(tooltipHtml).css({ display: 'block' });
         updateTooltipPosition(e);
@@ -693,6 +805,17 @@
           populateFilters();
           applyFilters();
           updateTimestamp();
+
+          // --- Set Total Inventory card as active by default ---
+          $('.stat-card').removeClass('active');
+          // Add active class to Total Inventory card
+          $('#cardTotal').addClass('active');
+          // Ensure table is visible
+          $('#tableWrapper').removeClass('hidden');
+          // Reset filter states
+          activeStatusFilter = 'all';
+          activeAccumulatedFilter = null;
+          applyFilters();
         }).fail(function (error) {
           console.error('Error loading data:', error);
         });
