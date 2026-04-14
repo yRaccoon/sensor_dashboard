@@ -35,6 +35,7 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
             user-select: none;
+            position: relative;
         }
 
         .stat-card:hover {
@@ -44,6 +45,69 @@
 
         .stat-card.active {
             box-shadow: 0 0 0 2px #dc2626;
+        }
+
+        /* Tooltip Styles */
+        .stat-tooltip {
+            position: fixed;
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #111827;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-left: 3px solid #dc2626;
+            max-width: 340px;
+            min-width: 280px;
+        }
+
+        .stat-tooltip h4 {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 4px;
+        }
+
+        .stat-tooltip .process-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.85rem;
+        }
+
+        .stat-tooltip .process-name {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .stat-tooltip .process-count {
+            font-weight: 600;
+            color: #dc2626;
+        }
+
+        .stat-tooltip .total-row {
+            border-top: 1px solid #e5e7eb;
+            margin-top: 6px;
+            padding-top: 6px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-tooltip .total-label {
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .stat-tooltip .total-value {
+            font-weight: 800;
+            color: #dc2626;
+            font-size: 1rem;
         }
 
         .table-container {
@@ -132,25 +196,28 @@
     </nav>
 
     <main class="p-6 max-w-7xl mx-auto">
-        <!-- File Selector -->
+        <!-- Date Range Selector -->
         <div class="bg-white rounded-lg shadow-md border border-blue-200 p-4 mb-6">
-            <div class="flex items-center gap-4">
-                <label class="text-sm font-medium text-gray-700">Select LMS File:</label>
-                <select id="fileSelect"
-                    class="border border-gray-300 rounded px-3 py-2 text-sm bg-white w-64 focus:outline-none focus:ring-2 focus:ring-accent">
-                    <option value="">-- Loading files --</option>
-                </select>
-                <button id="loadBtn"
-                    class="bg-accent text-white px-4 py-2 rounded text-sm hover:bg-accent-hover transition">Load
-                    Data</button>
+            <div class="flex flex-wrap items-center gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Start</label>
+                    <input type="datetime-local" id="dateStart"
+                        class="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-accent">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">End</label>
+                    <input type="datetime-local" id="dateEnd"
+                        class="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-accent">
+                </div>
+                <button id="loadRangeBtn"
+                    class="bg-accent text-white px-5 py-2 rounded text-sm hover:bg-accent-hover transition mt-5">Apply</button>
                 <span id="recordCount" class="text-sm text-gray-500 ml-auto"></span>
             </div>
         </div>
 
-        <!-- Summary Cards (4 cards) -->
+        <!-- Summary Cards (4 cards) reordered -->
         <div id="cardsSection" class="hidden">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-
                 <!-- Total Alarms -->
                 <div id="cardTotal"
                     class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
@@ -164,33 +231,9 @@
                     <span class="text-2xl font-bold text-gray-800" id="textTotal">0</span>
                     <span class="text-sm text-gray-500 font-medium">Total Alarms</span>
                 </div>
-                <!-- Check L1 -->
-                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-                    data-filter="status" data-value="Check L1">
-                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
-                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <span class="text-2xl font-bold text-yellow-600" id="textL1">0</span>
-                    <span class="text-sm text-gray-500 font-medium">Check L1</span>
-                </div>
-                <!-- Check L2 -->
-                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-                    data-filter="status" data-value="Check L2">
-                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2">
-                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <span class="text-2xl font-bold text-orange-600" id="textL2">0</span>
-                    <span class="text-sm text-gray-500 font-medium">Check L2</span>
-                </div>
                 <!-- Stop -->
                 <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-                    data-filter="status" data-value="STOP">
+                    data-filter="status" data-value="STOP" data-card-type="stop">
                     <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2">
                         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -202,6 +245,30 @@
                     <span class="text-2xl font-bold text-red-600" id="textStop">0</span>
                     <span class="text-sm text-gray-500 font-medium">Stop</span>
                 </div>
+                <!-- Check L2 -->
+                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+                    data-filter="status" data-value="Check L2" data-card-type="l2">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-orange-600" id="textL2">0</span>
+                    <span class="text-sm text-gray-500 font-medium">Check L2</span>
+                </div>
+                <!-- Check L1 -->
+                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+                    data-filter="status" data-value="Check L1" data-card-type="l1">
+                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-yellow-600" id="textL1">0</span>
+                    <span class="text-sm text-gray-500 font-medium">Check L1</span>
+                </div>
             </div>
         </div>
 
@@ -210,8 +277,8 @@
             <div class="flex flex-wrap gap-4 mb-4 items-center justify-between border-b pb-4">
                 <div class="flex gap-4 items-center">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Search DCP Name</label>
-                        <input type="text" id="tableSearchId" placeholder="Enter ID..."
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Search (ID or Description)</label>
+                        <input type="text" id="tableSearch" placeholder="Enter ID or description..."
                             class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
                     </div>
                 </div>
@@ -219,8 +286,8 @@
                     <label class="block text-xs font-medium text-gray-500 mb-1">Show entries</label>
                     <select id="pageSize"
                         class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
-                        <option value="10">10</option>
-                        <option value="25" selected>25</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </select>
@@ -253,8 +320,11 @@
         <!-- Indicators -->
         <div id="loadingIndicator" class="text-center py-8 text-gray-500 hidden">Loading file data...</div>
         <div id="errorIndicator" class="text-center py-8 text-red-500 hidden"></div>
-        <div id="emptyIndicator" class="text-center py-8 text-gray-500">Select an LMS file and click Load</div>
+        <div id="emptyIndicator" class="text-center py-8 text-gray-500">Select a date range and click Apply</div>
     </main>
+
+    <!-- Tooltip container -->
+    <div id="statTooltip" class="stat-tooltip"></div>
 
     <script>
         $(document).ready(function () {
@@ -262,9 +332,94 @@
             let allData = [];
             let filteredData = [];
             let currentPage = 1;
-            let pageSize = 25;
+            let pageSize = 10;
             let activeStatusFilter = 'all';
             let tableSearchTerm = '';
+
+            // Set default datetime range (yesterday 7am to today 7am)
+            function setDefaultDateTime() {
+                const now = new Date();
+                const today7am = new Date(now);
+                today7am.setHours(7, 0, 0, 0);
+
+                const yesterday7am = new Date(today7am);
+                yesterday7am.setDate(yesterday7am.getDate() - 1);
+
+                const format = (d) => {
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const hours = String(d.getHours()).padStart(2, '0');
+                    const minutes = String(d.getMinutes()).padStart(2, '0');
+                    return `${year}-${month}-${day}T${hours}:${minutes}`;
+                };
+
+                $('#dateStart').val(format(yesterday7am));
+                $('#dateEnd').val(format(today7am));
+            }
+            setDefaultDateTime();
+
+            // Tooltip helpers
+            const $tooltip = $('#statTooltip');
+            function updateTooltipPosition(e) {
+                const tw = $tooltip.outerWidth(), th = $tooltip.outerHeight();
+                const ww = $(window).width(), wh = $(window).height();
+                let left = e.clientX + 15, top = e.clientY + 15;
+                if (left + tw > ww - 10) left = e.clientX - tw - 15;
+                if (left < 10) left = 10;
+                if (top + th > wh - 10) top = e.clientY - th - 15;
+                if (top < 10) top = 10;
+                $tooltip.css({ left, top });
+            }
+
+            function getProcessBreakdown(filterValue) {
+                const counts = {};
+                let total = 0;
+                allData.forEach(row => {
+                    const alarm = (row['Alarm Code'] || '').toString().trim().toUpperCase();
+                    let match = false;
+                    if (filterValue === 'STOP') match = (alarm === 'STOP');
+                    else if (filterValue === 'Check L2') match = (alarm.includes('L2') || alarm === 'CHECK L2');
+                    else if (filterValue === 'Check L1') match = (alarm.includes('L1') || alarm === 'CHECK L1');
+                    else if (filterValue === 'all') match = true;
+                    if (match) {
+                        const proc = row['Process'] || 'Unknown';
+                        counts[proc] = (counts[proc] || 0) + 1;
+                        total++;
+                    }
+                });
+                return { counts, total };
+            }
+
+            $(document).on('mouseenter', '.stat-card', function (e) {
+                const $card = $(this);
+                const filter = $card.data('filter');
+                const value = $card.data('value');
+                let title = '';
+                if (filter === 'all') title = 'Total Alarms';
+                else if (value === 'STOP') title = 'Stop Alarms';
+                else if (value === 'Check L2') title = 'Check L2 Alarms';
+                else if (value === 'Check L1') title = 'Check L1 Alarms';
+                else return;
+
+                const filterValue = filter === 'all' ? 'all' : value;
+                const { counts, total } = getProcessBreakdown(filterValue);
+                let html = `<h4>${title} by Process</h4>`;
+                const sorted = Object.keys(counts).sort();
+                if (sorted.length === 0) {
+                    html += '<div class="process-item"><span class="process-name">No data</span><span class="process-count">0</span></div>';
+                } else {
+                    sorted.forEach(proc => {
+                        html += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${counts[proc]}</span></div>`;
+                    });
+                }
+                html += `<div class="total-row"><span class="total-label">📋 TOTAL</span><span class="total-value">${total}</span></div>`;
+                $tooltip.html(html).css({ display: 'block' });
+                updateTooltipPosition(e);
+            });
+
+            $(document).on('mousemove', '.stat-card', updateTooltipPosition);
+            $(document).on('mouseleave', '.stat-card', () => $tooltip.css('display', 'none'));
 
             // Helper: get badge class based on alarm text
             function getBadgeClass(alarmText) {
@@ -276,26 +431,34 @@
                 return 'badge-other';
             }
 
-            // Load available files
-            function loadFileList() {
-                $.getJSON('/api/archive/files')
-                    .done(files => {
-                        const select = $('#fileSelect');
-                        select.empty();
-                        if (files.length === 0) {
-                            select.append('<option value="">No LMS files found</option>');
-                        } else {
-                            select.append('<option value="">-- Select a file --</option>');
-                            files.forEach(f => select.append(`<option value="${f}">${f}</option>`));
-                        }
-                    })
-                    .fail(() => $('#fileSelect').html('<option value="">Error loading files</option>'));
+            // Format datetime to 12-hour with AM/PM
+            function formatDateTime12h(dateTimeStr) {
+                if (!dateTimeStr) return '';
+                let date;
+                if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/.test(dateTimeStr)) {
+                    const parts = dateTimeStr.split(' ');
+                    const dParts = parts[0].split('/');
+                    const tParts = parts[1].split(':');
+                    date = new Date(parseInt(dParts[2]), parseInt(dParts[1]) - 1, parseInt(dParts[0]), parseInt(tParts[0]), parseInt(tParts[1]));
+                }
+                else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateTimeStr)) {
+                    date = new Date(dateTimeStr.replace(' ', 'T'));
+                }
+                else {
+                    return dateTimeStr;
+                }
+                if (isNaN(date.getTime())) return dateTimeStr;
+                return date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, month: 'numeric', day: 'numeric', year: 'numeric' });
             }
-            loadFileList();
 
-            // Load and process file
-            function loadFileData(filename) {
-                if (!filename) return;
+            // Load data by range
+            function loadDataByRange() {
+                const start = $('#dateStart').val();
+                const end = $('#dateEnd').val();
+                if (!start || !end) {
+                    alert('Please select both start and end datetime');
+                    return;
+                }
 
                 $('#cardsSection').addClass('hidden');
                 $('#tableWrapper').addClass('hidden');
@@ -304,7 +467,7 @@
                 $('#errorIndicator').addClass('hidden');
                 $('#recordCount').text('');
 
-                $.getJSON(`/api/archive/data/${encodeURIComponent(filename)}`)
+                $.getJSON('/api/archive/data_by_range', { start: start, end: end })
                     .done(response => {
                         $('#loadingIndicator').addClass('hidden');
                         if (response.error) {
@@ -313,10 +476,8 @@
                         }
 
                         allData = response.data;
-                        console.log('Loaded data sample:', allData[0]); // Debug
-
                         if (allData.length === 0) {
-                            $('#emptyIndicator').removeClass('hidden').text('No data in file');
+                            $('#emptyIndicator').removeClass('hidden').text('No data in selected range');
                             return;
                         }
 
@@ -326,7 +487,7 @@
                         // Reset filters
                         activeStatusFilter = 'all';
                         tableSearchTerm = '';
-                        $('#tableSearchId').val('');
+                        $('#tableSearch').val('');
                         $('.stat-card').removeClass('active');
                         $('#cardTotal').addClass('active');
 
@@ -334,7 +495,7 @@
                     })
                     .fail(xhr => {
                         $('#loadingIndicator').addClass('hidden');
-                        let msg = 'Failed to load file';
+                        let msg = 'Failed to load data';
                         if (xhr.responseJSON?.error) msg = xhr.responseJSON.error;
                         $('#errorIndicator').removeClass('hidden').text('Error: ' + msg);
                     });
@@ -360,20 +521,23 @@
             function applyFilters() {
                 filteredData = allData.filter(row => {
                     const id = (row['DCP Name'] || '').toString();
-                    const matchId = !tableSearchTerm || id.toLowerCase().includes(tableSearchTerm.toLowerCase());
+                    const desc = (row['Description'] || '').toString();
+                    const matchSearch = !tableSearchTerm ||
+                        id.toLowerCase().includes(tableSearchTerm) ||
+                        desc.toLowerCase().includes(tableSearchTerm);
 
                     let matchStatus = true;
-                    if (activeStatusFilter !== 'all' && activeStatusFilter !== null) {
+                    if (activeStatusFilter !== 'all') {
                         const alarm = (row['Alarm Code'] || '').toString().trim().toUpperCase();
-                        if (activeStatusFilter === 'Check L1') {
-                            matchStatus = alarm.includes('L1') || alarm === 'CHECK L1';
+                        if (activeStatusFilter === 'STOP') {
+                            matchStatus = (alarm === 'STOP');
                         } else if (activeStatusFilter === 'Check L2') {
                             matchStatus = alarm.includes('L2') || alarm === 'CHECK L2';
-                        } else if (activeStatusFilter === 'STOP') {
-                            matchStatus = alarm === 'STOP';
+                        } else if (activeStatusFilter === 'Check L1') {
+                            matchStatus = alarm.includes('L1') || alarm === 'CHECK L1';
                         }
                     }
-                    return matchId && matchStatus;
+                    return matchSearch && matchStatus;
                 });
 
                 calculateStats();
@@ -381,7 +545,7 @@
                 renderTable();
             }
 
-            // Render table
+            // Render table - Alarm Code now right after Description
             function renderTable() {
                 const thead = $('#tableHead');
                 const tbody = $('#tableBody');
@@ -389,7 +553,8 @@
                 const end = start + pageSize;
                 const pageData = filteredData.slice(start, end);
 
-                const columns = ['Date_Time', 'Process / Line No.', 'DCP Name', 'Description', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data', 'Alarm Code', 'Process'];
+                // New column order: Date_Time, DCP Name, Description, Alarm Code, 1st data, 2nd data, 3rd data, 4th data, 5th data, Average Data
+                const columns = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
 
                 let headerRow = '<tr>';
                 columns.forEach(col => headerRow += `<th class="px-4 py-3 text-left">${col}</th>`);
@@ -398,31 +563,24 @@
 
                 tbody.empty();
                 if (pageData.length === 0) {
-                    tbody.append('<tr><td colspan="12" class="text-center py-4 text-gray-500">No matching records</td></tr>');
+                    tbody.append('<tr><td colspan="10" class="text-center py-4 text-gray-500">No matching records</td></tr>');
                 } else {
                     pageData.forEach(row => {
                         const alarmText = row['Alarm Code'] || '';
                         const badgeClass = getBadgeClass(alarmText);
-
-                        // Helper to safely get value (show 0 as '0', not empty)
-                        const getVal = (key) => {
-                            const val = row[key];
-                            return (val !== undefined && val !== null) ? val : '';
-                        };
+                        const getVal = (key) => (row[key] !== undefined && row[key] !== null) ? row[key] : '';
 
                         let tr = '<tr class="hover:bg-blue-50">';
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${getVal('Date_Time')}</td>`;
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${getVal('Process / Line No.')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${formatDateTime12h(getVal('Date_Time'))}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm font-mono font-bold text-blue-700">${getVal('DCP Name')}</td>`;
                         tr += `<td class="px-4 py-2 text-sm max-w-xs truncate" title="${getVal('Description')}">${getVal('Description')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm"><span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-md status-badge ${badgeClass}">${alarmText}</span></td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('1st data')}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('2nd data')}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('3rd data')}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('4th data')}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('5th data')}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center font-semibold">${getVal('Average Data')}</td>`;
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm"><span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-md status-badge ${badgeClass}">${alarmText}</span></td>`;
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${getVal('Process')}</td>`;
                         tr += '</tr>';
                         tbody.append(tr);
                     });
@@ -446,13 +604,9 @@
             }
 
             // Event Handlers
-            $('#loadBtn').click(() => {
-                const file = $('#fileSelect').val();
-                if (file) loadFileData(file);
-                else alert('Please select a file');
-            });
+            $('#loadRangeBtn').click(loadDataByRange);
 
-            $('#tableSearchId').on('input', function () {
+            $('#tableSearch').on('input', function () {
                 tableSearchTerm = $(this).val().trim().toLowerCase();
                 applyFilters();
             });
@@ -469,7 +623,7 @@
                 if (currentPage < totalPages) { currentPage++; renderTable(); }
             });
 
-            // Card filtering (using alarm text)
+            // Card filtering
             $('.stat-card').click(function () {
                 const filterType = $(this).data('filter');
                 const filterValue = $(this).data('value');

@@ -355,35 +355,7 @@
         <span class="text-sm text-gray-500 font-medium">Stale</span>
       </div>
 
-      <!-- Check L1 -->
-      <div
-        class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-        data-filter="accumulated" data-value="l1" data-card-type="l1">
-        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
-          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-            </path>
-          </svg>
-        </div>
-        <span class="text-2xl font-bold text-yellow-600" id="textL1">0</span>
-        <span class="text-sm text-gray-500 font-medium">Check L1</span>
-      </div>
-
-      <!-- Check L2 -->
-      <div
-        class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-        data-filter="accumulated" data-value="l2" data-card-type="l2">
-        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2">
-          <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-        <span class="text-2xl font-bold text-orange-600" id="textL2">0</span>
-        <span class="text-sm text-gray-500 font-medium">Check L2</span>
-      </div>
-
+      
       <!-- Stop -->
       <div
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
@@ -398,6 +370,34 @@
         </div>
         <span class="text-2xl font-bold text-red-600" id="textStop">0</span>
         <span class="text-sm text-gray-500 font-medium">Stop</span>
+      </div>
+      <!-- Check L2 -->
+      <div
+        class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+        data-filter="accumulated" data-value="l2" data-card-type="l2">
+        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <span class="text-2xl font-bold text-orange-600" id="textL2">0</span>
+        <span class="text-sm text-gray-500 font-medium">Check L2</span>
+      </div>
+
+      <!-- Check L1 -->
+      <div
+        class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+        data-filter="accumulated" data-value="l1" data-card-type="l1">
+        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+            </path>
+          </svg>
+        </div>
+        <span class="text-2xl font-bold text-yellow-600" id="textL1">0</span>
+        <span class="text-sm text-gray-500 font-medium">Check L1</span>
       </div>
     </div>
 
@@ -422,8 +422,8 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-500 mb-1">Search DCP Name</label>
-              <input type="text" id="tableSearchId" placeholder="Enter ID..."
+              <label class="block text-xs font-medium text-gray-500 mb-1">Search (ID or Desc)</label>
+              <input type="text" id="tableSearchId" placeholder="Enter ID or description..."
                 class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
 
             </div>
@@ -452,8 +452,8 @@
                 <th class="px-4 py-3 text-left">🔢 Line</th>
                 <th class="px-4 py-3 text-left">📊 Status</th>
                 <th class="px-4 py-3 text-center">🛑 Stop Cnt</th>
-                <th class="px-4 py-3 text-center">⚠️ L1</th>
                 <th class="px-4 py-3 text-center">⚠️ L2</th>
+                <th class="px-4 py-3 text-center">⚠️ L1</th>
                 <th class="px-4 py-3 text-center rounded-tr-lg">📈 Average</th>
               </tr>
             </thead>
@@ -598,6 +598,8 @@
       let activeStatusFilter = 'all';
       let activeAccumulatedFilter = null;
       let tableSearchTerm = '';
+      let sortBy = null;          // 'stop', 'l1', 'l2', or null
+      let sortOrder = 'desc';     // 'asc' or 'desc'
 
       // Sensor graph state
       let currentSensor = null;
@@ -815,6 +817,7 @@
           // Reset filter states
           activeStatusFilter = 'all';
           activeAccumulatedFilter = null;
+          sortBy = null;
           applyFilters();
         }).fail(function (error) {
           console.error('Error loading data:', error);
@@ -863,7 +866,9 @@
         filteredData = allData.filter(item => {
           const matchLoc = (locFilter === 'all' || item.loc === locFilter);
           const matchProc = (procFilter === 'all' || item.process === procFilter);
-          const matchId = !tableSearchTerm || (item.id && item.id.toLowerCase().includes(tableSearchTerm));
+          const matchId = !tableSearchTerm || 
+            (item.id && item.id.toLowerCase().includes(tableSearchTerm)) ||
+            (item.desc && item.desc.toLowerCase().includes(tableSearchTerm));
 
           let matchStatus = true;
           if (activeStatusFilter === 'active') {
@@ -884,6 +889,19 @@
 
           return matchLoc && matchProc && matchId && matchStatus && matchAccumulated;
         });
+
+        // Apply sorting if set
+        if (sortBy) {
+          filteredData.sort((a, b) => {
+            let valA = parseInt(a[sortBy]) || 0;
+            let valB = parseInt(b[sortBy]) || 0;
+            if (sortOrder === 'desc') {
+              return valB - valA;
+            } else {
+              return valA - valB;
+            }
+          });
+        }
 
         calculateStats();
         currentPage = 1;
@@ -908,9 +926,9 @@
                             <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="process-pill">${item.process || 'N/A'}</span></td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600"><span class="font-mono">${item.line_no || 'N/A'}</span></td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-md status-badge ${getStatusColor(item.status_code)}">${getStatusText(item.status_code)}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-gray-700">${item.stop || 0}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-amber-700 font-bold">${item.l1 || 0}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-orange-700 font-bold">${item.l2 || 0}</span></td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-red-700">${item.stop || 0}</span></td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-amber-700 font-bold">${item.l2 || 0}</span></td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-orange-700 font-bold">${item.l1 || 0}</span></td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-gray-700 font-semibold">${item.average || 0}</span></td>
                         </tr>
                     `;
@@ -1077,6 +1095,7 @@
           $(this).toggleClass('active');
           activeAccumulatedFilter = null;
           activeStatusFilter = 'all';
+          sortBy = null;
           $('.stat-card[data-filter="status"], .stat-card[data-filter="accumulated"]').removeClass('active');
           applyFilters();
           return;
@@ -1091,17 +1110,30 @@
           if ($(this).hasClass('active')) {
             $(this).removeClass('active');
             activeAccumulatedFilter = null;
+            sortBy = null;
           } else {
             $('.stat-card[data-filter="accumulated"]').removeClass('active');
             $('.stat-card[data-filter="status"]').removeClass('active');
             $(this).addClass('active');
             activeAccumulatedFilter = filterValue;
             activeStatusFilter = 'all';
+            // Set sorting based on card type
+            if (cardType === 'stop') {
+              sortBy = 'stop';
+              sortOrder = 'desc';
+            } else if (cardType === 'l1') {
+              sortBy = 'l1';
+              sortOrder = 'desc';
+            } else if (cardType === 'l2') {
+              sortBy = 'l2';
+              sortOrder = 'desc';
+            }
           }
           applyFilters();
         } else if (filterType === 'status') {
           $('.stat-card[data-filter="accumulated"]').removeClass('active');
           activeAccumulatedFilter = null;
+          sortBy = null; // reset sorting for status cards
           if ($(this).hasClass('active')) {
             $(this).removeClass('active');
             activeStatusFilter = 'all';
@@ -1121,14 +1153,6 @@
           const sensorData = allData.find(item => item.id === idCell);
           const description = sensorData ? sensorData.desc : idCell;
           openSensorGraph(idCell, description);
-        }
-      });
-
-      // Graph section search by ID (press Enter)
-      $('#graphSensorSearch').on('keypress', function (e) {
-        if (e.which === 13) {
-          const searchId = $(this).val().trim();
-          if (searchId) performGraphSearch(searchId);
         }
       });
 

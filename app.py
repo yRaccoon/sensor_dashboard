@@ -2,7 +2,7 @@ import os
 import glob
 import io
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify, request
 import pandas as pd
 from collections import defaultdict
@@ -111,9 +111,8 @@ def api_archive_files():
     data_dir = os.path.join(os.path.dirname(__file__), 'data')
     pattern = os.path.join(data_dir, 'LMS*.csv')
     files = glob.glob(pattern)
-    # Return just the base filenames
     filenames = [os.path.basename(f) for f in files]
-    filenames.sort(reverse=True)  # newest first typically
+    filenames.sort(reverse=True)
     return jsonify(filenames)
 
 @app.route('/api/archive/data/<filename>')
@@ -127,7 +126,6 @@ def api_archive_data(filename):
         return jsonify({'error': 'File not found'}), 404
     
     try:
-        # Read CSV, keep Alarm Code as string
         df = pd.read_csv(filepath, dtype={'Alarm Code': str})
         df = df.fillna('')
         data = df.to_dict(orient='records')
@@ -135,7 +133,104 @@ def api_archive_data(filename):
         return jsonify({'columns': columns, 'data': data})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
+@app.route('/api/archive/data_by_range')
+def api_archive_data_by_range():
+    """Load LMS files that overlap with the given datetime range."""
+    start_str = request.args.get('start')
+    end_str = request.args.get('end')
+    if not start_str or not end_str:
+        return jsonify({'error': 'start and end parameters are required'}), 400
+
+    try:
+        start_dt = datetime.fromisoformat(start_str)
+        end_dt = datetime.fromisoformat(end_str)
+    except ValueError:
+        return jsonify({'error': 'Invalid datetime format'}), 400
+
+    if start_dt >= end_dt:
+        return jsonify({'error': 'start must be before end'}), 400
+
+    data_dir = os.path.join(os.path.dirname(__file__), 'data')
+    all_files = glob.glob(os.path.join(data_dir, 'LMS*.csv'))
+
+    # Determine which files to load based on their defined time spans
+    files_to_load = []
+    for f in all_files:
+        base = os.path.basename(f)
+        if not base.startswith('LMS') or not base.endswith('.csv'):
+            continue
+        # Expected format: LMS_YYYYMMDD_DS.csv or LMS_YYYYMMDD_NS.csv
+        parts = base.replace('.csv', '').split('_')
+        if len(parts) < 3:
+            continue
+        date_str = parts[1]  # YYYYMMDD
+        shift = parts[2]     # DS or NS
+        try:
+            file_date = datetime.strptime(date_str, '%Y%m%d')
+        except ValueError:
+            continue
+
+        if shift == 'DS':
+            file_start = file_date.replace(hour=7, minute=0, second=0)
+            file_end = file_date.replace(hour=19, minute=0, second=0)
+        elif shift == 'NS':
+            file_start = file_date.replace(hour=19, minute=0, second=0)
+            file_end = file_date.replace(hour=7, minute=0, second=0) + timedelta(days=1)
+        else:
+            continue
+
+        # Check if interval overlaps with [start_dt, end_dt]
+        if file_start <= end_dt and file_end >= start_dt:
+            files_to_load.append(f)
+
+    if not files_to_load:
+        return jsonify({'error': 'No LMS files cover the selected time range'}), 404
+
+    # Load and combine all relevant files
+    dfs = []
+    for f in files_to_load:
+        try:
+            df = pd.read_csv(f, dtype={'Alarm Code': str})
+            dfs.append(df)
+        except Exception as e:
+            print(f"Error reading {f}: {e}")
+
+    if not dfs:
+        return jsonify({'error': 'Could not read any CSV files'}), 500
+
+    combined = pd.concat(dfs, ignore_index=True)
+    combined = combined.fillna('')
+
+    # Parse Date_Time column (handles both formats)
+    def parse_date_time(val):
+        if pd.isna(val) or val == '':
+            return pd.NaT
+        val_str = str(val).strip()
+        # Try format "dd/mm/yyyy HH:MM"
+        try:
+            return datetime.strptime(val_str, '%d/%m/%Y %H:%M')
+        except ValueError:
+            pass
+        # Try format "yyyy-mm-dd HH:MM:SS"
+        try:
+            return datetime.strptime(val_str, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            pass
+        return pd.NaT
+
+    combined['_dt'] = combined['Date_Time'].apply(parse_date_time)
+    combined = combined.dropna(subset=['_dt'])
+
+    # Filter by actual date range
+    combined = combined[(combined['_dt'] >= start_dt) & (combined['_dt'] <= end_dt)]
+    combined = combined.sort_values('_dt')
+    combined = combined.drop('_dt', axis=1)
+
+    data = combined.to_dict(orient='records')
+    columns = combined.columns.tolist()
+    return jsonify({'columns': columns, 'data': data})
+
 @app.route('/api/sensor/<sensor_id>/plot')
 def sensor_plot(sensor_id):
     try:
@@ -205,26 +300,44 @@ def sensor_plot(sensor_id):
         if combined.empty:
             return jsonify({'error': 'No data in selected time range'}), 404
         
+        # Determine axis limits
         x_min = combined['date_time'].min()
         x_max = combined['date_time'].max()
         if start_dt:
             x_min = start_dt
         if end_dt:
             x_max = end_dt
-        
+
+        # Compute duration for label
+        duration = x_max - x_min
+        days = duration.days
+        hours = duration.seconds // 3600
+        minutes = (duration.seconds % 3600) // 60
+
+        duration_parts = []
+        if days > 0:
+            duration_parts.append(f"{days} day{'s' if days != 1 else ''}")
+        if hours > 0:
+            duration_parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+        if minutes > 0 and days == 0:
+            duration_parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+        duration_str = ', '.join(duration_parts) if duration_parts else '0 minutes'
+
+        start_label = x_min.strftime('%Y-%m-%d %H:%M')
+        end_label = x_max.strftime('%Y-%m-%d %H:%M')
+        xlabel_text = f"Time: {start_label} to {end_label}   |   Duration: {duration_str}"
+
         plt.figure(figsize=(12, 6))
         plt.plot(combined['date_time'], combined['value1'], color='#2563eb', linewidth=2)
         plt.axhline(y=5, color='#eab308', linestyle='--', linewidth=2)
         plt.axhline(y=20, color='#dc2626', linestyle='--', linewidth=2)
         plt.ylim(0, 100)
-        plt.xlabel('Time')
-        plt.ylabel('Value')
+        plt.xlabel(xlabel_text)
         plt.title(description)
-        
+
         ax = plt.gca()
         ax.set_xlim(x_min, x_max)
-        
-        # Adaptive tick locator
+
         span_days = (x_max - x_min).total_seconds() / (24 * 3600)
         if span_days <= 1:
             ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
@@ -232,9 +345,9 @@ def sensor_plot(sensor_id):
             ax.xaxis.set_major_locator(mdates.DayLocator())
         else:
             ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-        
+
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))
-        plt.xticks(rotation=45, ha='right')
+        plt.xticks(rotation=90, ha='right')
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         
