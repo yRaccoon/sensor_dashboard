@@ -20,7 +20,7 @@
           colors: {
             bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
             'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827',
-            status: { activeCount: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#6b7280', unknown: '#9ca3af' }
+            status: { activeCount: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#ff00d0', unknown: '#9ca3af' }
           }
         }
       }
@@ -65,7 +65,7 @@
     }
 
     .status-stale {
-      background: #6b7280;
+      background: #ff00d0;
     }
 
     .status-unknown {
@@ -183,13 +183,25 @@
     .navbar-text {
       font-size: 1rem;
     }
+
+    .date-pill {
+      background: #dc2626;
+      border: 1px solid #b91c1c;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 0.5rem 1.5rem;
+      border-radius: 5px;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 0.3px;
+    }
   </style>
 </head>
 
 <body class="bg-bg text-fg min-h-screen overflow-hidden">
 
-  <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
-    <div class="flex items-center gap-3">
+  <nav class="bg-card border-b border-border px-6 py-3 flex items-center justify-between shadow-sm">
+    <!-- Left: Logo + Title -->
+    <div class="flex items-center gap-3 w-1/4">
       <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -202,15 +214,18 @@
       <h1 class="font-sans font-bold tracking-tight text-accent navbar-title">Viewstation Dashboard</h1>
     </div>
 
-    <div class="flex items-center gap-6 text-base">
-      <!-- Navigation Link to Home -->
-      <a href="/"
-        class="text-accent hover:text-accent-hover transition-colors font-bold underline underline-offset-4">Home</a>
-
-      <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
-        <span class="text-muted navbar-text">Updated:</span>
-        <span id="lastUpdate" class="font-semibold text-fg navbar-text">--:--:--</span>
+    <!-- Center: Date display (replaces time, placed in the middle) -->
+    <div class="flex-1 flex justify-center">
+      <div id="currentDateDisplay" class="date-pill text-lg shadow-sm">
+        <!-- Will be populated by JS -->
       </div>
+    </div>
+
+    <!-- Right: Home link + Status counts  -->
+    <div class="flex items-center gap-6 text-base w-1/4 justify-end">
+      <!-- Navigation Link to Home -->
+      <a href="/" class="px-4 py-1.5 rounded-full text-sm font-medium transition 
+              bg-accent text-white hover:bg-accent-hover shadow-sm">Home</a>
 
       <div class="flex items-center gap-4 px-2">
         <div class="flex items-center gap-1.5">
@@ -223,21 +238,21 @@
         </div>
 
         <div class="w-px h-6 bg-gray-300 mx-1"></div>
-
+        <div class="flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
+          <span id="checkL2Count" class="font-bold text-status-warn status-count-number">0</span>
+        </div>
         <div class="flex items-center gap-1.5">
           <div class="w-2.5 h-2.5 rounded-sm" style="background-color: #eab308;"></div>
           <span id="checkL1Count" class="font-bold"
             style="color: #eab308; font-size: 1.5rem; font-weight: bold;">0</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
-          <span id="checkL2Count" class="font-bold text-status-warn status-count-number">0</span>
-        </div>
-        <div class="flex items-center gap-1.5">
           <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
           <span id="stopCount" class="font-bold text-status-critical status-count-number">0</span>
         </div>
       </div>
+    </div>
   </nav>
 
   <main class="p-3 h-[calc(100vh-56px)] overflow-auto">
@@ -264,18 +279,11 @@
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="wcs-container"></div>
       </div>
 
-      <div class="col-span-1 section-card rounded-lg overflow-hidden">
+      <div class="col-span-2 section-card rounded-lg overflow-hidden">
         <div class="table-header px-3 py-2">
           <h2 class="font-sans font-bold uppercase tracking-wider">AOI</h2>
         </div>
         <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="aoi-container"></div>
-      </div>
-
-      <div class="col-span-1 section-card rounded-lg overflow-hidden">
-        <div class="table-header px-3 py-2">
-          <h2 class="font-sans font-bold uppercase tracking-wider">S10, S20, S30</h2>
-        </div>
-        <div class="p-2 overflow-auto max-h-[calc(50vh-80px)]" id="smachine-container"></div>
       </div>
 
       <div class="col-span-12 section-card rounded-lg overflow-hidden">
@@ -296,6 +304,19 @@
       let DATA_MAP = {};
       let lineItemsMap = {};
 
+      // --- Date display setup ---
+      function updateDateDisplay() {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const year = now.getFullYear();
+        const dateStr = `${month}/${day}/${year}`;
+        $('#currentDateDisplay').text(dateStr);
+      }
+      updateDateDisplay();
+      // Update date at midnight (optional)
+      setInterval(updateDateDisplay, 60000); // check every minute, updates if day changes
+
       function getLinePrefix(lineName) {
         const match = lineName.match(/^(AL|NL)/);
         return match ? match[0] : '';
@@ -307,6 +328,7 @@
         return 0;
       }
 
+      // This function is kept but no longer used for smachine section
       function sortSMachineItems(items) {
         return items.sort((a, b) => {
           const lineA = a.line_no;
@@ -336,7 +358,7 @@
         if (code === 1) return '#eab308';      // CHECK L1 (Yellow)
         if (code === 2) return '#d97706';      // CHECK L2 (Orange)
         if (code === 3) return '#dc2626';      // STOP (Red)
-        if (code === 4) return '#6b7280';      // STALE (Gray)
+        if (code === 4) return '#ff00d0';      // STALE (Gray)
         return '#9ca3af';
       }
 
@@ -379,7 +401,7 @@
           buildLineItemsMap();
           initSections();
           updateCounts();
-          updateTimestamp();
+          // Removed updateTimestamp call
         }).fail(function (error) {
           console.error('Error loading data:', error);
         });
@@ -391,13 +413,12 @@
         let statusClass = data.status;
         let pulseClass = '';
 
-        // UPDATED LOGIC: Differentiate L1 (Yellow) from L2 (Orange)
         const code = parseInt(data.status_code);
         if (code === 1) {
-          statusClass = 'l1'; // Uses the new .status-l1 class
+          statusClass = 'l1';
           pulseClass = 'pulse-warn';
         } else if (code === 2) {
-          statusClass = 'l2'; // Uses the existing .status-warn class
+          statusClass = 'l2';
           pulseClass = 'pulse-warn';
         } else if (code === 3) {
           pulseClass = 'pulse-critical';
@@ -459,16 +480,13 @@
         const container = $(`#${containerId}`);
         let html = '<div class="flex flex-col gap-1">';
         let items = DATA_MAP[sectionKey] || [];
-        if (sectionKey === 'smachine') {
-          items = sortSMachineItems(items);
-        } else {
-          items.sort((a, b) => {
-            const prefixA = getLinePrefix(a.line_no);
-            const prefixB = getLinePrefix(b.line_no);
-            if (prefixA !== prefixB) return prefixA.localeCompare(prefixB);
-            return getLineNumber(a.line_no) - getLineNumber(b.line_no);
-          });
-        }
+        items.sort((a, b) => {
+          const prefixA = getLinePrefix(a.line_no);
+          const prefixB = getLinePrefix(b.line_no);
+          if (prefixA !== prefixB) return prefixA.localeCompare(prefixB);
+          return getLineNumber(a.line_no) - getLineNumber(b.line_no);
+        });
+
         items.forEach((item, i) => {
           html += `
             <div class="flex items-center gap-2 bg-slate-50 rounded px-2 py-0.5 border border-slate-100">
@@ -526,7 +544,6 @@
         generateTableSection('disassy-container', 'disassy', { defaultCols: 5 });
         generateWCSSection('wcs-container', 'wcs');
         generateListSection('aoi-container', 'aoi');
-        generateListSection('smachine-container', 'smachine');
         generateTableSection('hda-container', 'hda', { defaultCols: 18 });
       }
 
@@ -538,7 +555,6 @@
           const l2 = parseInt($(this).data('l2')) || 0;
           const stop = parseInt($(this).data('stop')) || 0;
 
-          // ACTIVE count includes: GOOD(0), STOP(3), CHECK L1(1), CHECK L2(2)
           if (statusCode === 0 || statusCode === 1 || statusCode === 2 || statusCode === 3) {
             activeCount++;
           }
@@ -548,16 +564,14 @@
           checkL2Count += l2;
           stopCount += stop;
         });
-        $('#activeCount').text(activeCount);  // This now shows total ACTIVE (Good + Stop + L1 + L2)
+        $('#activeCount').text(activeCount);
         $('#staleCount').text(staleCount);
         $('#checkL1Count').text(checkL1Count);
         $('#checkL2Count').text(checkL2Count);
         $('#stopCount').text(stopCount);
       }
 
-      function updateTimestamp() {
-        $('#lastUpdate').text(new Date().toLocaleTimeString());
-      }
+      // Removed updateTimestamp function entirely
 
       const $tooltip = $('#tooltip');
       function updateTooltipPosition(e) {
@@ -593,8 +607,7 @@
       $(document).on('mouseleave', '.sensor-btn', () => $tooltip.css('display', 'none'));
 
       loadData();
-      setInterval(updateTimestamp, 1000);
-      setInterval(loadData, 10000);
+      setInterval(loadData, 60000);
     });
   </script>
 </body>

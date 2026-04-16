@@ -20,7 +20,7 @@
           colors: {
             bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
             'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827',
-            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#6b7280', unknown: '#9ca3af' }
+            status: { ok: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#9d174d', unknown: '#9ca3af' }
           }
         }
       }
@@ -170,11 +170,11 @@
       border-left: 3px solid #ef4444;
     }
 
-    .badge-stale {
-      background: #f3f4f6;
-      color: #374151;
-      border-left: 3px solid #6b7280;
-    }
+.badge-stale {
+    background: #fce7f3;        /* light pink background */
+    color: #9d174d;             /* dark pink text */
+    border-left: 3px solid #ff00d0;
+}
 
     /* Table header enhancement - Blue theme */
     .table-header th {
@@ -278,6 +278,15 @@
       font-size: 0.9rem;
       font-weight: 500;
     }
+
+#currentSensorDesc {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+#currentSensorDesc:hover {
+    color: #b91c1c;
+    text-decoration: underline dotted;
+}
   </style>
 </head>
 
@@ -345,13 +354,13 @@
       <div
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
         data-filter="status" data-value="4" data-card-type="stale">
-        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mb-2">
-          <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mb-2">
+          <svg class="w-6 h-6 text-[#ff00d0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
-        <span class="text-2xl font-bold text-gray-500" id="textStale">0</span>
+<span class="text-2xl font-bold text-[#ff00d0]" id="textStale">0</span>
         <span class="text-sm text-gray-500 font-medium">Stale</span>
       </div>
 
@@ -444,18 +453,18 @@
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="table-header">
-              <tr>
-                <th class="px-4 py-3 text-left rounded-tl-lg">📌 ID</th>
-                <th class="px-4 py-3 text-left">📝 Description</th>
-                <th class="px-4 py-3 text-left">📍 Location</th>
-                <th class="px-4 py-3 text-left">⚙️ Process</th>
-                <th class="px-4 py-3 text-left">🔢 Line</th>
-                <th class="px-4 py-3 text-left">📊 Status</th>
-                <th class="px-4 py-3 text-center">🛑 Stop Cnt</th>
-                <th class="px-4 py-3 text-center">⚠️ L2</th>
-                <th class="px-4 py-3 text-center">⚠️ L1</th>
-                <th class="px-4 py-3 text-center rounded-tr-lg">📈 Average</th>
-              </tr>
+<tr>
+    <th class="px-4 py-3 text-left rounded-tl-lg">ID</th>
+    <th class="px-4 py-3 text-left">Description</th>
+    <th class="px-4 py-3 text-left">Location</th>
+    <th class="px-4 py-3 text-left">Process</th>
+    <th class="px-4 py-3 text-left">Line</th>
+    <th class="px-4 py-3 text-left">Status</th>
+    <th class="px-4 py-3 text-center">Stop Cnt</th>
+    <th class="px-4 py-3 text-center">L2</th>
+    <th class="px-4 py-3 text-center">L1</th>
+    <th class="px-4 py-3 text-center rounded-tr-lg">Average</th>
+</tr>
             </thead>
             <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
               <!-- Rows injected by JS -->
@@ -541,6 +550,10 @@
                 class="bg-gray-100 text-gray-700 px-4 py-1.5 rounded text-sm font-medium hover:bg-gray-200 transition border border-gray-300 shadow-sm">
                 📋 Copy
               </button>
+              <button id="exportCsvBtn"
+        class="bg-blue-600 text-white px-5 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition shadow-sm">
+    📥 Export CSV
+</button>
             </div>
           </div>
         </div>
@@ -1018,7 +1031,59 @@
             $('#graphPlaceholder').removeClass('hidden');
           });
       }
+function exportSensorCsv() {
+    if (!currentSensor) return;
 
+    const start = $('#graphStart').val();
+    const end = $('#graphEnd').val();
+    let url = `/api/sensor/${encodeURIComponent(currentSensor)}/raw`;
+    const params = new URLSearchParams();
+    if (start) params.append('start', start);
+    if (end) params.append('end', end);
+    if (params.toString()) url += '?' + params.toString();
+
+    $('#graphLoading').removeClass('hidden');
+    $('#graphError').addClass('hidden');
+
+    $.getJSON(url)
+        .done(function(response) {
+            $('#graphLoading').addClass('hidden');
+            if (response.error) {
+                showToast('Export failed: ' + response.error, 'error');
+                return;
+            }
+            const rows = response.data;
+            if (!rows.length) {
+                showToast('No data to export', 'error');
+                return;
+            }
+
+            // Convert to CSV
+            let csvContent = "date_time,value1\n";
+            rows.forEach(row => {
+                csvContent += `${row.date_time},${row.value1}\n`;
+            });
+
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${currentSensor}_${start}_${end}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showToast('CSV exported successfully', 'success');
+        })
+        .fail(function(xhr) {
+            $('#graphLoading').addClass('hidden');
+            let msg = 'Export failed';
+            if (xhr.responseJSON?.error) msg = xhr.responseJSON.error;
+            showToast(msg, 'error');
+        });
+}
       // Graph section search by ID (press Enter or click button)
       function performGraphSearch() {
         const searchId = $('#graphSensorSearch').val().trim();
@@ -1048,7 +1113,14 @@
           performGraphSearch();
         }
       });
-
+$('#currentSensorDesc').on('click', function() {
+    const text = $(this).text();
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Description copied', 'success');
+    }).catch(() => {
+        showToast('Copy failed', 'error');
+    });
+});
       $('#graphSensorSearchBtn').on('click', performGraphSearch);
 
       // ---------- Event Handlers ----------
@@ -1158,7 +1230,7 @@
 
       // Apply button in graph section
       $('#applyGraphRange').on('click', loadSensorPlot);
-
+$('#exportCsvBtn').on('click', exportSensorCsv);
       // Close graph
       $('#closeGraphBtn').on('click', function () {
         $('#graphSection').addClass('hidden');

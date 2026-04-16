@@ -167,6 +167,47 @@
             color: #374151;
             border-left: 3px solid #6b7280;
         }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left: 4px solid #22c55e;
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast-icon {
+            font-size: 1.2rem;
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 
@@ -282,18 +323,27 @@
                             class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Show entries</label>
-                    <select id="pageSize"
-                        class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
-                        <option value="10" selected>10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
+                <div class="flex items-center gap-3">
+                    <button id="copyTableBtn"
+                        class="bg-gray-100 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-200 transition border border-gray-300">
+                        📋 Copy Table
+                    </button>
+                    <button id="exportCsvBtn"
+                        class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">
+                        ⬇️ Export CSV
+                    </button>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Show entries</label>
+                        <select id="pageSize"
+                            class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="table-header" id="tableHead"></thead>
@@ -325,6 +375,11 @@
 
     <!-- Tooltip container -->
     <div id="statTooltip" class="stat-tooltip"></div>
+    <!-- Toast container -->
+    <div id="copyToast" class="toast">
+        <span class="toast-icon"></span>
+        <span class="toast-message"></span>
+    </div>
 
     <script>
         $(document).ready(function () {
@@ -358,6 +413,23 @@
                 $('#dateEnd').val(format(today7am));
             }
             setDefaultDateTime();
+
+            // Toast helper
+            function showToast(message, type = 'success') {
+                const $toast = $('#copyToast');
+                $toast.removeClass('show success error');
+                $toast.addClass(type);
+                $toast.find('.toast-message').text(message);
+                $toast.find('.toast-icon').text(type === 'success' ? '✅' : '❌');
+
+                void $toast[0].offsetWidth; // reflow
+                $toast.addClass('show');
+
+                clearTimeout(window.toastTimeout);
+                window.toastTimeout = setTimeout(() => {
+                    $toast.removeClass('show');
+                }, 3000);
+            }
 
             // Tooltip helpers
             const $tooltip = $('#statTooltip');
@@ -456,7 +528,7 @@
                 const start = $('#dateStart').val();
                 const end = $('#dateEnd').val();
                 if (!start || !end) {
-                    alert('Please select both start and end datetime');
+                    showToast('Please select both start and end datetime', 'error');
                     return;
                 }
 
@@ -472,12 +544,14 @@
                         $('#loadingIndicator').addClass('hidden');
                         if (response.error) {
                             $('#errorIndicator').removeClass('hidden').text('Error: ' + response.error);
+                            showToast('Error: ' + response.error, 'error');
                             return;
                         }
 
                         allData = response.data;
                         if (allData.length === 0) {
                             $('#emptyIndicator').removeClass('hidden').text('No data in selected range');
+                            showToast('No data in selected range', 'error');
                             return;
                         }
 
@@ -498,6 +572,7 @@
                         let msg = 'Failed to load data';
                         if (xhr.responseJSON?.error) msg = xhr.responseJSON.error;
                         $('#errorIndicator').removeClass('hidden').text('Error: ' + msg);
+                        showToast('Error: ' + msg, 'error');
                     });
             }
 
@@ -553,7 +628,6 @@
                 const end = start + pageSize;
                 const pageData = filteredData.slice(start, end);
 
-                // New column order: Date_Time, DCP Name, Description, Alarm Code, 1st data, 2nd data, 3rd data, 4th data, 5th data, Average Data
                 const columns = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
 
                 let headerRow = '<tr>';
@@ -568,7 +642,7 @@
                     pageData.forEach(row => {
                         const alarmText = row['Alarm Code'] || '';
                         const badgeClass = getBadgeClass(alarmText);
-                        const getVal = (key) => (row[key] !== undefined && row[key] !== null) ? row[key] : '';
+                        const getVal = (key) => (row[key] != null) ? row[key] : '';
 
                         let tr = '<tr class="hover:bg-blue-50">';
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${formatDateTime12h(getVal('Date_Time'))}</td>`;
@@ -601,6 +675,79 @@
                 $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
                 $('#prevPage').prop('disabled', currentPage === 1);
                 $('#nextPage').prop('disabled', currentPage >= totalPages);
+            }
+
+            // Copy Table (TSV)
+            function copyTableAsTSV() {
+                if (filteredData.length === 0) {
+                    showToast('No data to copy', 'error');
+                    return;
+                }
+
+                const headers = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
+
+                let tsv = headers.join('\t') + '\n';
+
+                filteredData.forEach(row => {
+                    const values = [
+                        formatDateTime12h(row['Date_Time']),
+                        row['DCP Name'] ?? '',
+                        row['Description'] ?? '',
+                        row['Alarm Code'] ?? '',
+                        row['1st data'] ?? '',
+                        row['2nd data'] ?? '',
+                        row['3rd data'] ?? '',
+                        row['4th data'] ?? '',
+                        row['5th data'] ?? '',
+                        row['Average Data'] ?? ''
+                    ];
+                    tsv += values.join('\t') + '\n';
+                });
+
+                navigator.clipboard.writeText(tsv).then(() => {
+                    showToast('Table copied to clipboard (TSV)', 'success');
+                }).catch(() => {
+                    showToast('Copy failed. Check permissions.', 'error');
+                });
+            }
+
+            // Export CSV
+            function exportToCSV() {
+                if (filteredData.length === 0) {
+                    showToast('No data to export', 'error');
+                    return;
+                }
+
+                const headers = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
+                let csv = headers.join(',') + '\n';
+
+                filteredData.forEach(row => {
+                    const values = [
+                        `"${formatDateTime12h(row['Date_Time']).replace(/"/g, '""')}"`,
+                        `"${(row['DCP Name'] ?? '').replace(/"/g, '""')}"`,
+                        `"${(row['Description'] ?? '').replace(/"/g, '""')}"`,
+                        `"${(row['Alarm Code'] ?? '').replace(/"/g, '""')}"`,
+                        row['1st data'] ?? '',
+                        row['2nd data'] ?? '',
+                        row['3rd data'] ?? '',
+                        row['4th data'] ?? '',
+                        row['5th data'] ?? '',
+                        row['Average Data'] ?? ''
+                    ];
+                    csv += values.join(',') + '\n';
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `LMS_export_${new Date().toISOString().slice(0, 10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showToast('CSV exported successfully', 'success');
             }
 
             // Event Handlers
@@ -638,6 +785,10 @@
                 }
                 applyFilters();
             });
+
+            // Copy and Export buttons
+            $('#copyTableBtn').on('click', copyTableAsTSV);
+            $('#exportCsvBtn').on('click', exportToCSV);
         });
     </script>
 </body>
