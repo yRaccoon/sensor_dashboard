@@ -315,35 +315,36 @@
 
         <!-- Table Section -->
         <div id="tableWrapper" class="bg-white rounded-lg shadow-md border border-blue-200 p-4 table-container hidden">
-            <div class="flex flex-wrap gap-4 mb-4 items-center justify-between border-b pb-4">
-                <div class="flex gap-4 items-center">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Search (ID or Description)</label>
-                        <input type="text" id="tableSearch" placeholder="Enter ID or description..."
-                            class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button id="copyTableBtn"
-                        class="bg-gray-100 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-200 transition border border-gray-300">
-                        📋 Copy Table
-                    </button>
-                    <button id="exportCsvBtn"
-                        class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">
-                        ⬇️ Export CSV
-                    </button>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Show entries</label>
-                        <select id="pageSize"
-                            class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
-                            <option value="10" selected>10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+
+            <div class="flex flex-wrap gap-3 mb-4 items-center justify-between border-b pb-4">
+    <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+        <input type="text" id="tableSearch" placeholder="ID or description..."
+            class="w-48 md:w-64 pl-3 pr-3 py-2 text-sm border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md border bg-white">
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+        <button id="copyTableBtn" class="bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-200 transition border border-gray-300">📋 Copy Table</button>
+        <button id="exportCsvBtn" class="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition">⬇️ Export CSV</button>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Sort Time by</label>
+            <select id="sortOrder" class="w-28 pl-2 pr-6 py-2 text-sm border-blue-200 rounded-md border bg-white">
+                <option value="asc">Ascending ↑</option>
+                <option value="desc">Descending ↓</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Show</label>
+            <select id="pageSize" class="w-20 pl-2 pr-6 py-2 text-sm border-blue-200 rounded-md border bg-white">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+</div>
+            
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="table-header" id="tableHead"></thead>
@@ -390,7 +391,7 @@
             let pageSize = 10;
             let activeStatusFilter = 'all';
             let tableSearchTerm = '';
-
+let dateSortOrder = 'asc';   // 'asc' or 'desc'
             // Set default datetime range (yesterday 7am to today 7am)
             function setDefaultDateTime() {
                 const now = new Date();
@@ -592,6 +593,21 @@
                 $('#textStop').text(stop);
             }
 
+function parseDateTime(dateTimeStr) {
+    if (!dateTimeStr) return new Date(0); // epoch for empty
+    // Try dd/mm/yyyy HH:MM
+    if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/.test(dateTimeStr)) {
+        const parts = dateTimeStr.split(' ');
+        const dParts = parts[0].split('/');
+        const tParts = parts[1].split(':');
+        return new Date(parseInt(dParts[2]), parseInt(dParts[1]) - 1, parseInt(dParts[0]), parseInt(tParts[0]), parseInt(tParts[1]));
+    }
+    // Try yyyy-mm-dd HH:MM:SS
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateTimeStr)) {
+        return new Date(dateTimeStr.replace(' ', 'T'));
+    }
+    return new Date(dateTimeStr); // fallback
+}
             // Apply filters
             function applyFilters() {
                 filteredData = allData.filter(row => {
@@ -614,7 +630,14 @@
                     }
                     return matchSearch && matchStatus;
                 });
-
+    // Sort by Date_Time
+    filteredData.sort((a, b) => {
+        const dateA = parseDateTime(a['Date_Time']);
+        const dateB = parseDateTime(b['Date_Time']);
+        if (dateA < dateB) return dateSortOrder === 'asc' ? -1 : 1;
+        if (dateA > dateB) return dateSortOrder === 'asc' ? 1 : -1;
+        return 0;
+    });
                 calculateStats();
                 currentPage = 1;
                 renderTable();
@@ -752,6 +775,11 @@
 
             // Event Handlers
             $('#loadRangeBtn').click(loadDataByRange);
+
+$('#sortOrder').change(function () {
+    dateSortOrder = $(this).val();
+    applyFilters();
+});
 
             $('#tableSearch').on('input', function () {
                 tableSearchTerm = $(this).val().trim().toLowerCase();
