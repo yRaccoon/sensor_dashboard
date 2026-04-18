@@ -170,11 +170,13 @@
       border-left: 3px solid #ef4444;
     }
 
-.badge-stale {
-    background: #fce7f3;        /* light pink background */
-    color: #9d174d;             /* dark pink text */
-    border-left: 3px solid #ff00d0;
-}
+    .badge-stale {
+      background: #fce7f3;
+      /* light pink background */
+      color: #9d174d;
+      /* dark pink text */
+      border-left: 3px solid #ff00d0;
+    }
 
     /* Table header enhancement - Blue theme */
     .table-header th {
@@ -279,14 +281,15 @@
       font-weight: 500;
     }
 
-#currentSensorDesc {
-    cursor: pointer;
-    transition: color 0.2s;
-}
-#currentSensorDesc:hover {
-    color: #b91c1c;
-    text-decoration: underline dotted;
-}
+    #currentSensorDesc {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    #currentSensorDesc:hover {
+      color: #b91c1c;
+      text-decoration: underline dotted;
+    }
   </style>
 </head>
 
@@ -360,11 +363,11 @@
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
-<span class="text-2xl font-bold text-[#ff00d0]" id="textStale">0</span>
+        <span class="text-2xl font-bold text-[#ff00d0]" id="textStale">0</span>
         <span class="text-sm text-gray-500 font-medium">Stale</span>
       </div>
 
-      
+
       <!-- Stop -->
       <div
         class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
@@ -453,18 +456,18 @@
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="table-header">
-<tr>
-    <th class="px-4 py-3 text-left rounded-tl-lg">ID</th>
-    <th class="px-4 py-3 text-left">Description</th>
-    <th class="px-4 py-3 text-left">Location</th>
-    <th class="px-4 py-3 text-left">Process</th>
-    <th class="px-4 py-3 text-left">Line</th>
-    <th class="px-4 py-3 text-left">Status</th>
-    <th class="px-4 py-3 text-center">Stop Cnt</th>
-    <th class="px-4 py-3 text-center">L2</th>
-    <th class="px-4 py-3 text-center">L1</th>
-    <th class="px-4 py-3 text-center rounded-tr-lg">Average</th>
-</tr>
+              <tr>
+                <th class="px-4 py-3 text-left rounded-tl-lg">ID</th>
+                <th class="px-4 py-3 text-left">Description</th>
+                <th class="px-4 py-3 text-left">Location</th>
+                <th class="px-4 py-3 text-left">Process</th>
+                <th class="px-4 py-3 text-left">Line</th>
+                <th class="px-4 py-3 text-left">Status</th>
+                <th class="px-4 py-3 text-center">Stop Cnt</th>
+                <th class="px-4 py-3 text-center">L2</th>
+                <th class="px-4 py-3 text-center">L1</th>
+                <th class="px-4 py-3 text-center rounded-tr-lg">Average</th>
+              </tr>
             </thead>
             <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
               <!-- Rows injected by JS -->
@@ -551,9 +554,9 @@
                 📋 Copy
               </button>
               <button id="exportCsvBtn"
-        class="bg-blue-600 text-white px-5 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition shadow-sm">
-    📥 Export CSV
-</button>
+                class="bg-blue-600 text-white px-5 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition shadow-sm">
+                📥 Export CSV
+              </button>
             </div>
           </div>
         </div>
@@ -879,7 +882,7 @@
         filteredData = allData.filter(item => {
           const matchLoc = (locFilter === 'all' || item.loc === locFilter);
           const matchProc = (procFilter === 'all' || item.process === procFilter);
-          const matchId = !tableSearchTerm || 
+          const matchId = !tableSearchTerm ||
             (item.id && item.id.toLowerCase().includes(tableSearchTerm)) ||
             (item.desc && item.desc.toLowerCase().includes(tableSearchTerm));
 
@@ -1031,37 +1034,37 @@
             $('#graphPlaceholder').removeClass('hidden');
           });
       }
-function exportSensorCsv() {
-    if (!currentSensor) return;
+      function exportSensorCsv() {
+        if (!currentSensor) return;
 
-    const start = $('#graphStart').val();
-    const end = $('#graphEnd').val();
-    let url = `/api/sensor/${encodeURIComponent(currentSensor)}/raw`;
-    const params = new URLSearchParams();
-    if (start) params.append('start', start);
-    if (end) params.append('end', end);
-    if (params.toString()) url += '?' + params.toString();
+        const start = $('#graphStart').val();
+        const end = $('#graphEnd').val();
+        let url = `/api/sensor/${encodeURIComponent(currentSensor)}/raw`;
+        const params = new URLSearchParams();
+        if (start) params.append('start', start);
+        if (end) params.append('end', end);
+        if (params.toString()) url += '?' + params.toString();
 
-    $('#graphLoading').removeClass('hidden');
-    $('#graphError').addClass('hidden');
+        $('#graphLoading').removeClass('hidden');
+        $('#graphError').addClass('hidden');
 
-    $.getJSON(url)
-        .done(function(response) {
+        $.getJSON(url)
+          .done(function (response) {
             $('#graphLoading').addClass('hidden');
             if (response.error) {
-                showToast('Export failed: ' + response.error, 'error');
-                return;
+              showToast('Export failed: ' + response.error, 'error');
+              return;
             }
             const rows = response.data;
             if (!rows.length) {
-                showToast('No data to export', 'error');
-                return;
+              showToast('No data to export', 'error');
+              return;
             }
 
             // Convert to CSV
             let csvContent = "date_time,value1\n";
             rows.forEach(row => {
-                csvContent += `${row.date_time},${row.value1}\n`;
+              csvContent += `${row.date_time},${row.value1}\n`;
             });
 
             // Download
@@ -1076,14 +1079,14 @@ function exportSensorCsv() {
             URL.revokeObjectURL(url);
 
             showToast('CSV exported successfully', 'success');
-        })
-        .fail(function(xhr) {
+          })
+          .fail(function (xhr) {
             $('#graphLoading').addClass('hidden');
             let msg = 'Export failed';
             if (xhr.responseJSON?.error) msg = xhr.responseJSON.error;
             showToast(msg, 'error');
-        });
-}
+          });
+      }
       // Graph section search by ID (press Enter or click button)
       function performGraphSearch() {
         const searchId = $('#graphSensorSearch').val().trim();
@@ -1113,14 +1116,14 @@ function exportSensorCsv() {
           performGraphSearch();
         }
       });
-$('#currentSensorDesc').on('click', function() {
-    const text = $(this).text();
-    navigator.clipboard.writeText(text).then(() => {
-        showToast('Description copied', 'success');
-    }).catch(() => {
-        showToast('Copy failed', 'error');
-    });
-});
+      $('#currentSensorDesc').on('click', function () {
+        const text = $(this).text();
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Description copied', 'success');
+        }).catch(() => {
+          showToast('Copy failed', 'error');
+        });
+      });
       $('#graphSensorSearchBtn').on('click', performGraphSearch);
 
       // ---------- Event Handlers ----------
@@ -1230,7 +1233,7 @@ $('#currentSensorDesc').on('click', function() {
 
       // Apply button in graph section
       $('#applyGraphRange').on('click', loadSensorPlot);
-$('#exportCsvBtn').on('click', exportSensorCsv);
+      $('#exportCsvBtn').on('click', exportSensorCsv);
       // Close graph
       $('#closeGraphBtn').on('click', function () {
         $('#graphSection').addClass('hidden');

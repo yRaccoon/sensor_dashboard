@@ -329,18 +329,18 @@
       }
 
       // This function is kept but no longer used for smachine section
-      function sortSMachineItems(items) {
-        return items.sort((a, b) => {
-          const lineA = a.line_no;
-          const lineB = b.line_no;
-          const matchA = lineA.match(/S(\d+)/);
-          const matchB = lineB.match(/S(\d+)/);
-          if (matchA && matchB) {
-            return parseInt(matchA[1]) - parseInt(matchB[1]);
-          }
-          return lineA.localeCompare(lineB);
-        });
-      }
+      // function sortSMachineItems(items) {
+      //   return items.sort((a, b) => {
+      //     const lineA = a.line_no;
+      //     const lineB = b.line_no;
+      //     const matchA = lineA.match(/S(\d+)/);
+      //     const matchB = lineB.match(/S(\d+)/);
+      //     if (matchA && matchB) {
+      //       return parseInt(matchA[1]) - parseInt(matchB[1]);
+      //     }
+      //     return lineA.localeCompare(lineB);
+      //   });
+      // }
 
       function getStatusText(statusCode) {
         const code = parseInt(statusCode);

@@ -67,9 +67,9 @@ def load_data():
             if 'AOI' in desc:
                 section = 'aoi'
                 is_list_section = True
-            else:
-                section = 'smachine'
-                is_list_section = True
+            # else:
+            #     section = 'smachine'
+            #     is_list_section = True
 
         if not section:
             continue
