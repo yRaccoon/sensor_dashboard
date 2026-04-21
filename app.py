@@ -1,18 +1,9 @@
 import os
 import glob
-import io
-import base64
 from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify, request
 import pandas as pd
 from collections import defaultdict
-
-# 🔧 Set Matplotlib backend to non-interactive BEFORE importing pyplot
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-
 
 app = Flask(__name__)
 
@@ -231,138 +222,6 @@ def api_archive_data_by_range():
     columns = combined.columns.tolist()
     return jsonify({'columns': columns, 'data': data})
 
-@app.route('/api/sensor/<sensor_id>/plot')
-def sensor_plot(sensor_id):
-    try:
-        start_str = request.args.get('start')
-        end_str = request.args.get('end')
-        description = request.args.get('description', sensor_id) 
-
-        folder = os.path.join(os.path.dirname(__file__), 'data', 'sensors', sensor_id)
-        if not os.path.isdir(folder):
-            return jsonify({'error': f'Sensor folder not found: {sensor_id}'}), 404
-        
-        all_files = glob.glob(os.path.join(folder, '*.csv'))
-        if not all_files:
-            return jsonify({'error': 'No CSV files found in sensor folder'}), 404
-        
-        start_dt = datetime.fromisoformat(start_str) if start_str else None
-        end_dt = datetime.fromisoformat(end_str) if end_str else None
-        
-        selected_files = []
-        for f in all_files:
-            base = os.path.splitext(os.path.basename(f))[0]
-            try:
-                file_date = datetime.strptime(base[:8], '%Y%m%d')
-            except ValueError:
-                selected_files.append(f)
-                continue
-            
-            file_day_start = file_date.replace(hour=0, minute=0, second=0)
-            file_day_end = file_date.replace(hour=23, minute=59, second=59)
-            
-            if start_dt and end_dt:
-                if file_day_end >= start_dt and file_day_start <= end_dt:
-                    selected_files.append(f)
-            elif start_dt:
-                if file_day_end >= start_dt:
-                    selected_files.append(f)
-            elif end_dt:
-                if file_day_start <= end_dt:
-                    selected_files.append(f)
-            else:
-                selected_files.append(f)
-        
-        if not selected_files:
-            return jsonify({'error': 'No CSV files cover the selected time range'}), 404
-        
-        dfs = []
-        for f in selected_files:
-            try:
-                df = pd.read_csv(f)
-                dfs.append(df)
-            except Exception as e:
-                print(f"Error reading {f}: {e}")
-        
-        if not dfs:
-            return jsonify({'error': 'Could not read any CSV files'}), 500
-        
-        combined = pd.concat(dfs, ignore_index=True)
-        combined['date_time'] = pd.to_datetime(combined['date_time'], errors='coerce')
-        combined = combined.dropna(subset=['date_time'])
-        combined = combined.sort_values('date_time')
-        
-        if start_dt:
-            combined = combined[combined['date_time'] >= start_dt]
-        if end_dt:
-            combined = combined[combined['date_time'] <= end_dt]
-        
-        if combined.empty:
-            return jsonify({'error': 'No data in selected time range'}), 404
-        
-        # Determine axis limits
-        x_min = combined['date_time'].min()
-        x_max = combined['date_time'].max()
-        if start_dt:
-            x_min = start_dt
-        if end_dt:
-            x_max = end_dt
-
-        # Compute duration for label
-        duration = x_max - x_min
-        days = duration.days
-        hours = duration.seconds // 3600
-        minutes = (duration.seconds % 3600) // 60
-
-        duration_parts = []
-        if days > 0:
-            duration_parts.append(f"{days} day{'s' if days != 1 else ''}")
-        if hours > 0:
-            duration_parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
-        if minutes > 0 and days == 0:
-            duration_parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
-        duration_str = ', '.join(duration_parts) if duration_parts else '0 minutes'
-
-        start_label = x_min.strftime('%Y-%m-%d %H:%M')
-        end_label = x_max.strftime('%Y-%m-%d %H:%M')
-        xlabel_text = f"Time: {start_label} to {end_label}   |   Duration: {duration_str}"
-
-        plt.figure(figsize=(12, 6))
-        plt.plot(combined['date_time'], combined['value1'], color='#2563eb', linewidth=2)
-        plt.axhline(y=5, color='#eab308', linestyle='--', linewidth=2)
-        plt.axhline(y=20, color='#dc2626', linestyle='--', linewidth=2)
-        plt.ylim(0, 100)
-        plt.xlabel(xlabel_text)
-        plt.title(description)
-
-        ax = plt.gca()
-        ax.set_xlim(x_min, x_max)
-
-        span_days = (x_max - x_min).total_seconds() / (24 * 3600)
-        if span_days <= 1:
-            ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
-        elif span_days <= 7:
-            ax.xaxis.set_major_locator(mdates.DayLocator())
-        else:
-            ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))
-        plt.xticks(rotation=90, ha='right')
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', dpi=100)
-        buf.seek(0)
-        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-        plt.close()
-        
-        return jsonify({'image': img_base64})
-    
-    except Exception as e:
-        print(f"Plot generation error: {e}")
-        return jsonify({'error': f'Server error: {str(e)}'}), 500
-    
 @app.route('/api/sensor/<sensor_id>/raw')
 def sensor_raw_data(sensor_id):
     """Return raw data (date_time, value1) for the given sensor and date range."""
@@ -437,7 +296,7 @@ def sensor_raw_data(sensor_id):
         return jsonify({'data': data})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
 @app.route('/')
 def home():
     return render_template('home.html')

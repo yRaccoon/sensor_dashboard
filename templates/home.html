@@ -10,6 +10,8 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Plotly for interactive charts -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <script>
@@ -115,7 +117,6 @@
       font-size: 1rem;
     }
 
-    /* Very Light Blue Theme for Table */
     .table-row-hover:hover {
       background-color: #e0f2fe !important;
       transition: background-color 0.2s ease;
@@ -127,25 +128,20 @@
       letter-spacing: 0.01em;
     }
 
-    /* Alternating row colors - Light blue shades */
     tbody tr:nth-child(even) {
       background-color: #f0f9ff;
-      /* Very light blue */
     }
 
     tbody tr:nth-child(odd) {
       background-color: #f8fafc;
-      /* Off-white with slight blue tint */
     }
 
-    /* Better number alignment */
     .number-cell {
       font-family: 'Inter', monospace;
       font-weight: 500;
       text-align: center;
     }
 
-    /* Status badge enhancements - Keep original colors for status badges */
     .badge-active {
       background: #dcfce7;
       color: #166534;
@@ -172,13 +168,10 @@
 
     .badge-stale {
       background: #fce7f3;
-      /* light pink background */
       color: #9d174d;
-      /* dark pink text */
       border-left: 3px solid #ff00d0;
     }
 
-    /* Table header enhancement - Blue theme */
     .table-header th {
       background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
       border-bottom: 2px solid #bfdbfe;
@@ -191,26 +184,22 @@
       border-top: 1px solid #bfdbfe;
     }
 
-    /* Row dividers - Light blue */
     tbody tr {
       border-bottom: 1px solid #e2e8f0;
     }
 
-    /* Table container border - Blue tint */
     .table-container {
       border: 1px solid #dbeafe;
       border-radius: 12px;
       overflow: hidden;
     }
 
-    /* ID column styling */
     .id-cell {
       font-weight: 700;
       color: #1e40af;
       background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
     }
 
-    /* Process column pill */
     .process-pill {
       background: #dbeafe;
       color: #1e40af;
@@ -221,7 +210,6 @@
       display: inline-block;
     }
 
-    /* Number cells background */
     .number-cell-bg {
       background: #f8fafc;
       border-radius: 6px;
@@ -230,7 +218,6 @@
       min-width: 40px;
     }
 
-    /* Description cell */
     .desc-cell {
       color: #334155;
       font-weight: 500;
@@ -240,7 +227,6 @@
       text-overflow: ellipsis;
     }
 
-    /* Toast notification */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -589,9 +575,9 @@
           <p id="graphErrorMessage" class="text-red-500"></p>
         </div>
 
-        <!-- Chart Image -->
+        <!-- Interactive Chart Container -->
         <div class="bg-gray-50 rounded-lg p-3">
-          <img id="sensorChartImg" class="w-full h-auto object-contain rounded shadow-sm hidden" alt="Sensor plot">
+          <div id="sensorChart" class="w-full rounded shadow-sm hidden" style="height: 500px;"></div>
         </div>
       </div>
     </div>
@@ -604,6 +590,7 @@
   <div id="copyToast" class="toast">
     <span class="toast-message">Chart copied to clipboard</span>
   </div>
+
   <script>
     $(document).ready(function () {
       // ---------- State ----------
@@ -620,7 +607,7 @@
       // Sensor graph state
       let currentSensor = null;
       let currentSensorDesc = '';
-      let currentImageBase64 = '';
+      let plotlyChartRendered = false;
 
       // ---------- Helper Functions ----------
       function getStatusColor(code) {
@@ -675,7 +662,7 @@
         };
       }
 
-      // Tooltip handlers (place inside your existing script)
+      // Tooltip handlers
       const $tooltip = $('#statTooltip');
 
       function updateTooltipPosition(e) {
@@ -689,7 +676,6 @@
         $tooltip.css({ left, top });
       }
 
-      // Helper functions (if not already present)
       function getAccumulatedSumsForCard(cardType) {
         let processSums = {};
         let totalSum = 0;
@@ -824,13 +810,10 @@
           applyFilters();
           updateTimestamp();
 
-          // --- Set Total Inventory card as active by default ---
+          // Set Total Inventory card as active by default
           $('.stat-card').removeClass('active');
-          // Add active class to Total Inventory card
           $('#cardTotal').addClass('active');
-          // Ensure table is visible
           $('#tableWrapper').removeClass('hidden');
-          // Reset filter states
           activeStatusFilter = 'all';
           activeAccumulatedFilter = null;
           sortBy = null;
@@ -906,7 +889,6 @@
           return matchLoc && matchProc && matchId && matchStatus && matchAccumulated;
         });
 
-        // Apply sorting if set
         if (sortBy) {
           filteredData.sort((a, b) => {
             let valA = parseInt(a[sortBy]) || 0;
@@ -971,7 +953,7 @@
         $('#lastUpdate').text(new Date().toLocaleTimeString());
       }
 
-      // ---------- Sensor Graph Functions ----------
+      // ---------- Sensor Graph Functions (Interactive Plotly) ----------
       function openSensorGraph(sensorId, description) {
         currentSensor = sensorId;
         currentSensorDesc = description;
@@ -983,11 +965,24 @@
         $('#graphStart').val(defaults.start);
         $('#graphEnd').val(defaults.end);
 
-        // Clear any existing chart
-        $('#sensorChartImg').addClass('hidden').attr('src', '');
+        // Reset chart area
+        $('#sensorChart').addClass('hidden').empty();
         $('#graphError').addClass('hidden').text('');
         $('#graphLoading').addClass('hidden');
         $('#graphPlaceholder').removeClass('hidden');
+        plotlyChartRendered = false;
+      }
+
+      function computeDuration(startDate, endDate) {
+        const diffMs = endDate - startDate;
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diffMs % 86400000) / 3600000);
+        const minutes = Math.floor((diffMs % 3600000) / 60000);
+        const parts = [];
+        if (days > 0) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
+        if (hours > 0) parts.push(`${hours} hour${hours !== 1 ? 's' : ''}`);
+        if (minutes > 0 && days === 0) parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
+        return parts.join(', ') || '0 minutes';
       }
 
       function loadSensorPlot() {
@@ -995,18 +990,19 @@
 
         const start = $('#graphStart').val();
         const end = $('#graphEnd').val();
-        let url = `/api/sensor/${encodeURIComponent(currentSensor)}/plot`;
+        let url = `/api/sensor/${encodeURIComponent(currentSensor)}/raw`;
         const params = new URLSearchParams();
         if (start) params.append('start', start);
         if (end) params.append('end', end);
-        if (currentSensorDesc) params.append('description', currentSensorDesc);
         if (params.toString()) url += '?' + params.toString();
 
+        // Show loading, hide other states
         $('#graphLoading').removeClass('hidden');
         $('#graphError').addClass('hidden').text('');
-        $('#sensorChartImg').addClass('hidden').attr('src', '');
         $('#graphPlaceholder').addClass('hidden');
-        currentImageBase64 = '';
+
+        // Make chart container visible (so Plotly can measure its width)
+        $('#sensorChart').empty().removeClass('hidden');
 
         $.getJSON(url)
           .done(function (response) {
@@ -1014,15 +1010,87 @@
             if (response.error) {
               $('#graphError').removeClass('hidden').text(response.error);
               $('#graphPlaceholder').removeClass('hidden');
+              $('#sensorChart').addClass('hidden'); // hide empty chart
               return;
             }
-            if (response.image) {
-              currentImageBase64 = response.image;
-              $('#sensorChartImg').attr('src', 'data:image/png;base64,' + response.image).removeClass('hidden');
-            } else {
-              $('#graphError').removeClass('hidden').text('No image data received');
+
+            const rows = response.data;
+            if (!rows || rows.length === 0) {
+              $('#graphError').removeClass('hidden').text('No data in selected range');
               $('#graphPlaceholder').removeClass('hidden');
+              $('#sensorChart').addClass('hidden');
+              return;
             }
+
+            // Prepare data for Plotly
+            const dates = rows.map(r => new Date(r.date_time));
+            const values = rows.map(r => r.value1);
+
+            const trace = {
+              x: dates,
+              y: values,
+              type: 'scatter',
+              mode: 'lines',
+              line: { color: '#2563eb', width: 2 },
+              name: currentSensorDesc || currentSensor
+            };
+
+            const layout = {
+              title: {
+                text: currentSensorDesc || currentSensor,
+                font: { size: 16, family: 'Inter, sans-serif' }
+              },
+              xaxis: {
+                title: {
+                  text: `Time: ${start || 'start'} to ${end || 'end'}   |   Duration: ${computeDuration(dates[0], dates[dates.length - 1])}`,
+                  font: { size: 12 }
+                },
+                type: 'date',
+                tickformat: '%Y-%m-%d %H:%M',
+                tickangle: -90,
+                automargin: true
+              },
+              yaxis: {
+                title: 'Value',
+                range: [0, 101],
+                fixedrange: false
+              },
+              shapes: [
+                {
+                  type: 'line',
+                  x0: dates[0],
+                  x1: dates[dates.length - 1],
+                  y0: 5,
+                  y1: 5,
+                  line: { color: '#eab308', width: 2, dash: 'dash' }
+                },
+                {
+                  type: 'line',
+                  x0: dates[0],
+                  x1: dates[dates.length - 1],
+                  y0: 20,
+                  y1: 20,
+                  line: { color: '#dc2626', width: 2, dash: 'dash' }
+                }
+              ],
+              hovermode: 'x unified',
+              margin: { l: 60, r: 30, t: 60, b: 100 },
+              paper_bgcolor: '#f9fafb',
+              plot_bgcolor: '#f9fafb',
+              font: { family: 'Inter, sans-serif' },
+              autosize: true         // ensures it fills container
+            };
+
+            const config = {
+              responsive: true,
+              displayModeBar: true,
+              modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+              displaylogo: false
+            };
+
+            Plotly.newPlot('sensorChart', [trace], layout, config);
+            // Chart is already visible (hidden class removed earlier)
+            plotlyChartRendered = true;
           })
           .fail(function (xhr) {
             $('#graphLoading').addClass('hidden');
@@ -1032,8 +1100,10 @@
             else if (xhr.status === 0) errorMsg = 'Network error – check server connection';
             $('#graphError').removeClass('hidden').text('Error loading data: ' + errorMsg);
             $('#graphPlaceholder').removeClass('hidden');
+            $('#sensorChart').addClass('hidden'); // hide empty chart
           });
       }
+
       function exportSensorCsv() {
         if (!currentSensor) return;
 
@@ -1061,13 +1131,11 @@
               return;
             }
 
-            // Convert to CSV
             let csvContent = "date_time,value1\n";
             rows.forEach(row => {
               csvContent += `${row.date_time},${row.value1}\n`;
             });
 
-            // Download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
@@ -1087,70 +1155,64 @@
             showToast(msg, 'error');
           });
       }
-      // Graph section search by ID (press Enter or click button)
+
       function performGraphSearch() {
         const searchId = $('#graphSensorSearch').val().trim();
         if (!searchId) return;
 
-        // Case-insensitive search
         const sensorData = allData.find(item => item.id && item.id.toLowerCase() === searchId.toLowerCase());
         if (sensorData) {
           openSensorGraph(sensorData.id, sensorData.desc);
-          // Optional: highlight row in table
           $('#tableBody tr').removeClass('bg-yellow-100');
           $(`#tableBody tr`).each(function () {
             if ($(this).find('td:first-child span').text().toLowerCase() === searchId.toLowerCase()) {
               $(this).addClass('bg-yellow-100');
             }
           });
-          // Clear search input after successful load (optional)
-          // $('#graphSensorSearch').val('');
         } else {
           alert(`Sensor "${searchId}" not found`);
         }
       }
 
-      $('#graphSensorSearch').on('keypress', function (e) {
-        if (e.which === 13) {
-          e.preventDefault();   // prevent any accidental form submission
-          performGraphSearch();
-        }
-      });
-      $('#currentSensorDesc').on('click', function () {
-        const text = $(this).text();
-        navigator.clipboard.writeText(text).then(() => {
-          showToast('Description copied', 'success');
-        }).catch(() => {
-          showToast('Copy failed', 'error');
-        });
-      });
-      $('#graphSensorSearchBtn').on('click', performGraphSearch);
+      // Toast helper
+      function showToast(message, type = 'success') {
+        const $toast = $('#copyToast');
+        $toast.removeClass('show success error');
+        $toast.addClass(type);
+        $toast.find('.toast-message').text(message);
+        $toast.find('.toast-icon').text(type === 'success' ? '✅' : '❌');
+
+        void $toast[0].offsetWidth;
+        $toast.addClass('show');
+
+        clearTimeout(window.toastTimeout);
+        window.toastTimeout = setTimeout(() => {
+          $toast.removeClass('show');
+        }, 3000);
+      }
 
       // ---------- Event Handlers ----------
-      // Table search input
       $('#tableSearchId').on('input', function () {
         tableSearchTerm = $(this).val().trim().toLowerCase();
         currentPage = 1;
         applyFilters();
       });
 
-      // Filter dropdowns
       $('#filterLocation, #filterProcess').change(() => applyFilters());
 
-      // Page size
       $('#pageSize').change(function () {
         pageSize = parseInt($(this).val());
         currentPage = 1;
         renderTable();
       });
 
-      // Pagination
       $('#prevPage').click(function () {
         if (currentPage > 1) {
           currentPage--;
           renderTable();
         }
       });
+
       $('#nextPage').click(function () {
         const totalPages = Math.ceil(filteredData.length / pageSize);
         if (currentPage < totalPages) {
@@ -1159,7 +1221,6 @@
         }
       });
 
-      // Summary card clicks
       $('.stat-card').click(function () {
         const filterType = $(this).data('filter');
         const filterValue = $(this).data('value');
@@ -1192,7 +1253,6 @@
             $(this).addClass('active');
             activeAccumulatedFilter = filterValue;
             activeStatusFilter = 'all';
-            // Set sorting based on card type
             if (cardType === 'stop') {
               sortBy = 'stop';
               sortOrder = 'desc';
@@ -1208,7 +1268,7 @@
         } else if (filterType === 'status') {
           $('.stat-card[data-filter="accumulated"]').removeClass('active');
           activeAccumulatedFilter = null;
-          sortBy = null; // reset sorting for status cards
+          sortBy = null;
           if ($(this).hasClass('active')) {
             $(this).removeClass('active');
             activeStatusFilter = 'all';
@@ -1221,7 +1281,6 @@
         }
       });
 
-      // Table row click -> open graph for that sensor
       $('#tableBody').on('click', 'tr', function () {
         const idCell = $(this).find('td:first-child span').text();
         if (idCell && idCell !== 'N/A') {
@@ -1231,49 +1290,50 @@
         }
       });
 
-      // Apply button in graph section
       $('#applyGraphRange').on('click', loadSensorPlot);
       $('#exportCsvBtn').on('click', exportSensorCsv);
-      // Close graph
+
       $('#closeGraphBtn').on('click', function () {
         $('#graphSection').addClass('hidden');
         currentSensor = null;
-        currentImageBase64 = '';
+        plotlyChartRendered = false;
       });
 
-      // Toast helper
-      function showToast(message, type = 'success') {
-        const $toast = $('#copyToast');
-        $toast.removeClass('show success error');
-        $toast.addClass(type);
-        $toast.find('.toast-message').text(message);
-        $toast.find('.toast-icon').text(type === 'success' ? '✅' : '❌');
+      $('#graphSensorSearch').on('keypress', function (e) {
+        if (e.which === 13) {
+          e.preventDefault();
+          performGraphSearch();
+        }
+      });
 
-        // Force reflow to restart animation
-        void $toast[0].offsetWidth;
-        $toast.addClass('show');
+      $('#currentSensorDesc').on('click', function () {
+        const text = $(this).text();
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Description copied', 'success');
+        }).catch(() => {
+          showToast('Copy failed', 'error');
+        });
+      });
 
-        clearTimeout(window.toastTimeout);
-        window.toastTimeout = setTimeout(() => {
-          $toast.removeClass('show');
-        }, 3000);
-      }
+      $('#graphSensorSearchBtn').on('click', performGraphSearch);
 
-      // Copy chart as image
+      // Copy chart as image using Plotly.toImage
       $('#copyChartBtn').on('click', async function () {
         const $btn = $(this);
         const originalText = $btn.html();
 
-        if (!currentImageBase64) {
+        if (!plotlyChartRendered) {
           showToast('No chart to copy', 'error');
           return;
         }
 
-        // Animate button
         $btn.html('⏳ Copying...').prop('disabled', true);
 
         try {
-          const byteCharacters = atob(currentImageBase64);
+          const graphDiv = document.getElementById('sensorChart');
+          const imgData = await Plotly.toImage(graphDiv, { format: 'png', width: 1200, height: 600 });
+          const base64 = imgData.split(',')[1];
+          const byteCharacters = atob(base64);
           const byteNumbers = new Array(byteCharacters.length);
           for (let i = 0; i < byteCharacters.length; i++) {
             byteNumbers[i] = byteCharacters.charCodeAt(i);
@@ -1290,6 +1350,7 @@
           $btn.html(originalText).prop('disabled', false);
         }
       });
+
       // Initial load
       loadData();
       setInterval(updateTimestamp, 1000);
