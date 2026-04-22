@@ -271,24 +271,39 @@ def sensor_raw_data(sensor_id):
         for f in selected_files:
             try:
                 df = pd.read_csv(f)
+                if 'date_time' not in df.columns or 'value1' not in df.columns:
+                    print(f"Skipping {f}: missing required columns")
+                    continue
                 dfs.append(df)
             except Exception as e:
                 print(f"Error reading {f}: {e}")
 
         if not dfs:
-            return jsonify({'error': 'Could not read any CSV files'}), 500
+            return jsonify({'error': 'No valid data found in CSV files'}), 404
 
         combined = pd.concat(dfs, ignore_index=True)
+
         combined['date_time'] = pd.to_datetime(combined['date_time'], errors='coerce')
-        combined = combined.dropna(subset=['date_time'])
+        combined['value1'] = pd.to_numeric(combined['value1'], errors='coerce')
+
+        combined = combined.dropna(subset=['date_time', 'value1'])
+
+        if combined.empty:
+            return jsonify({'error': 'No valid data after cleaning'}), 404
+
+        combined = combined.drop_duplicates(subset=['date_time'], keep='first')
+
         combined = combined.sort_values('date_time')
 
+        # Filter by requested date range
         if start_dt:
             combined = combined[combined['date_time'] >= start_dt]
         if end_dt:
             combined = combined[combined['date_time'] <= end_dt]
 
-        # Keep only needed columns
+        if combined.empty:
+            return jsonify({'error': 'No data in selected time range after filtering'}), 404
+
         result = combined[['date_time', 'value1']].copy()
         result['date_time'] = result['date_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
         data = result.to_dict(orient='records')

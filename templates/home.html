@@ -601,8 +601,8 @@
       let activeStatusFilter = 'all';
       let activeAccumulatedFilter = null;
       let tableSearchTerm = '';
-      let sortBy = null;          // 'stop', 'l1', 'l2', or null
-      let sortOrder = 'desc';     // 'asc' or 'desc'
+      let sortBy = null;
+      let sortOrder = 'desc';
 
       // Sensor graph state
       let currentSensor = null;
@@ -714,7 +714,6 @@
         return { processCounts, totalCount };
       }
 
-      // Main tooltip event
       $(document).on('mouseenter', '.stat-card', function (e) {
         const $card = $(this);
         const cardType = $card.data('card-type');
@@ -808,7 +807,6 @@
           allData = flattenData(response);
           populateFilters();
           applyFilters();
-          updateTimestamp();
 
           // Set Total Inventory card as active by default
           $('.stat-card').removeClass('active');
@@ -917,19 +915,19 @@
         } else {
           pageData.forEach(item => {
             const row = `
-                        <tr class="table-row-hover">
-                            <td class="px-4 py-3 whitespace-nowrap text-sm id-cell"><span class="font-bold">${item.id || 'N/A'}</span></td>
-                            <td class="px-4 py-3 text-sm desc-cell" title="${item.desc || 'N/A'}"><span class="desc-cell">${item.desc || 'N/A'}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600"><span class="font-medium">${item.loc || 'N/A'}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="process-pill">${item.process || 'N/A'}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600"><span class="font-mono">${item.line_no || 'N/A'}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-md status-badge ${getStatusColor(item.status_code)}">${getStatusText(item.status_code)}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-red-700">${item.stop || 0}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-amber-700 font-bold">${item.l2 || 0}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-orange-700 font-bold">${item.l1 || 0}</span></td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-gray-700 font-semibold">${item.average || 0}</span></td>
-                        </tr>
-                    `;
+            <tr class="table-row-hover">
+              <td class="px-4 py-3 whitespace-nowrap text-sm id-cell"><span class="font-bold">${item.id || 'N/A'}</span></td>
+              <td class="px-4 py-3 text-sm desc-cell" title="${item.desc || 'N/A'}"><span class="desc-cell">${item.desc || 'N/A'}</span></td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600"><span class="font-medium">${item.loc || 'N/A'}</span></td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="process-pill">${item.process || 'N/A'}</span></td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600"><span class="font-mono">${item.line_no || 'N/A'}</span></td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-md status-badge ${getStatusColor(item.status_code)}">${getStatusText(item.status_code)}</span></td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-red-700">${item.stop || 0}</span></td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-amber-700 font-bold">${item.l2 || 0}</span></td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-orange-700 font-bold">${item.l1 || 0}</span></td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-center"><span class="number-cell-bg text-gray-700 font-semibold">${item.average || 0}</span></td>
+            </tr>
+          `;
             tbody.append(row);
           });
         }
@@ -949,11 +947,7 @@
         $('#nextPage').prop('disabled', currentPage >= totalPages);
       }
 
-      function updateTimestamp() {
-        $('#lastUpdate').text(new Date().toLocaleTimeString());
-      }
-
-      // ---------- Sensor Graph Functions (Interactive Plotly) ----------
+      // ---------- Sensor Graph Functions ----------
       function openSensorGraph(sensorId, description) {
         currentSensor = sensorId;
         currentSensorDesc = description;
@@ -965,7 +959,6 @@
         $('#graphStart').val(defaults.start);
         $('#graphEnd').val(defaults.end);
 
-        // Reset chart area
         $('#sensorChart').addClass('hidden').empty();
         $('#graphError').addClass('hidden').text('');
         $('#graphLoading').addClass('hidden');
@@ -996,12 +989,9 @@
         if (end) params.append('end', end);
         if (params.toString()) url += '?' + params.toString();
 
-        // Show loading, hide other states
         $('#graphLoading').removeClass('hidden');
         $('#graphError').addClass('hidden').text('');
         $('#graphPlaceholder').addClass('hidden');
-
-        // Make chart container visible (so Plotly can measure its width)
         $('#sensorChart').empty().removeClass('hidden');
 
         $.getJSON(url)
@@ -1010,7 +1000,7 @@
             if (response.error) {
               $('#graphError').removeClass('hidden').text(response.error);
               $('#graphPlaceholder').removeClass('hidden');
-              $('#sensorChart').addClass('hidden'); // hide empty chart
+              $('#sensorChart').addClass('hidden');
               return;
             }
 
@@ -1022,7 +1012,6 @@
               return;
             }
 
-            // Prepare data for Plotly
             const dates = rows.map(r => new Date(r.date_time));
             const values = rows.map(r => r.value1);
 
@@ -1051,7 +1040,7 @@
                 automargin: true
               },
               yaxis: {
-                title: 'Value',
+                // title: 'Value',
                 range: [0, 101],
                 fixedrange: false
               },
@@ -1078,7 +1067,7 @@
               paper_bgcolor: '#f9fafb',
               plot_bgcolor: '#f9fafb',
               font: { family: 'Inter, sans-serif' },
-              autosize: true         // ensures it fills container
+              autosize: true
             };
 
             const config = {
@@ -1089,7 +1078,6 @@
             };
 
             Plotly.newPlot('sensorChart', [trace], layout, config);
-            // Chart is already visible (hidden class removed earlier)
             plotlyChartRendered = true;
           })
           .fail(function (xhr) {
@@ -1100,7 +1088,7 @@
             else if (xhr.status === 0) errorMsg = 'Network error – check server connection';
             $('#graphError').removeClass('hidden').text('Error loading data: ' + errorMsg);
             $('#graphPlaceholder').removeClass('hidden');
-            $('#sensorChart').addClass('hidden'); // hide empty chart
+            $('#sensorChart').addClass('hidden');
           });
       }
 
@@ -1174,7 +1162,6 @@
         }
       }
 
-      // Toast helper
       function showToast(message, type = 'success') {
         const $toast = $('#copyToast');
         $toast.removeClass('show success error');
@@ -1317,7 +1304,6 @@
 
       $('#graphSensorSearchBtn').on('click', performGraphSearch);
 
-      // Copy chart as image using Plotly.toImage
       $('#copyChartBtn').on('click', async function () {
         const $btn = $(this);
         const originalText = $btn.html();
@@ -1353,7 +1339,6 @@
 
       // Initial load
       loadData();
-      setInterval(updateTimestamp, 1000);
     });
   </script>
 </body>
