@@ -241,13 +241,8 @@
         <div class="bg-white rounded-lg shadow-md border border-blue-200 p-4 mb-6">
             <div class="flex flex-wrap items-center gap-4">
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Start</label>
-                    <input type="datetime-local" id="dateStart"
-                        class="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-accent">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">End</label>
-                    <input type="datetime-local" id="dateEnd"
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Date</label>
+                    <input type="date" id="datePicker"
                         class="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-accent">
                 </div>
                 <button id="loadRangeBtn"
@@ -317,31 +312,47 @@
         <div id="tableWrapper" class="bg-white rounded-lg shadow-md border border-blue-200 p-4 table-container hidden">
 
             <div class="flex flex-wrap gap-3 mb-4 items-center justify-between border-b pb-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Search</label>
-                    <input type="text" id="tableSearch" placeholder="ID or description..."
-                        class="w-48 md:w-64 pl-3 pr-3 py-2 text-sm border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md border bg-white">
+
+                <!-- Left: Search + Process filter side-by-side -->
+                <div class="flex items-end gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+                        <input type="text" id="tableSearch" placeholder="ID or description..."
+                            class="w-48 md:w-64 pl-3 pr-3 py-2 text-sm border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Process</label>
+                        <select id="filterProcess"
+                            class="w-36 pl-2 pr-6 py-2 text-sm border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
+                            <option value="all">All Processes</option>
+                        </select>
+                    </div>
                 </div>
 
+                <!-- Right: Sort time + action buttons + page size -->
                 <div class="flex flex-wrap items-center gap-3">
-                    <button id="copyTableBtn"
-                        class="bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-200 transition border border-gray-300">📋
-                        Copy Table</button>
-                    <button id="exportCsvBtn"
-                        class="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition">⬇️ Export
-                        CSV</button>
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Sort Time by</label>
                         <select id="sortOrder"
-                            class="w-28 pl-2 pr-6 py-2 text-sm border-blue-200 rounded-md border bg-white">
+                            class="w-28 md:w-32 pl-2 pr-6 py-2 text-sm border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
                             <option value="asc">Ascending ↑</option>
                             <option value="desc">Descending ↓</option>
                         </select>
                     </div>
+
+                    <button id="copyTableBtn"
+                        class="bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-200 transition border border-gray-300">
+                        📋 Copy Table
+                    </button>
+                    <button id="exportCsvBtn"
+                        class="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition">
+                        ⬇️ Export CSV
+                    </button>
+
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Show</label>
                         <select id="pageSize"
-                            class="w-20 pl-2 pr-6 py-2 text-sm border-blue-200 rounded-md border bg-white">
+                            class="w-20 pl-2 pr-6 py-2 text-sm border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
@@ -349,6 +360,7 @@
                         </select>
                     </div>
                 </div>
+
             </div>
 
             <div class="overflow-x-auto">
@@ -390,55 +402,67 @@
 
     <script>
         $(document).ready(function () {
-            // State
+            // ---------- State ----------
             let allData = [];
             let filteredData = [];
             let currentPage = 1;
             let pageSize = 10;
             let activeStatusFilter = 'all';
             let tableSearchTerm = '';
-            let dateSortOrder = 'asc';   // 'asc' or 'desc'
-            // Set default datetime range (yesterday 7am to today 7am)
-            function setDefaultDateTime() {
-                const now = new Date();
-                const today7am = new Date(now);
-                today7am.setHours(7, 0, 0, 0);
+            let dateSortOrder = 'asc';       // 'asc' or 'desc'
+            let activeProcessFilter = 'all';
 
-                const yesterday7am = new Date(today7am);
-                yesterday7am.setDate(yesterday7am.getDate() - 1);
+            // Inventory map DCP Name → Process
+            let dcpProcessMap = {};
 
-                const format = (d) => {
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    const hours = String(d.getHours()).padStart(2, '0');
-                    const minutes = String(d.getMinutes()).padStart(2, '0');
-                    return `${year}-${month}-${day}T${hours}:${minutes}`;
-                };
-
-                $('#dateStart').val(format(yesterday7am));
-                $('#dateEnd').val(format(today7am));
+            // ---------- Helper: Parse date_time ----------
+            function parseDateTime(dateTimeStr) {
+                if (!dateTimeStr) return new Date(0);
+                if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/.test(dateTimeStr)) {
+                    const parts = dateTimeStr.split(' ');
+                    const dParts = parts[0].split('/');
+                    const tParts = parts[1].split(':');
+                    return new Date(parseInt(dParts[2]), parseInt(dParts[1]) - 1, parseInt(dParts[0]), parseInt(tParts[0]), parseInt(tParts[1]));
+                }
+                if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateTimeStr)) {
+                    return new Date(dateTimeStr.replace(' ', 'T'));
+                }
+                return new Date(dateTimeStr);
             }
-            setDefaultDateTime();
 
-            // Toast helper
+            // Determine shift: DS = 07:00-18:59, NS = 19:00-06:59
+            function getShift(dateTimeStr) {
+                const d = parseDateTime(dateTimeStr);
+                const h = d.getHours();
+                return (h >= 7 && h < 19) ? 'DS' : 'NS';
+            }
+
+            // ---------- Set default date (today) ----------
+            function setDefaultDate() {
+                const today = new Date();
+                const y = today.getFullYear();
+                const m = String(today.getMonth() + 1).padStart(2, '0');
+                const d = String(today.getDate()).padStart(2, '0');
+                $('#datePicker').val(`${y}-${m}-${d}`);
+            }
+            setDefaultDate();
+
+            // ---------- Toast ----------
             function showToast(message, type = 'success') {
                 const $toast = $('#copyToast');
                 $toast.removeClass('show success error');
                 $toast.addClass(type);
                 $toast.find('.toast-message').text(message);
                 $toast.find('.toast-icon').text(type === 'success' ? '✅' : '❌');
-
-                void $toast[0].offsetWidth; // reflow
+                void $toast[0].offsetWidth;
                 $toast.addClass('show');
-
                 clearTimeout(window.toastTimeout);
                 window.toastTimeout = setTimeout(() => {
                     $toast.removeClass('show');
                 }, 3000);
             }
 
-            // Tooltip helpers
+            // ---------- Tooltip ----------
             const $tooltip = $('#statTooltip');
             function updateTooltipPosition(e) {
                 const tw = $tooltip.outerWidth(), th = $tooltip.outerHeight();
@@ -451,9 +475,10 @@
                 $tooltip.css({ left, top });
             }
 
-            function getProcessBreakdown(filterValue) {
-                const counts = {};
-                let total = 0;
+            // Shift breakdown with per‑process counts
+            function getShiftProcessBreakdown(filterValue) {
+                const ds = {}, ns = {};
+                let dsTotal = 0, nsTotal = 0;
                 allData.forEach(row => {
                     const alarm = (row['Alarm Code'] || '').toString().trim().toUpperCase();
                     let match = false;
@@ -461,15 +486,23 @@
                     else if (filterValue === 'Check L2') match = (alarm.includes('L2') || alarm === 'CHECK L2');
                     else if (filterValue === 'Check L1') match = (alarm.includes('L1') || alarm === 'CHECK L1');
                     else if (filterValue === 'all') match = true;
+
                     if (match) {
-                        const proc = row['Process'] || 'Unknown';
-                        counts[proc] = (counts[proc] || 0) + 1;
-                        total++;
+                        const proc = (dcpProcessMap[row['DCP Name']] || 'Unknown').trim();
+                        const shift = getShift(row['Date_Time']);
+                        if (shift === 'DS') {
+                            ds[proc] = (ds[proc] || 0) + 1;
+                            dsTotal++;
+                        } else {
+                            ns[proc] = (ns[proc] || 0) + 1;
+                            nsTotal++;
+                        }
                     }
                 });
-                return { counts, total };
+                return { ds, ns, dsTotal, nsTotal };
             }
 
+            // Tooltip hover event
             $(document).on('mouseenter', '.stat-card', function (e) {
                 const $card = $(this);
                 const filter = $card.data('filter');
@@ -482,25 +515,60 @@
                 else return;
 
                 const filterValue = filter === 'all' ? 'all' : value;
-                const { counts, total } = getProcessBreakdown(filterValue);
-                let html = `<h4>${title} by Process</h4>`;
-                const sorted = Object.keys(counts).sort();
-                if (sorted.length === 0) {
-                    html += '<div class="process-item"><span class="process-name">No data</span><span class="process-count">0</span></div>';
+                const { ds, ns, dsTotal, nsTotal } = getShiftProcessBreakdown(filterValue);
+
+                // Format date from picker for the title
+                let formattedDate = '';
+                const dateVal = $('#datePicker').val();   // "YYYY-MM-DD"
+                if (dateVal) {
+                    const parts = dateVal.split('-');
+                    if (parts.length === 3) {
+                        const month = parseInt(parts[1], 10);
+                        const day = parseInt(parts[2], 10);
+                        const year = parts[0];
+                        formattedDate = `${month}-${day}-${year}`;
+                    }
+                }
+
+                let html = `<h4 style="text-align:center;">${title}: ${formattedDate}</h4>`;
+                html += '<div style="display:flex; gap:16px;">';
+
+                // Day Shift column
+                html += '<div style="flex:1;">';
+                html += '<strong>☀️ Day Shift</strong>';
+                const dsProcs = Object.keys(ds).sort();
+                if (dsProcs.length === 0) {
+                    html += '<div class="process-item"><span class="process-name">No data</span></div>';
                 } else {
-                    sorted.forEach(proc => {
-                        html += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${counts[proc]}</span></div>`;
+                    dsProcs.forEach(proc => {
+                        html += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${ds[proc]}</span></div>`;
                     });
                 }
-                html += `<div class="total-row"><span class="total-label">📋 TOTAL</span><span class="total-value">${total}</span></div>`;
+                html += `<div class="total-row"><span class="total-label">Total</span><span class="total-value">${dsTotal}</span></div>`;
+                html += '</div>';
+
+                // Night Shift column
+                html += '<div style="flex:1;">';
+                html += '<strong>🌙 Night Shift</strong>';
+                const nsProcs = Object.keys(ns).sort();
+                if (nsProcs.length === 0) {
+                    html += '<div class="process-item"><span class="process-name">No data</span></div>';
+                } else {
+                    nsProcs.forEach(proc => {
+                        html += `<div class="process-item"><span class="process-name">${proc}</span><span class="process-count">${ns[proc]}</span></div>`;
+                    });
+                }
+                html += `<div class="total-row"><span class="total-label">Total</span><span class="total-value">${nsTotal}</span></div>`;
+                html += '</div>';
+
+                html += '</div>';
                 $tooltip.html(html).css({ display: 'block' });
                 updateTooltipPosition(e);
             });
-
             $(document).on('mousemove', '.stat-card', updateTooltipPosition);
             $(document).on('mouseleave', '.stat-card', () => $tooltip.css('display', 'none'));
 
-            // Helper: get badge class based on alarm text
+            // ---------- Badge helper ----------
             function getBadgeClass(alarmText) {
                 if (!alarmText) return 'badge-other';
                 const text = alarmText.toString().trim().toUpperCase();
@@ -510,7 +578,7 @@
                 return 'badge-other';
             }
 
-            // Format datetime to 12-hour with AM/PM
+            // Format datetime 12h
             function formatDateTime12h(dateTimeStr) {
                 if (!dateTimeStr) return '';
                 let date;
@@ -519,25 +587,45 @@
                     const dParts = parts[0].split('/');
                     const tParts = parts[1].split(':');
                     date = new Date(parseInt(dParts[2]), parseInt(dParts[1]) - 1, parseInt(dParts[0]), parseInt(tParts[0]), parseInt(tParts[1]));
-                }
-                else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateTimeStr)) {
+                } else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateTimeStr)) {
                     date = new Date(dateTimeStr.replace(' ', 'T'));
-                }
-                else {
+                } else {
                     return dateTimeStr;
                 }
                 if (isNaN(date.getTime())) return dateTimeStr;
                 return date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, month: 'numeric', day: 'numeric', year: 'numeric' });
             }
 
-            // Load data by range
+            // ---------- Inventory loading → Process map ----------
+            function loadInventory() {
+                $.getJSON('/api/data').done(resp => {
+                    const flat = [];
+                    for (let key in resp) {
+                        const val = resp[key];
+                        if (Array.isArray(val)) flat.push(...val);
+                        else if (val.id) flat.push(val);
+                    }
+                    flat.forEach(item => { dcpProcessMap[item.id] = item.process || ''; });
+                    populateProcessFilter();
+                }).fail(() => console.warn('Could not load inventory data'));
+            }
+
+            function populateProcessFilter() {
+                const uniqueProcesses = [...new Set(Object.values(dcpProcessMap).filter(Boolean))].sort();
+                const sel = $('#filterProcess');
+                sel.empty().append('<option value="all">All Processes</option>');
+                uniqueProcesses.forEach(p => sel.append(`<option value="${p}">${p}</option>`));
+            }
+
+            // ---------- Data loading (date only) ----------
             function loadDataByRange() {
-                const start = $('#dateStart').val();
-                const end = $('#dateEnd').val();
-                if (!start || !end) {
-                    showToast('Please select both start and end datetime', 'error');
+                const dateVal = $('#datePicker').val();
+                if (!dateVal) {
+                    showToast('Please select a date', 'error');
                     return;
                 }
+                const start = dateVal + 'T00:00';
+                const end = dateVal + 'T23:59';
 
                 $('#cardsSection').addClass('hidden');
                 $('#tableWrapper').addClass('hidden');
@@ -546,7 +634,7 @@
                 $('#errorIndicator').addClass('hidden');
                 $('#recordCount').text('');
 
-                $.getJSON('/api/archive/data_by_range', { start: start, end: end })
+                $.getJSON('/api/archive/data_by_range', { start, end })
                     .done(response => {
                         $('#loadingIndicator').addClass('hidden');
                         if (response.error) {
@@ -557,8 +645,8 @@
 
                         allData = response.data;
                         if (allData.length === 0) {
-                            $('#emptyIndicator').removeClass('hidden').text('No data in selected range');
-                            showToast('No data in selected range', 'error');
+                            $('#emptyIndicator').removeClass('hidden').text('No data for this date');
+                            showToast('No data found', 'error');
                             return;
                         }
 
@@ -568,7 +656,9 @@
                         // Reset filters
                         activeStatusFilter = 'all';
                         tableSearchTerm = '';
+                        activeProcessFilter = 'all';
                         $('#tableSearch').val('');
+                        $('#filterProcess').val('all');
                         $('.stat-card').removeClass('active');
                         $('#cardTotal').addClass('active');
 
@@ -583,7 +673,7 @@
                     });
             }
 
-            // Calculate card stats
+            // ---------- Card stats ----------
             function calculateStats() {
                 let total = allData.length;
                 let l1 = 0, l2 = 0, stop = 0;
@@ -599,22 +689,7 @@
                 $('#textStop').text(stop);
             }
 
-            function parseDateTime(dateTimeStr) {
-                if (!dateTimeStr) return new Date(0); // epoch for empty
-                // Try dd/mm/yyyy HH:MM
-                if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/.test(dateTimeStr)) {
-                    const parts = dateTimeStr.split(' ');
-                    const dParts = parts[0].split('/');
-                    const tParts = parts[1].split(':');
-                    return new Date(parseInt(dParts[2]), parseInt(dParts[1]) - 1, parseInt(dParts[0]), parseInt(tParts[0]), parseInt(tParts[1]));
-                }
-                // Try yyyy-mm-dd HH:MM:SS
-                if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(dateTimeStr)) {
-                    return new Date(dateTimeStr.replace(' ', 'T'));
-                }
-                return new Date(dateTimeStr); // fallback
-            }
-            // Apply filters
+            // ---------- Apply filters ----------
             function applyFilters() {
                 filteredData = allData.filter(row => {
                     const id = (row['DCP Name'] || '').toString();
@@ -623,19 +698,26 @@
                         id.toLowerCase().includes(tableSearchTerm) ||
                         desc.toLowerCase().includes(tableSearchTerm);
 
+                    // Status filter
                     let matchStatus = true;
                     if (activeStatusFilter !== 'all') {
                         const alarm = (row['Alarm Code'] || '').toString().trim().toUpperCase();
-                        if (activeStatusFilter === 'STOP') {
-                            matchStatus = (alarm === 'STOP');
-                        } else if (activeStatusFilter === 'Check L2') {
-                            matchStatus = alarm.includes('L2') || alarm === 'CHECK L2';
-                        } else if (activeStatusFilter === 'Check L1') {
-                            matchStatus = alarm.includes('L1') || alarm === 'CHECK L1';
-                        }
+                        if (activeStatusFilter === 'STOP') matchStatus = (alarm === 'STOP');
+                        else if (activeStatusFilter === 'Check L2') matchStatus = alarm.includes('L2') || alarm === 'CHECK L2';
+                        else if (activeStatusFilter === 'Check L1') matchStatus = alarm.includes('L1') || alarm === 'CHECK L1';
                     }
-                    return matchSearch && matchStatus;
+
+                    // Process filter
+                    let matchProcess = true;
+                    if (activeProcessFilter !== 'all') {
+                        const dcpName = row['DCP Name'] || '';
+                        const proc = dcpProcessMap[dcpName] || '';
+                        matchProcess = (proc === activeProcessFilter);
+                    }
+
+                    return matchSearch && matchStatus && matchProcess;
                 });
+
                 // Sort by Date_Time
                 filteredData.sort((a, b) => {
                     const dateA = parseDateTime(a['Date_Time']);
@@ -644,12 +726,13 @@
                     if (dateA > dateB) return dateSortOrder === 'asc' ? 1 : -1;
                     return 0;
                 });
+
                 calculateStats();
                 currentPage = 1;
                 renderTable();
             }
 
-            // Render table - Alarm Code now right after Description
+            // ---------- Render table ----------
             function renderTable() {
                 const thead = $('#tableHead');
                 const tbody = $('#tableBody');
@@ -672,7 +755,6 @@
                         const alarmText = row['Alarm Code'] || '';
                         const badgeClass = getBadgeClass(alarmText);
                         const getVal = (key) => (row[key] != null) ? row[key] : '';
-
                         let tr = '<tr class="hover:bg-blue-50">';
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm">${formatDateTime12h(getVal('Date_Time'))}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm font-mono font-bold text-blue-700">${getVal('DCP Name')}</td>`;
@@ -706,17 +788,14 @@
                 $('#nextPage').prop('disabled', currentPage >= totalPages);
             }
 
-            // Copy Table (TSV)
+            // ---------- Copy table (TSV) ----------
             function copyTableAsTSV() {
                 if (filteredData.length === 0) {
                     showToast('No data to copy', 'error');
                     return;
                 }
-
                 const headers = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
-
                 let tsv = headers.join('\t') + '\n';
-
                 filteredData.forEach(row => {
                     const values = [
                         formatDateTime12h(row['Date_Time']),
@@ -732,24 +811,18 @@
                     ];
                     tsv += values.join('\t') + '\n';
                 });
-
-                navigator.clipboard.writeText(tsv).then(() => {
-                    showToast('Table copied to clipboard (TSV)', 'success');
-                }).catch(() => {
-                    showToast('Copy failed. Check permissions.', 'error');
-                });
+                navigator.clipboard.writeText(tsv).then(() => showToast('Table copied (TSV)', 'success'))
+                    .catch(() => showToast('Copy failed', 'error'));
             }
 
-            // Export CSV
+            // ---------- Export CSV ----------
             function exportToCSV() {
                 if (filteredData.length === 0) {
                     showToast('No data to export', 'error');
                     return;
                 }
-
                 const headers = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
                 let csv = headers.join(',') + '\n';
-
                 filteredData.forEach(row => {
                     const values = [
                         `"${formatDateTime12h(row['Date_Time']).replace(/"/g, '""')}"`,
@@ -765,7 +838,6 @@
                     ];
                     csv += values.join(',') + '\n';
                 });
-
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 const url = URL.createObjectURL(blob);
@@ -775,20 +847,24 @@
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
-
-                showToast('CSV exported successfully', 'success');
+                showToast('CSV exported', 'success');
             }
 
-            // Event Handlers
+            // ---------- Event bindings ----------
             $('#loadRangeBtn').click(loadDataByRange);
+
+            $('#tableSearch').on('input', function () {
+                tableSearchTerm = $(this).val().trim().toLowerCase();
+                applyFilters();
+            });
 
             $('#sortOrder').change(function () {
                 dateSortOrder = $(this).val();
                 applyFilters();
             });
 
-            $('#tableSearch').on('input', function () {
-                tableSearchTerm = $(this).val().trim().toLowerCase();
+            $('#filterProcess').change(function () {
+                activeProcessFilter = $(this).val();
                 applyFilters();
             });
 
@@ -804,14 +880,12 @@
                 if (currentPage < totalPages) { currentPage++; renderTable(); }
             });
 
-            // Card filtering
+            // Card filtering (status)
             $('.stat-card').click(function () {
                 const filterType = $(this).data('filter');
                 const filterValue = $(this).data('value');
-
                 $('.stat-card').removeClass('active');
                 $(this).addClass('active');
-
                 if (filterType === 'all') {
                     activeStatusFilter = 'all';
                 } else {
@@ -820,9 +894,11 @@
                 applyFilters();
             });
 
-            // Copy and Export buttons
             $('#copyTableBtn').on('click', copyTableAsTSV);
             $('#exportCsvBtn').on('click', exportToCSV);
+
+            // Initialise inventory map and populate process filter
+            loadInventory();
         });
     </script>
 </body>
