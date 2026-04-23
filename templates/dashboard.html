@@ -194,6 +194,20 @@
       color: white;
       letter-spacing: 0.3px;
     }
+
+    .cip-badge {
+      font-family: 'Arial Black', 'Impact', 'Franklin Gothic Heavy', sans-serif;
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: #dc2626;
+      /* red */
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      /* Ensures squared proportions */
+      line-height: 1.2;
+    }
   </style>
 </head>
 
@@ -201,7 +215,7 @@
 
   <nav class="bg-card border-b border-border px-6 py-3 flex items-center justify-between shadow-sm">
     <!-- Left: Logo + Title -->
-    <div class="flex items-center gap-3 w-1/4">
+    <div class="flex items-center gap-3 w-1/4"><span class="cip-badge">CIP</span>
       <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -294,6 +308,36 @@
       </div>
 
     </div>
+
+    <!-- Centered Legend -->
+    <div class="mt-6 mb-4 flex justify-center">
+      <div class="flex items-center gap-6 bg-white border border-gray-200 rounded-lg px-6 py-3 shadow-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded" style="background-color: #16a34a;"></span>
+          <span class="text-sm text-gray-700 font-semibold">ACTIVE</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded" style="background-color: #ff00d0;"></span>
+          <span class="text-sm text-gray-700 font-semibold">STALE</span>
+        </div>
+
+        <div class="w-px h-6 bg-gray-300"></div>
+
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded" style="background-color: #d97706;"></span>
+          <span class="text-sm text-gray-700 font-semibold">CHECK L2</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded" style="background-color: #eab308;"></span>
+          <span class="text-sm text-gray-700 font-semibold">CHECK L1</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded" style="background-color: #dc2626;"></span>
+          <span class="text-sm text-gray-700 font-semibold">STOP</span>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <div id="tooltip" class="tooltip"></div>
