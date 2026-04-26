@@ -1,6 +1,6 @@
 import os
 import glob
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask import Flask, render_template, jsonify, request
 import pandas as pd
 from collections import defaultdict
@@ -58,9 +58,6 @@ def load_data():
             if 'AOI' in desc:
                 section = 'aoi'
                 is_list_section = True
-            # else:
-            #     section = 'smachine'
-            #     is_list_section = True
 
         if not section:
             continue
@@ -95,132 +92,6 @@ def load_data():
         sensor_map[section] = items
 
     return sensor_map
-
-@app.route('/api/archive/files')
-def api_archive_files():
-    """Return list of CSV files in data/ that start with 'LMS'"""
-    data_dir = os.path.join(os.path.dirname(__file__), 'data')
-    pattern = os.path.join(data_dir, 'LMS*.csv')
-    files = glob.glob(pattern)
-    filenames = [os.path.basename(f) for f in files]
-    filenames.sort(reverse=True)
-    return jsonify(filenames)
-
-@app.route('/api/archive/data/<filename>')
-def api_archive_data(filename):
-    if not filename.startswith('LMS') or not filename.endswith('.csv'):
-        return jsonify({'error': 'Invalid filename'}), 400
-    
-    data_dir = os.path.join(os.path.dirname(__file__), 'data')
-    filepath = os.path.join(data_dir, filename)
-    if not os.path.isfile(filepath):
-        return jsonify({'error': 'File not found'}), 404
-    
-    try:
-        df = pd.read_csv(filepath, dtype={'Alarm Code': str})
-        df = df.fillna('')
-        data = df.to_dict(orient='records')
-        columns = df.columns.tolist()
-        return jsonify({'columns': columns, 'data': data})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/archive/data_by_range')
-def api_archive_data_by_range():
-    """Load LMS files that overlap with the given datetime range."""
-    start_str = request.args.get('start')
-    end_str = request.args.get('end')
-    if not start_str or not end_str:
-        return jsonify({'error': 'start and end parameters are required'}), 400
-
-    try:
-        start_dt = datetime.fromisoformat(start_str)
-        end_dt = datetime.fromisoformat(end_str)
-    except ValueError:
-        return jsonify({'error': 'Invalid datetime format'}), 400
-
-    if start_dt >= end_dt:
-        return jsonify({'error': 'start must be before end'}), 400
-
-    data_dir = os.path.join(os.path.dirname(__file__), 'data')
-    all_files = glob.glob(os.path.join(data_dir, 'LMS*.csv'))
-
-    # Determine which files to load based on their defined time spans
-    files_to_load = []
-    for f in all_files:
-        base = os.path.basename(f)
-        if not base.startswith('LMS') or not base.endswith('.csv'):
-            continue
-        # Expected format: LMS_YYYYMMDD_DS.csv or LMS_YYYYMMDD_NS.csv
-        parts = base.replace('.csv', '').split('_')
-        if len(parts) < 3:
-            continue
-        date_str = parts[1]  # YYYYMMDD
-        shift = parts[2]     # DS or NS
-        try:
-            file_date = datetime.strptime(date_str, '%Y%m%d')
-        except ValueError:
-            continue
-
-        if shift == 'DS':
-            file_start = file_date.replace(hour=7, minute=0, second=0)
-            file_end = file_date.replace(hour=19, minute=0, second=0)
-        elif shift == 'NS':
-            file_start = file_date.replace(hour=19, minute=0, second=0)
-            file_end = file_date.replace(hour=7, minute=0, second=0) + timedelta(days=1)
-        else:
-            continue
-
-        # Check if interval overlaps with [start_dt, end_dt]
-        if file_start <= end_dt and file_end >= start_dt:
-            files_to_load.append(f)
-
-    if not files_to_load:
-        return jsonify({'error': 'No LMS files cover the selected time range'}), 404
-
-    # Load and combine all relevant files
-    dfs = []
-    for f in files_to_load:
-        try:
-            df = pd.read_csv(f, dtype={'Alarm Code': str})
-            dfs.append(df)
-        except Exception as e:
-            print(f"Error reading {f}: {e}")
-
-    if not dfs:
-        return jsonify({'error': 'Could not read any CSV files'}), 500
-
-    combined = pd.concat(dfs, ignore_index=True)
-    combined = combined.fillna('')
-
-    # Parse Date_Time column (handles both formats)
-    def parse_date_time(val):
-        if pd.isna(val) or val == '':
-            return pd.NaT
-        val_str = str(val).strip()
-        # Try format "dd/mm/yyyy HH:MM"
-        try:
-            return datetime.strptime(val_str, '%d/%m/%Y %H:%M')
-        except ValueError:
-            pass
-        # Try format "yyyy-mm-dd HH:MM:SS"
-        try:
-            return datetime.strptime(val_str, '%Y-%m-%d %H:%M:%S')
-        except ValueError:
-            pass
-        return pd.NaT
-
-    combined['_dt'] = combined['Date_Time'].apply(parse_date_time)
-    combined = combined.dropna(subset=['_dt'])
-
-    # Filter by actual date range
-    combined = combined[(combined['_dt'] >= start_dt) & (combined['_dt'] <= end_dt)]
-    combined = combined.sort_values('_dt')
-    combined = combined.drop('_dt', axis=1)
-
-    data = combined.to_dict(orient='records')
-    columns = combined.columns.tolist()
-    return jsonify({'columns': columns, 'data': data})
 
 @app.route('/api/sensor/<sensor_id>/raw')
 def sensor_raw_data(sensor_id):
@@ -282,20 +153,16 @@ def sensor_raw_data(sensor_id):
             return jsonify({'error': 'No valid data found in CSV files'}), 404
 
         combined = pd.concat(dfs, ignore_index=True)
-
         combined['date_time'] = pd.to_datetime(combined['date_time'], errors='coerce')
         combined['value1'] = pd.to_numeric(combined['value1'], errors='coerce')
-
         combined = combined.dropna(subset=['date_time', 'value1'])
 
         if combined.empty:
             return jsonify({'error': 'No valid data after cleaning'}), 404
 
         combined = combined.drop_duplicates(subset=['date_time'], keep='first')
-
         combined = combined.sort_values('date_time')
 
-        # Filter by requested date range
         if start_dt:
             combined = combined[combined['date_time'] >= start_dt]
         if end_dt:
@@ -311,6 +178,56 @@ def sensor_raw_data(sensor_id):
         return jsonify({'data': data})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/archive/data_by_date/<date_str>')
+def api_archive_data_by_date(date_str):
+    """Load LMS_YYYYMMDD_DS.csv and LMS_YYYYMMDD_NS.csv for a given date (YYYY-MM-DD)."""
+    try:
+        date_dt = datetime.strptime(date_str, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'error': 'Invalid date format. Use YYY-MM-DD'}), 400
+
+    date_compact = date_dt.strftime('%Y%m%d')
+    data_dir = os.path.join(os.path.dirname(__file__), 'data')
+    files_to_load = [
+        os.path.join(data_dir, f'LMS_{date_compact}_DS.csv'),
+        os.path.join(data_dir, f'LMS_{date_compact}_NS.csv')
+    ]
+
+    dfs = []
+    for f in files_to_load:
+        if os.path.isfile(f):
+            # Determine shift from filename (e.g. LMS_20260410_DS.csv → DS)
+            file_shift = os.path.basename(f).split('_')[-1].replace('.csv', '')  # 'DS' or 'NS'
+            try:
+                df = pd.read_csv(f, dtype={'Alarm Code': str})
+                df['Shift'] = file_shift          # <-- add origin shift
+                dfs.append(df)
+            except Exception as e:
+                print(f"Error reading {f}: {e}")
+
+    combined = pd.concat(dfs, ignore_index=True).fillna('')
+
+    # Parse & sort by Date_Time
+    def parse_date_time(val):
+        if pd.isna(val) or val == '':
+            return pd.NaT
+        val_str = str(val).strip()
+        for fmt in ('%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M:%S'):
+            try:
+                return datetime.strptime(val_str, fmt)
+            except ValueError:
+                continue
+        return pd.NaT
+
+    combined['_dt'] = combined['Date_Time'].apply(parse_date_time)
+    combined = combined.dropna(subset=['_dt'])
+    combined = combined.sort_values('_dt')
+    combined = combined.drop('_dt', axis=1)
+
+    data = combined.to_dict(orient='records')
+    columns = combined.columns.tolist()
+    return jsonify({'columns': columns, 'data': data})
 
 @app.route('/')
 def home():

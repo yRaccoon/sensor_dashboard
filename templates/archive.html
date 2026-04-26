@@ -267,20 +267,6 @@
                     <span class="text-2xl font-bold text-gray-800" id="textTotal">0</span>
                     <span class="text-sm text-gray-500 font-medium">Total Alarms</span>
                 </div>
-                <!-- Stop -->
-                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
-                    data-filter="status" data-value="STOP" data-card-type="stop">
-                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                        </svg>
-                    </div>
-                    <span class="text-2xl font-bold text-red-600" id="textStop">0</span>
-                    <span class="text-sm text-gray-500 font-medium">Stop</span>
-                </div>
                 <!-- Check L2 -->
                 <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
                     data-filter="status" data-value="Check L2" data-card-type="l2">
@@ -305,6 +291,20 @@
                     <span class="text-2xl font-bold text-yellow-600" id="textL1">0</span>
                     <span class="text-sm text-gray-500 font-medium">Check L1</span>
                 </div>
+                <!-- Stop -->
+                <div class="stat-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center"
+                    data-filter="status" data-value="STOP" data-card-type="stop">
+                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-bold text-red-600" id="textStop">0</span>
+                    <span class="text-sm text-gray-500 font-medium">Stop</span>
+                </div>
             </div>
         </div>
 
@@ -325,6 +325,16 @@
                         <select id="filterProcess"
                             class="w-36 pl-2 pr-6 py-2 text-sm border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
                             <option value="all">All Processes</option>
+                        </select>
+                    </div>
+                    <!-- 👇 New Shift filter -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Shift</label>
+                        <select id="filterShift"
+                            class="w-28 pl-2 pr-6 py-2 text-sm border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
+                            <option value="all">All Shifts</option>
+                            <option value="DS">Day Shift</option>
+                            <option value="NS">Night Shift</option>
                         </select>
                     </div>
                 </div>
@@ -411,6 +421,7 @@
             let tableSearchTerm = '';
             let dateSortOrder = 'asc';       // 'asc' or 'desc'
             let activeProcessFilter = 'all';
+            let activeShiftFilter = 'all';   // 'all', 'DS', 'NS'
 
             // Inventory map DCP Name → Process
             let dcpProcessMap = {};
@@ -428,13 +439,6 @@
                     return new Date(dateTimeStr.replace(' ', 'T'));
                 }
                 return new Date(dateTimeStr);
-            }
-
-            // Determine shift: DS = 07:00-18:59, NS = 19:00-06:59
-            function getShift(dateTimeStr) {
-                const d = parseDateTime(dateTimeStr);
-                const h = d.getHours();
-                return (h >= 7 && h < 19) ? 'DS' : 'NS';
             }
 
             // ---------- Set default date (today) ----------
@@ -475,7 +479,7 @@
                 $tooltip.css({ left, top });
             }
 
-            // Shift breakdown with per‑process counts
+            // Shift breakdown using the Shift column from backend
             function getShiftProcessBreakdown(filterValue) {
                 const ds = {}, ns = {};
                 let dsTotal = 0, nsTotal = 0;
@@ -489,11 +493,11 @@
 
                     if (match) {
                         const proc = (dcpProcessMap[row['DCP Name']] || 'Unknown').trim();
-                        const shift = getShift(row['Date_Time']);
+                        const shift = (row['Shift'] || '').toString().toUpperCase(); // 'DS' or 'NS'
                         if (shift === 'DS') {
                             ds[proc] = (ds[proc] || 0) + 1;
                             dsTotal++;
-                        } else {
+                        } else if (shift === 'NS') {
                             ns[proc] = (ns[proc] || 0) + 1;
                             nsTotal++;
                         }
@@ -517,9 +521,8 @@
                 const filterValue = filter === 'all' ? 'all' : value;
                 const { ds, ns, dsTotal, nsTotal } = getShiftProcessBreakdown(filterValue);
 
-                // Format date from picker for the title
                 let formattedDate = '';
-                const dateVal = $('#datePicker').val();   // "YYYY-MM-DD"
+                const dateVal = $('#datePicker').val();
                 if (dateVal) {
                     const parts = dateVal.split('-');
                     if (parts.length === 3) {
@@ -618,14 +621,12 @@
             }
 
             // ---------- Data loading (date only) ----------
-            function loadDataByRange() {
+            function loadDataByDate() {
                 const dateVal = $('#datePicker').val();
                 if (!dateVal) {
                     showToast('Please select a date', 'error');
                     return;
                 }
-                const start = dateVal + 'T00:00';
-                const end = dateVal + 'T23:59';
 
                 $('#cardsSection').addClass('hidden');
                 $('#tableWrapper').addClass('hidden');
@@ -634,7 +635,7 @@
                 $('#errorIndicator').addClass('hidden');
                 $('#recordCount').text('');
 
-                $.getJSON('/api/archive/data_by_range', { start, end })
+                $.getJSON(`/api/archive/data_by_date/${dateVal}`)
                     .done(response => {
                         $('#loadingIndicator').addClass('hidden');
                         if (response.error) {
@@ -653,12 +654,14 @@
                         $('#cardsSection').removeClass('hidden');
                         $('#tableWrapper').removeClass('hidden');
 
-                        // Reset filters
+                        // reset filters
                         activeStatusFilter = 'all';
                         tableSearchTerm = '';
                         activeProcessFilter = 'all';
+                        activeShiftFilter = 'all';
                         $('#tableSearch').val('');
                         $('#filterProcess').val('all');
+                        $('#filterShift').val('all');
                         $('.stat-card').removeClass('active');
                         $('#cardTotal').addClass('active');
 
@@ -715,7 +718,14 @@
                         matchProcess = (proc === activeProcessFilter);
                     }
 
-                    return matchSearch && matchStatus && matchProcess;
+                    // Shift filter
+                    let matchShift = true;
+                    if (activeShiftFilter !== 'all') {
+                        const shift = (row['Shift'] || '').toString().toUpperCase();
+                        matchShift = (shift === activeShiftFilter);
+                    }
+
+                    return matchSearch && matchStatus && matchProcess && matchShift;
                 });
 
                 // Sort by Date_Time
@@ -851,7 +861,7 @@
             }
 
             // ---------- Event bindings ----------
-            $('#loadRangeBtn').click(loadDataByRange);
+            $('#loadRangeBtn').click(loadDataByDate);
 
             $('#tableSearch').on('input', function () {
                 tableSearchTerm = $(this).val().trim().toLowerCase();
@@ -865,6 +875,11 @@
 
             $('#filterProcess').change(function () {
                 activeProcessFilter = $(this).val();
+                applyFilters();
+            });
+
+            $('#filterShift').change(function () {
+                activeShiftFilter = $(this).val();
                 applyFilters();
             });
 
