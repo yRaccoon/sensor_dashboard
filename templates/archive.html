@@ -750,7 +750,7 @@
                 const end = start + pageSize;
                 const pageData = filteredData.slice(start, end);
 
-                const columns = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
+                const columns = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st Data', '2nd Data', '3rd Data', '4th Data', '5th Data', 'Average Data'];
 
                 let headerRow = '<tr>';
                 columns.forEach(col => headerRow += `<th class="px-4 py-3 text-left">${col}</th>`);
@@ -770,11 +770,11 @@
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm font-mono font-bold text-blue-700">${getVal('DCP Name')}</td>`;
                         tr += `<td class="px-4 py-2 text-sm max-w-xs truncate" title="${getVal('Description')}">${getVal('Description')}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm"><span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-md status-badge ${badgeClass}">${alarmText}</span></td>`;
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('1st data')}</td>`;
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('2nd data')}</td>`;
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('3rd data')}</td>`;
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('4th data')}</td>`;
-                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('5th data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('1st Data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('2nd Data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('3rd Data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('4th Data')}</td>`;
+                        tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center">${getVal('5th Data')}</td>`;
                         tr += `<td class="px-4 py-2 whitespace-nowrap text-sm text-center font-semibold">${getVal('Average Data')}</td>`;
                         tr += '</tr>';
                         tbody.append(tr);
@@ -804,7 +804,7 @@
                     showToast('No data to copy', 'error');
                     return;
                 }
-                const headers = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
+                const headers = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st Data', '2nd Data', '3rd Data', '4th Data', '5th Data', 'Average Data'];
                 let tsv = headers.join('\t') + '\n';
                 filteredData.forEach(row => {
                     const values = [
@@ -812,11 +812,11 @@
                         row['DCP Name'] ?? '',
                         row['Description'] ?? '',
                         row['Alarm Code'] ?? '',
-                        row['1st data'] ?? '',
-                        row['2nd data'] ?? '',
-                        row['3rd data'] ?? '',
-                        row['4th data'] ?? '',
-                        row['5th data'] ?? '',
+                        row['1st Data'] ?? '',
+                        row['2nd Data'] ?? '',
+                        row['3rd Data'] ?? '',
+                        row['4th Data'] ?? '',
+                        row['5th Data'] ?? '',
                         row['Average Data'] ?? ''
                     ];
                     tsv += values.join('\t') + '\n';
@@ -831,7 +831,7 @@
                     showToast('No data to export', 'error');
                     return;
                 }
-                const headers = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st data', '2nd data', '3rd data', '4th data', '5th data', 'Average Data'];
+                const headers = ['Date_Time', 'DCP Name', 'Description', 'Alarm Code', '1st Data', '2nd Data', '3rd Data', '4th Data', '5th Data', 'Average Data'];
                 let csv = headers.join(',') + '\n';
                 filteredData.forEach(row => {
                     const values = [
@@ -839,11 +839,11 @@
                         `"${(row['DCP Name'] ?? '').replace(/"/g, '""')}"`,
                         `"${(row['Description'] ?? '').replace(/"/g, '""')}"`,
                         `"${(row['Alarm Code'] ?? '').replace(/"/g, '""')}"`,
-                        row['1st data'] ?? '',
-                        row['2nd data'] ?? '',
-                        row['3rd data'] ?? '',
-                        row['4th data'] ?? '',
-                        row['5th data'] ?? '',
+                        row['1st Data'] ?? '',
+                        row['2nd Data'] ?? '',
+                        row['3rd Data'] ?? '',
+                        row['4th Data'] ?? '',
+                        row['5th Data'] ?? '',
                         row['Average Data'] ?? ''
                     ];
                     csv += values.join(',') + '\n';

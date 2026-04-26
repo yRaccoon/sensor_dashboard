@@ -10,8 +10,9 @@ app = Flask(__name__)
 def map_status(status_code):
     try:
         code = int(status_code)
-        if code == 0: return 'active'  
-        if code in [1, 2]: return 'warn'
+        if code == 0: return 'active'
+        if code == 1: return 'l1'
+        if code == 2: return 'l2'
         if code == 3: return 'critical'
         if code == 4: return 'stale'
         return 'unknown'
@@ -201,7 +202,7 @@ def api_archive_data_by_date(date_str):
             file_shift = os.path.basename(f).split('_')[-1].replace('.csv', '')  # 'DS' or 'NS'
             try:
                 df = pd.read_csv(f, dtype={'Alarm Code': str})
-                df['Shift'] = file_shift          # <-- add origin shift
+                df['Shift'] = file_shift        
                 dfs.append(df)
             except Exception as e:
                 print(f"Error reading {f}: {e}")

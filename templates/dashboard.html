@@ -20,7 +20,14 @@
           colors: {
             bg: '#f8f9fa', card: '#ffffff', border: '#e5e7eb', accent: '#dc2626',
             'accent-hover': '#b91c1c', muted: '#6b7280', fg: '#111827',
-            status: { activeCount: '#16a34a', warn: '#d97706', critical: '#dc2626', stale: '#ff00d0', unknown: '#9ca3af' }
+            status: {
+              activeCount: '#16a34a',
+              l1: '#eab308',
+              l2: '#d97706',
+              critical: '#dc2626',
+              stale: '#ff00d0',
+              unknown: '#9ca3af'
+            }
           }
         }
       }
@@ -253,13 +260,12 @@
 
         <div class="w-px h-6 bg-gray-300 mx-1"></div>
         <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-sm bg-status-warn"></div>
-          <span id="checkL2Count" class="font-bold text-status-warn status-count-number">0</span>
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-l2"></div>
+          <span id="checkL2Count" class="font-bold text-status-l2 status-count-number">0</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-sm" style="background-color: #eab308;"></div>
-          <span id="checkL1Count" class="font-bold"
-            style="color: #eab308; font-size: 1.5rem; font-weight: bold;">0</span>
+          <div class="w-2.5 h-2.5 rounded-sm bg-status-l1"></div>
+          <span id="checkL1Count" class="font-bold text-status-l1 status-count-number">0</span>
         </div>
         <div class="flex items-center gap-1.5">
           <div class="w-2.5 h-2.5 rounded-sm bg-status-critical"></div>
@@ -454,15 +460,11 @@
       function createSensorButton(sectionKey, rowKey, colIndex, data) {
         if (!data || data.id === 'N/A') return '';
 
-        let statusClass = data.status;
+        const statusClass = data.status;
         let pulseClass = '';
-
         const code = parseInt(data.status_code);
-        if (code === 1) {
-          statusClass = 'l1';
-          pulseClass = 'pulse-warn';
-        } else if (code === 2) {
-          statusClass = 'l2';
+
+        if (code === 1 || code === 2) {
           pulseClass = 'pulse-warn';
         } else if (code === 3) {
           pulseClass = 'pulse-critical';
