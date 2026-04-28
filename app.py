@@ -154,7 +154,23 @@ def sensor_raw_data(sensor_id):
             return jsonify({'error': 'No valid data found in CSV files'}), 404
 
         combined = pd.concat(dfs, ignore_index=True)
-        combined['date_time'] = pd.to_datetime(combined['date_time'], errors='coerce')
+        
+        def parse_datetime(val):
+            if pd.isna(val) or val == '':
+                return pd.NaT
+            val_str = str(val).strip()
+            formats = [
+                '%Y-%m-%d %H:%M:%S.%f',  # with milliseconds
+                '%Y-%m-%d %H:%M:%S',      # without milliseconds
+            ]
+            for fmt in formats:
+                try:
+                    return datetime.strptime(val_str, fmt)
+                except ValueError:
+                    continue
+            return pd.NaT
+        
+        combined['date_time'] = combined['date_time'].apply(parse_datetime)
         combined['value1'] = pd.to_numeric(combined['value1'], errors='coerce')
         combined = combined.dropna(subset=['date_time', 'value1'])
 
@@ -179,7 +195,7 @@ def sensor_raw_data(sensor_id):
         return jsonify({'data': data})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+    
 @app.route('/api/archive/data_by_date/<date_str>')
 def api_archive_data_by_date(date_str):
     """Load LMS_YYYYMMDD_DS.csv and LMS_YYYYMMDD_NS.csv for a given date (YYYY-MM-DD)."""
