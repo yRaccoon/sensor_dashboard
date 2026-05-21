@@ -5,15 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Viewstation - Home</title>
-  <!-- <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.724 1.724 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.724 1.724 0 0 0 1.82.33H9a1.724 1.724 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.724 1.724 0 0 0 1 1.51 1.724 1.724 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.724 1.724 0 0 0-.33 1.82V9a1.724 1.724 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.724 1.724 0 0 0-1.51 1z'></path></svg>"> -->
-  <!-- With this -->
-  <link rel="icon" href="/static/logo.png">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <!-- Plotly for interactive charts -->
-  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="/static/logo5.png">
+  <script src="./static/tailwind.js"></script>
+  <link href="./static/inter.css" rel="stylesheet">
+  <script src="./static/jquery.min.js"></script>
+  <script src="./static/plotly.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -276,6 +272,16 @@
       color: #b91c1c;
       text-decoration: underline dotted;
     }
+
+    #currentSensorId {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    #currentSensorId:hover {
+      color: #b91c1c;
+      text-decoration: underline dotted;
+    }
   </style>
 </head>
 
@@ -284,16 +290,7 @@
   <!-- Navbar -->
   <nav class="bg-card border-b border-border px-4 py-2.5 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-3">
-      <!-- <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-          </path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
-          </path>
-        </svg>
-      </div> -->
-      <img src="/static/logo.png" alt="Logo" class="w-auto h-8">
+      <img src="/static/logo5.png" alt="Logo" class="w-auto h-8">
       <h1 class="font-sans font-bold tracking-tight text-accent text-xl">Viewstation</h1>
     </div>
 
@@ -422,8 +419,15 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-500 mb-1">Search (ID or Desc)</label>
-              <input type="text" id="tableSearchId" placeholder="Enter ID or description..."
+              <label class="block text-xs font-medium text-gray-500 mb-1">Line</label>
+              <select id="filterLine"
+                class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
+                <option value="all">All Lines</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Search (DCP or Desc)</label>
+              <input type="text" id="tableSearchId" placeholder="Enter DCP or description..."
                 class="block w-full pl-3 pr-10 py-2 text-base border-blue-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border bg-white">
 
             </div>
@@ -445,13 +449,13 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="table-header">
               <tr>
-                <th class="px-4 py-3 text-left rounded-tl-lg">ID</th>
+                <th class="px-4 py-3 text-left rounded-tl-lg">DCP Name</th>
                 <th class="px-4 py-3 text-left">Description</th>
                 <th class="px-4 py-3 text-left">Location</th>
                 <th class="px-4 py-3 text-left">Process</th>
                 <th class="px-4 py-3 text-left">Line</th>
                 <th class="px-4 py-3 text-left">Status</th>
-                <th class="px-4 py-3 text-center">Stop Cnt</th>
+                <th class="px-4 py-3 text-center">Stop Count</th>
                 <th class="px-4 py-3 text-center">L2</th>
                 <th class="px-4 py-3 text-center">L1</th>
                 <th class="px-4 py-3 text-center rounded-tr-lg">Average</th>
@@ -506,7 +510,7 @@
           <div>
             <label class="block text-xs text-gray-500 mb-0.5">Search DCP Name</label>
             <div class="flex gap-1">
-              <input type="text" id="graphSensorSearch" placeholder="Enter ID..."
+              <input type="text" id="graphSensorSearch" placeholder="Enter DCP Name..."
                 class="border border-gray-300 rounded px-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
               <button id="graphSensorSearchBtn"
                 class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded text-sm hover:bg-gray-200 transition border border-gray-300">
@@ -826,9 +830,13 @@
       function populateFilters() {
         const locations = new Set();
         const processes = new Set();
+        const lines = new Set();
         allData.forEach(item => {
           if (item.loc) locations.add(item.loc);
           if (item.process) processes.add(item.process);
+          if (item.line_no && item.process !== 'WCS' && item.process !== 'STW') {
+            lines.add(item.line_no);
+          }
         });
         const locSelect = $('#filterLocation');
         locSelect.empty().append('<option value="all">All Locations</option>');
@@ -836,6 +844,9 @@
         const procSelect = $('#filterProcess');
         procSelect.empty().append('<option value="all">All Processes</option>');
         [...processes].sort().forEach(proc => procSelect.append(`<option value="${proc}">${proc}</option>`));
+        const lineSelect = $('#filterLine');
+        lineSelect.empty().append('<option value="all">All Lines</option>');
+        [...lines].sort().forEach(line => lineSelect.append(`<option value="${line}">${line}</option>`));
       }
 
       function calculateStats() {
@@ -861,10 +872,12 @@
       function applyFilters() {
         const locFilter = $('#filterLocation').val();
         const procFilter = $('#filterProcess').val();
+        const lineFilter = $('#filterLine').val() || 'all';
 
         filteredData = allData.filter(item => {
           const matchLoc = (locFilter === 'all' || item.loc === locFilter);
           const matchProc = (procFilter === 'all' || item.process === procFilter);
+          const matchLine = (lineFilter === 'all' || item.line_no === lineFilter);
           const matchId = !tableSearchTerm ||
             (item.id && item.id.toLowerCase().includes(tableSearchTerm)) ||
             (item.desc && item.desc.toLowerCase().includes(tableSearchTerm));
@@ -886,7 +899,7 @@
             matchAccumulated = (parseInt(item.l2) || 0) >= 1;
           }
 
-          return matchLoc && matchProc && matchId && matchStatus && matchAccumulated;
+          return matchLoc && matchProc && matchLine && matchId && matchStatus && matchAccumulated;
         });
 
         if (sortBy) {
@@ -999,66 +1012,69 @@
         $.getJSON(url)
           .done(function (response) {
             $('#graphLoading').addClass('hidden');
-            if (response.error) {
-              $('#graphError').removeClass('hidden').text(response.error);
-              $('#graphPlaceholder').removeClass('hidden');
-              $('#sensorChart').addClass('hidden');
-              return;
-            }
 
-            const rows = response.data;
-            if (!rows || rows.length === 0) {
-              $('#graphError').removeClass('hidden').text('No data in selected range');
-              $('#graphPlaceholder').removeClass('hidden');
-              $('#sensorChart').addClass('hidden');
-              return;
-            }
+            const rows = response.data || [];
+            const startStr = $('#graphStart').val();
+            const endStr = $('#graphEnd').val();
 
-            const dates = rows.map(r => new Date(r.date_time));
-            const values = rows.map(r => r.value1);
+            // Always show chart, never hide behind placeholder
+            $('#sensorChart').removeClass('hidden').empty();
+            $('#graphPlaceholder').addClass('hidden');
+            $('#graphError').addClass('hidden');
+
+            let dates = [];
+            let values = [];
+
+            if (rows.length > 0) {
+              dates = rows.map(r => new Date(r.date_time));
+              values = rows.map(r => r.value1);
+            }
 
             const trace = {
               x: dates,
               y: values,
               type: 'scatter',
-              mode: 'lines',
+              mode: 'lines+markers',
               line: { color: '#2563eb', width: 2 },
+              marker: {
+                symbol: 'triangle-up',
+                size: 7,
+                color: '#2563eb'
+              },
               name: currentSensorDesc || currentSensor
             };
 
+            // Build layout with fixed x-axis range if both start and end are set
             const layout = {
               title: {
                 text: currentSensorDesc || currentSensor,
                 font: { size: 16, family: 'Inter, sans-serif' }
               },
               xaxis: {
-                title: {
-                  text: `Time: ${start || 'start'} to ${end || 'end'}   |   Duration: ${computeDuration(dates[0], dates[dates.length - 1])}`,
-                  font: { size: 12 }
-                },
                 type: 'date',
                 tickformat: '%Y-%m-%d %H:%M',
                 tickangle: -90,
-                automargin: true
+                automargin: true,
+                // force the axis to show the full selected range
+                range: (startStr && endStr) ? [startStr, endStr] : undefined
               },
               yaxis: {
-                // title: 'Value',
                 range: [0, 101],
                 fixedrange: false
               },
               shapes: [
                 {
                   type: 'line',
-                  x0: dates[0],
-                  x1: dates[dates.length - 1],
+                  x0: startStr || dates[0],
+                  x1: endStr || dates[dates.length - 1],
                   y0: 5,
                   y1: 5,
                   line: { color: '#eab308', width: 2, dash: 'dash' }
                 },
                 {
                   type: 'line',
-                  x0: dates[0],
-                  x1: dates[dates.length - 1],
+                  x0: startStr || dates[0],
+                  x1: endStr || dates[dates.length - 1],
                   y0: 20,
                   y1: 20,
                   line: { color: '#dc2626', width: 2, dash: 'dash' }
@@ -1187,7 +1203,7 @@
         applyFilters();
       });
 
-      $('#filterLocation, #filterProcess').change(() => applyFilters());
+      $('#filterLocation, #filterProcess, #filterLine').change(() => applyFilters());
 
       $('#pageSize').change(function () {
         pageSize = parseInt($(this).val());
@@ -1299,6 +1315,15 @@
         const text = $(this).text();
         navigator.clipboard.writeText(text).then(() => {
           showToast('Description copied', 'success');
+        }).catch(() => {
+          showToast('Copy failed', 'error');
+        });
+      });
+
+      $('#currentSensorId').on('click', function () {
+        const text = $(this).text();
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('DCP Name copied', 'success');
         }).catch(() => {
           showToast('Copy failed', 'error');
         });
